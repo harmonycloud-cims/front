@@ -1,0 +1,75 @@
+:global {
+    /* 字体大小 */
+    .s_fs_12 { font-size:12px; }
+    .s_fs_13 { font-size:13px; }
+    .s_fs_14 { font-size:14px; }
+    .s_fs_16 { font-size:16px; }
+    .s_fs_18 { font-size:18px; }
+    .s_fs_20 { font-size:20px; }
+    .s_fs_22 { font-size:22px; }
+    .s_fs_24 { font-size:24px; }
+    .s_fs_26 { font-size:26px; }
+    .s_fs_40 { font-size: 40px; }
+    /* margins */
+    .f_mb5 { margin-bottom:5px; }
+    .f_mr5 { margin-right:5px;  }
+    .f_ml5 { margin-left:5px; }
+    .f_mt5 { margin-top:5px; }
+
+    .f_mb10 { margin-bottom:10px; }
+    .f_mr10 { margin-right:10px;  }
+    .f_ml10 { margin-left:10px; }
+    .f_mt10 { margin-top:10px; }
+
+    .f_mb15 { margin-bottom:15px; }
+    .f_mr15 { margin-right:15px;  }
+    .f_ml15 { margin-left:15px; }
+    .f_mt15 { margin-top:15px; }
+
+    .f_mb20 { margin-bottom:20px; }
+    .f_mr20 { margin-right:20px;  }
+    .f_ml20 { margin-left:20px; }
+    .f_mt20 { margin-top:20px; }
+
+    .f_mb40 { margin-bottom:40px; }
+    .f_mr40 { margin-right:40px;  }
+    .f_ml40 { margin-left:40px; }
+    .f_mt40 { margin-top:40px; }
+    /* paddding */
+    .f_padding_10 {
+        padding: 10px;
+    }
+    /* 浮动float */
+    .f_over_hide{overflow: hidden;}
+    .f_fl{float:left;}
+    .f_fr{float:right;}
+    .select_custome {
+        height: 32px;
+        border: 1px solid;
+    }
+
+    .border {
+        border: 1px solid #e6e6e6;
+    }
+
+    /* body */
+    .nephele_main_body {
+        width: calc(100% - 40px);
+        min-height: calc(100vh - 100px);
+        //background: #EDF2F4;
+        overflow-y: auto;
+        margin-top: 60px;
+        padding: 20px;
+        position: relative;
+    }
+    .nephele_content_body {
+        width: calc(100% - 42px);
+        padding: 10px 20px;
+        background-color: white;
+        border: 1px solid #e6e6e6;
+        height: calc(100% - 10px);
+        overflow-y: auto;
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+}

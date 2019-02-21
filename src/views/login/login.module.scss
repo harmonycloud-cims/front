@@ -1,0 +1,35 @@
+.login {
+    width: 100vw;
+    height: 100vh;
+    overflow: auto;
+}
+.login_contain {
+    width: 450px;
+    margin: auto;
+    height: 100%;
+    position: relative;
+    padding-top: 60px;
+}
+.login_information {
+    margin-top: 20px;
+    color: dimgray;
+    width: 100%;
+    display: inline-grid;
+}
+.float_margint {
+    float: right;
+    margin-top: 10px;
+    margin-left: 330px;
+}
+.forget_password {
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+.login_notes {
+    margin-left: 10px;
+    color: dimgray;
+    font-size: 14px
+}
+.login_notes div {
+    margin-top: 10px;
+}
