@@ -8,10 +8,8 @@ import * as serviceWorker from './serviceWorker';
 import { Provider } from 'react-redux';
 import configure from './store/storeConfig';
 import { PersistGate } from 'redux-persist/integration/react';
-import rootSaga from './store/sagas/rootSaga';
 
 const { persistor, store } = configure({});
-store.runSaga(rootSaga);
 
 ReactDOM.render((
     <Provider store={store}>

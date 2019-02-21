@@ -11,7 +11,7 @@ class IndexWarp extends Component {
             <div className="nephele-main">
                 <CommonHeader/>
                 <div className="nephele-main-body">
-                    {this.props.children}
+                    hello
                 </div>
             </div>
         );

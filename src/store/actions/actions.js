@@ -1,9 +1,9 @@
 import * as type from './actionType';
 
 export const dologin = () => ({
-    type: type.UPDATE_LOGIN_USER
+    type: type.DO_LOGIN
 });
 
-export const changeArticle = () => ({
-    type: type.CHANGE_ARTICLE
+export const getCliniclist = () => ({
+    type: type.GET_CLINICLIST
 });

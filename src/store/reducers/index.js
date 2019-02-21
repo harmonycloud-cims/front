@@ -1,20 +1,21 @@
 import { combineReducers } from 'redux';
-import { handleActions } from 'redux-actions';
 // import * as type from '../actions/ActionsType';
 
 const initState = {
+    ifLogin: true,
     clinicList: [],
-    user: {}
+    user: {} // 登录人的基本信息
 };
-const updateUser = handleActions({
-    'UPDATE_LOGIN_USER'(state, action) {
-        return { ...state, user: action.payload};
-    },
-    'UPDATE_CLINICLIST'(state, action) {
-        return { ...state, clinicList: action.payload};
+const updateUser = (state = initState, action = {}) => {
+    switch (action.type) {
+        case 'UPDATE_LOGIN_USER':
+            return {...state, user: action.data, ifLogin: false};
+        case 'UPDATE_CLINICLIST':
+            return {...state, clinicList: action.data};
+        default:
+            return state;
     }
-}, initState);
-
+};
 const rootReducer = combineReducers({
     config: (state = {}) => state,
     updateUser

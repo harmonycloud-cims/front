@@ -12,7 +12,7 @@ class CommonHeader extends Component {
     render() {
         return (
             <header className="com-header">
-                
+                hello
             </header>
         );
     }

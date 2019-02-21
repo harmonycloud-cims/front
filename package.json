@@ -15,7 +15,6 @@
     "redux-saga": "1.0.1",
     "redux-logger": "3.0.6",
     "moment": "2.24.0",
-    "redux-actions": "2.6.4",
     "redux-persist": "5.10.0",
     "lodash": "4.17.5"
   },
@@ -28,7 +27,7 @@
   "devDependencies": {
     "node-sass": "^4.11.0"
   },
-  "proxy": "http://10.10.103.61:33003",
+  "proxy": "http://10.10.103.61:33010",
   "eslintConfig": {
     "extends": "react-app"
   },

@@ -1,87 +1,70 @@
 import React, { Component } from 'react';
-import { withRouter } from 'react-router-dom';
+import { withRouter, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { Select, Button, Input, MenuItem  } from '@material-ui/core';
+import { Button, Input } from '@material-ui/core';
 import loginPic from '../../images/login.png';
 import styles from './login.module.scss';
+import { withStyles } from '@material-ui/core/styles';
 
 function mapStateToProps(state) {
     return {
+        ifLogin: state.updateUser.ifLogin,
         user: state.updateUser.user,
         clinicList: state.updateUser.clinicList
     };
 }
-/* const mapStateToDispatch = (dispatch) => {
-    return bindActionCreators({
-        dispatch: dispatch
-    });
-}; */
-const mapStateToDispatch=(dispatch)=>{
-    return {
-        getClinicList:()=>{
-            console.log('sdf');
-            dispatch({type:'GET_CLINIC'});
-        },
-        doLogin:(params)=> {
-            console.log('sdfasdas', params);
-            dispatch({type:'DO_LOGIN', params});
-        }
-    };
-};
+const style = {
+    input: {
+        paddingLeft: 10
+    },
+}
 
 class Login extends Component {
     constructor(props) {
         super(props);
         this.state = {
             ifLogin: true,
-            clinic: 2,
-            loginId: '',
+            clinicid: 0,
+            loginname: '',
             password: ''
         };
     }
-    UNSAFE_componentWillMount() {
-        this.props.getClinicList();
-        console.log('UNSAFE_componentWillMount', 'user',this.props.user, this.props.clinicList);
-        // this.props.dispatch({type: 'GET_CLINIC'});
-    }
 
     componentDidMount() {
-        this.props.getClinicList();
-        console.log('componentDidMount', 'user',this.props.user, this.props.clinicList);
-        // this.props.dispatch({type: 'GET_CLINIC'});
+        this.props.dispatch({type:'GET_CLINICLIST'});
     }
 
     doLogin = () => {
         const params = {
-            clinic: this.state.clinic,
-            loginId: this.state.loginId,
+            clinicid: this.state.clinicid,
+            loginname: this.state.loginname,
             password: this.state.password
         };
-        // this.props.dispatch({type:'GET_CLINIC'})
-        this.props.doLogin(params);
-    }
+        this.props.dispatch({type:'DO_LOGIN', params});
+    };
 
     changeLoginInformation = (e, name) => {
         this.setState({[name]: e.target.value});
-    }
+    };
     render() {
+        const { classes } = this.props;
         return (
             <div>
                 {
-                    this.state.ifLogin ? <div className={styles.login}>
+                    this.props.ifLogin ? <div className={styles.login}>
                         <div className={styles.login_contain}>
                             <img src={loginPic} alt={''}/>
                             <div className={styles.login_information}>
                                 <div className={'f_mt15'}>Clinic:</div>
-                                    <Select value={this.state.clinic} onChange={(...arg) => this.changeLoginInformation(...arg, 'clinic')}>
-                                        <MenuItem value={10}>Ten</MenuItem>
-                                        <MenuItem value={20}>Twenty</MenuItem>
-                                        <MenuItem value={30}>Thirty</MenuItem>
-                                    </Select>
+                                    <select value={this.state.clinicid} onChange={(...arg) => this.changeLoginInformation(...arg, 'clinicid')} className={styles.select_boder}>
+                                        {
+                                            this.props.clinicList.map(item => <option key={item.clinicId} value={item.clinicId}>{item.clinicName}</option>)
+                                        }
+                                    </select>
                                 <div className={'f_mt15'}>Login ID:</div>
-                                <Input value={this.state.loginId} onChange={(...arg) => this.changeLoginInformation(...arg, 'loginId')}/>
+                                <Input className={classes.input} value={this.state.loginname} onChange={(...arg) => this.changeLoginInformation(...arg, 'loginname')}/>
                                 <div className={'f_mt15'}>Password:</div>
-                                <Input type={'password'} value={this.state.password} onChange={(...arg) => this.changeLoginInformation(...arg, 'password')}/>
+                                <Input className={classes.input} type={'password'} value={this.state.password} onChange={(...arg) => this.changeLoginInformation(...arg, 'password')}/>
                                 <div className={styles.float_margint}>
                                     <div className={styles.forget_password}>Forget your password</div>
                                     <Button style={{width: '120px'}} variant={'outlined'} size={'small'} color={'primary'} onClick={this.doLogin}>Sign in</Button>
@@ -97,11 +80,11 @@ class Login extends Component {
                                 <div>6. Please change your password on a regular basis</div>
                             </div>
                         </div>
-                    </div> : null
+                    </div> : <Redirect to={'/register'}/>
                 }
             </div>
         );
     }
 }
 
-export default withRouter(connect(mapStateToProps, mapStateToDispatch)(Login));
+export default withRouter(connect(mapStateToProps)(withStyles(style)(Login)));

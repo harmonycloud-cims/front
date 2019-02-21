@@ -1,2 +1,2 @@
-export const UPDATE_LOGIN_USER = 'UPDATE_LOGIN_USER';
-export const UPDATE_CLINICLIST = 'UPDATE_CLINICLIST';
+export const DO_LOGIN = 'DO_LOGIN';
+export const GET_CLINICLIST = 'GET_CLINICLIST';
