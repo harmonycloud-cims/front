@@ -83,7 +83,7 @@ class Register extends Component {
     };
     closeAddress = () => {
         console.log('123');
-    }
+    };
 
     render() {
         const { classes } = this.props;

@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import { withRouter, Link } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { PersonAdd, DateRange, LocalHospital, EventAvailable, Adb, ArrowForwardIos, Home } from '@material-ui/icons';
+import { PersonAdd, DateRange, LocalHospital, EventAvailable, Adb,
+    ArrowForwardIos, Home, Person, Edit, EventNote } from '@material-ui/icons';
 import moment from 'moment'
-// import { allMenuList } from "../../../services/staticData";
+import { allMenuList } from "../../../services/staticData";
 
 const components = {
     welcome: Home,
@@ -11,7 +12,10 @@ const components = {
     appointment: DateRange,
     attendance: LocalHospital,
     consultation: EventAvailable,
-    drug: Adb
+    drug: Adb,
+    assessment: Person,
+    investigation: Edit,
+    result: EventNote,
 };
 
 function mapStateToProps(state) {

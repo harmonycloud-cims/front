@@ -9,6 +9,9 @@ import Appointment from './views/appointment/appointment';
 import Attendance from './views/attendance/attendance';
 import Consultation from './views/consultation/consultation';
 import Drug from './views/drug/drug';
+import Assessment from './views/assessment/assessment';
+import Investigation from './views/investigation/investigation';
+import Result from './views/result/result';
 
 const routes = (
     <Switch>
@@ -24,6 +27,9 @@ const routes = (
                     <Route path="/index/attendance" component={Attendance}/>
                     <Route path="/index/consultation" component={Consultation}/>
                     <Route path="/index/drug" component={Drug}/>
+                    <Route path="/index/assessment" component={Assessment}/>
+                    <Route path="/index/investigation" component={Investigation}/>
+                    <Route path="/index/result" component={Result}/>
                 </Switch>
             </IndexWarp>
         )} />

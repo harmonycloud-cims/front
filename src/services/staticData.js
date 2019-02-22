@@ -16,6 +16,14 @@ export const allMenuList = [
         url: "/index/attendance",
         icon: "attendance",
     }, {
+        accessRightName: "Assessment",
+        url: "/index/assessment",
+        icon: "assessment",
+    }, {
+        accessRightName: "investigation",
+        url: "/index/investigation",
+        icon: "investigation",
+    }, {
         accessRightName: "Consultation",
         url: "/index/consultation",
         icon: "consultation",
@@ -23,5 +31,9 @@ export const allMenuList = [
         accessRightName: "Drug Admin/Dispensing",
         url: "/index/drug",
         icon: "drug",
+    }, {
+        accessRightName: "Result Notification",
+        url: "/index/result",
+        icon: "result",
     }
 ];
