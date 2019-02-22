@@ -1,3 +1,5 @@
+$headerHeight : 50px;
+$color : rgba(0,0,0,0.7);
 :global {
     /* 字体大小 */
     .s_fs_12 { font-size:12px; }
@@ -53,12 +55,17 @@
     }
 
     /* body */
+    .main_body {
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+    }
     .nephele_main_body {
         width: calc(100% - 40px);
         min-height: calc(100vh - 100px);
         //background: #EDF2F4;
         overflow-y: auto;
-        margin-top: 60px;
+        margin-top: $headerHeight;
         padding: 20px;
         position: relative;
     }
@@ -71,5 +78,69 @@
         overflow-y: auto;
         font-size: 14px;
         margin-bottom: 10px;
+    }
+    .com_header {
+        width: 100%;
+        height: $headerHeight;
+        background-color: #ffffff;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 10;
+        border-bottom: 1px solid #dcdcdc;
+    }
+    .com_header_menu_list {
+        display: inline-block;
+        float: left;
+        height: $headerHeight;
+        line-height: $headerHeight;
+    }
+    .com_header_right_warp {
+        display: inline-block;
+        height: $headerHeight;
+        line-height: $headerHeight;
+        float: right;
+        margin-right: 15px;
+    }
+    .menu_item {
+        text-decoration:none;
+        height: 30px;
+        padding: 10px 0px 10px 10px;
+        color: #46A0DE;
+    }
+    .menu_icon {
+        vertical-align: middle;
+    }
+    @mixin menu_font {
+        font-weight: 600;
+        vertical-align: middle;
+        padding: 3px;
+        border-radius: 5px;
+        font-size: 14px;
+    }
+    .menu_font_selected {
+        @include menu_font;
+        background-color: #46A0DE;
+        color: #fff;
+    }
+    .com_header_right_warp_item {
+        float: right;
+        height: $headerHeight;
+        margin-left: 10px;
+        cursor: pointer;
+    }
+    .com_header_right_warp_name {
+        height: 30px;
+        line-height: 30px;
+        font-size: 17px;
+        font-weight: 500;
+        color: $color;
+    }
+    .com_header_right_warp_time {
+        height: 20px;
+        line-height: 20px;
+        font-size: 14px;
+        font-weight: 400;
+        color:$color;
     }
 }

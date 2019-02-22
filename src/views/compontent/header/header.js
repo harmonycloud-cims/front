@@ -1,19 +1,73 @@
 import React, { Component } from 'react';
-import { withRouter } from 'react-router-dom';
+import { withRouter, Link } from 'react-router-dom';
 import { connect } from 'react-redux';
+import { PersonAdd, DateRange, LocalHospital, EventAvailable, Adb, ArrowForwardIos, Home } from '@material-ui/icons';
+import moment from 'moment'
+// import { allMenuList } from "../../../services/staticData";
+
+const components = {
+    welcome: Home,
+    register: PersonAdd,
+    appointment: DateRange,
+    attendance: LocalHospital,
+    consultation: EventAvailable,
+    drug: Adb
+};
 
 function mapStateToProps(state) {
     return {
         user: state.updateUser.user,
+        menuList: state.updateUser.menuList,
+        activeMenu: state.updateUser.activeMenu,
     };
 }
 
 class CommonHeader extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            time: moment(new Date().getTime()).format('DD-MMM-YYYY, HH:mm')
+        }
+    }
+    changeMenu = (item) => {
+        console.log(item);
+        this.props.dispatch({type: 'CHANGE_MENU', activeMenu: item.accessRightName});
+        this.props.history.push(item.url);
+    };
+    logout = () => {
+        this.props.dispatch({type: 'LOGOUT'});
+        this.props.history.push('/');
+    };
     render() {
         return (
-            <header className="com-header">
-                hello
-            </header>
+            <div className="com_header">
+                <div className="com_header_menu_list">
+                    {
+                        this.props.menuList.map((item, index) => {
+                            let Icon = components[item.icon];
+                            return (<Link to={item.url} key={index} className="menu_item">
+                                <Icon fontSize="default" color="action" className="menu_icon"/>
+                                <span className={this.props.activeMenu === item.accessRightName ? 'menu_font_selected' : 'menu_font'}
+                                    onClick={() => this.changeMenu(item)}>{item.accessRightName}</span>
+                            </Link>)
+                        })
+                    }
+                </div>
+                <div className="com_header_right_warp">
+                    <div onClick={() => this.logout()} className="com_header_right_warp_item" title={'Logout'}>
+                            <span className="menu_font" style={{color: '#46A0DE'}}>Logout</span>
+                            <ArrowForwardIos fontSize="default" color="action" className="menu_icon"/>
+                    </div>
+                    <div className="com_header_right_warp_item">
+                        <div className="com_header_right_warp_name">
+                            {this.props.user.loginName}
+                        </div>
+                        <div className="com_header_right_warp_time" >
+                            Login Time: {this.state.time}
+                        </div>
+                    </div>
+                </div>
+            </div>
         );
     }
 }

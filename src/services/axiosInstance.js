@@ -1,8 +1,15 @@
 import axios from 'axios';
 import { delCookie } from './utils';
+import configure from '../store/storeConfig';
+
+const { store } = configure({});
 
 axios.interceptors.request.use(
     config => {
+        /*console.log(123123,store.state.token)
+        if (store.state.token === null) {  // 判断是否存在token，如果存在的话，则每个http header都加上token
+            config.headers.Authorization = store.state.token;
+        }*/
         return config;
     },
     err => {

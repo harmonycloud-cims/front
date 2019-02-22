@@ -10,14 +10,16 @@ function mapStateToProps(state) {
     return {
         ifLogin: state.updateUser.ifLogin,
         user: state.updateUser.user,
-        clinicList: state.updateUser.clinicList
+        clinicList: state.updateUser.clinicList,
+        loginMessageShow: state.updateLogin.loginMessageShow,
+        loginMessage: state.updateLogin.loginMessage,
     };
 }
 const style = {
     input: {
         paddingLeft: 10
     },
-}
+};
 
 class Login extends Component {
     constructor(props) {
@@ -26,7 +28,7 @@ class Login extends Component {
             ifLogin: true,
             clinicid: 0,
             loginname: '',
-            password: ''
+            password: '',
         };
     }
 
@@ -65,6 +67,10 @@ class Login extends Component {
                                 <Input className={classes.input} value={this.state.loginname} onChange={(...arg) => this.changeLoginInformation(...arg, 'loginname')}/>
                                 <div className={'f_mt15'}>Password:</div>
                                 <Input className={classes.input} type={'password'} value={this.state.password} onChange={(...arg) => this.changeLoginInformation(...arg, 'password')}/>
+                                {
+                                    this.props.loginMessageShow ?
+                                        <div style={{color: 'red', fontSize: '14px'}}>{this.props.loginMessage}</div> : null
+                                }
                                 <div className={styles.float_margint}>
                                     <div className={styles.forget_password}>Forget your password</div>
                                     <Button style={{width: '120px'}} variant={'outlined'} size={'small'} color={'primary'} onClick={this.doLogin}>Sign in</Button>
@@ -80,7 +86,7 @@ class Login extends Component {
                                 <div>6. Please change your password on a regular basis</div>
                             </div>
                         </div>
-                    </div> : <Redirect to={'/register'}/>
+                    </div> : <Redirect to={'/index'}/>
                 }
             </div>
         );

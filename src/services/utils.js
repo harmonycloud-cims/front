@@ -49,6 +49,10 @@ export const fn = {
     };
   }
 };
+export const getCookie = (name) => {
+    let arr = document.cookie.match(new RegExp("(^| )"+name+"=([^;]*)(;|$)"));
+    if(arr) return unescape(arr[2]); return null;
+};
 //删除cookie
 export const delCookie = (name) => {
     let exp = new Date();

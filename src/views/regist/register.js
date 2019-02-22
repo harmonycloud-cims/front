@@ -3,7 +3,7 @@ import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { Search, Close } from '@material-ui/icons';
 import { withStyles } from '@material-ui/core/styles';
-import { Typography, IconButton, Paper, InputBase, Tabs, Tab, Radio } from '@material-ui/core';
+import { Typography, IconButton, Paper, InputBase, Tabs, Tab, Radio,  } from '@material-ui/core';
 import styles from './register.module.scss';
 
 const style = {

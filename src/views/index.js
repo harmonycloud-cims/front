@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import CommonHeader from './components/header/Header';
+import CommonHeader from './compontent/header/header';
 
 function mapStateToProps(state) {
     return { user: state.updateUser };
@@ -8,11 +8,9 @@ function mapStateToProps(state) {
 class IndexWarp extends Component {
     render() {
         return (
-            <div className="nephele-main">
+            <div className={'main_body'}>
                 <CommonHeader/>
-                <div className="nephele-main-body">
-                    hello
-                </div>
+                {this.props.children}
             </div>
         );
     }
