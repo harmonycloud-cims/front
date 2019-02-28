@@ -2,15 +2,15 @@ import { createStore, applyMiddleware  } from 'redux';
 import createSagaMiddleware, { END } from 'redux-saga';
 import rootReducer from './reducers/index';
 import  { persistReducer, persistStore  } from 'redux-persist';
-import storage from 'redux-persist/es/storage';
-import rootSaga from './sagas/rootSaga'
+import storage from 'redux-persist/lib/storage/session';
+import rootSaga from './sagas/rootSaga';
 
 const sagamiddleware = createSagaMiddleware();
 // 数据对象
 const storageConfig = {
     key: 'root', // 必须有的
     storage: storage, // storage is now required
-    blacklist: [''] // reducer 里不持久化的数据
+    blacklist: ['updateLogin', 'updatePatient', 'updateAppointment'] // reducer 里不持久化的数据
 };
 
 export default function configureStore(initState = {}) {

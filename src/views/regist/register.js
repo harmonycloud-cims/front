@@ -1,32 +1,23 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { Search, Close } from '@material-ui/icons';
+import { Close, Remove, Add } from '@material-ui/icons';
 import { withStyles } from '@material-ui/core/styles';
-import { Typography, IconButton, Paper, InputBase, Tabs, Tab, Radio,  } from '@material-ui/core';
+import { Typography, InputBase, Tabs, Tab, Radio, RadioGroup,
+    FormControlLabel, Button, Dialog, DialogActions, DialogContent } from '@material-ui/core';
 import styles from './register.module.scss';
+import FormInput from '../compontent/input/formInput';
+import SearchInput from '../compontent/input/searchInput';
+import Contact from './contact';
+import _ from 'lodash';
+import timg from '../../images/timg.gif';
+import { uuid } from '../../services/utils';
+import { doumentTypeList, contactBasic, patientBasic, countryCodeList, districtList } from '../../services/staticData';
+import moment from 'moment';
 
 const style = {
-    root: {
-        padding: '2px 4px',
-        display: 'flex',
-        alignItems: 'center',
-        borderRadius: '15px',
-        border: '1px solid rgba(0,0,0,0.2)',
-        height: 25,
-        width: 400
-    },
-    input: {
-        marginLeft: 8,
-        flex: 1,
-        fontSize: 14
-    },
-    iconButton: {
-        padding: 10
-    },
-    radio: {
-        paddingLeft: 10,
-        paddingRight: 0
+    grid: {
+      marginTop: 10
     },
     form_input: {
         marginLeft: 10,
@@ -49,26 +40,50 @@ const style = {
         padding: 0,
         float: 'right',
         marginRight: 10
+    },
+    add_icon: {
+        verticalAlign: 'bottom'
+    },
+    cover: {
+        top: 30,
+        position: 'absolute',
+        backgroundColor: '#fff',
+        width: 150,
+        fontSize: 14,
+        left: 18,
+        height: 20,
+        padding: '4px 0 0 0'
     }
 };
 function mapStateToProps(state) {
     return {
-        user: state.updateUser.user,
-        clinicList: state.updateUser.clinicList
+        patientList: state.updatePatient.patientList,
+        patientLoading: state.updatePatient.patientLoading,
+        patientErrorMessage: state.updatePatient.patientErrorMessage
     };
 }
+
 class Register extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            ifLogin: true,
-            patient: {},
-            tabValue: 0
+            patient: _.cloneDeep(patientBasic),
+            tabValue: 0,
+            showAddress: false, //if show address
+            contactPersonList: [],
+            isUpdate: false, // regist or update
+            loading: true
         };
     }
-    changeLoginInformation = (e, name) => {
+    changeInformation = (e, name) => {
         let { patient } = this.state;
-        patient[name] = e.target.value;
+        if (name === 'englishSurname' || name === 'englishGivenName' || name === 'documentNumber') {
+            patient[name] =  _.toUpper(e.target.value);
+        } else if (name === 'dateOfBirth') {
+            patient[name] = moment(e.target.value, 'YYYY-MM-DD').format('DD MMM YYYY');
+        } else {
+            patient[name] = e.target.value;
+        }
         this.setState({patient});
     };
     changeRadio = (e, checked, name) => {
@@ -82,151 +97,265 @@ class Register extends Component {
         this.setState({ tabValue: value});
     };
     closeAddress = () => {
-        console.log('123');
+        this.setState({showAddress: !this.state.showAddress});
+    };
+    addContact = () => {
+        let contactPersonList = _.cloneDeep(this.state.contactPersonList);
+        let contact = _.cloneDeep(contactBasic);
+        contact.displayOrder = contactPersonList.length;
+        if (this.state.isUpdate) contact.patientId = this.state.patient.patientId;
+        contactPersonList.push(contact);
+        this.setState({contactPersonList});
+    };
+    changeContact = (index, value, name) =>{
+        let contactPersonList = _.cloneDeep(this.state.contactPersonList);
+        contactPersonList[index][name] = value;
+        this.setState({contactPersonList});
+    };
+    doRegister = (e) => {
+        e.preventDefault();
+        let { patient, contactPersonList } = this.state;
+        // 后台格式(dd-MMM-YYYY), 前台格式(DD MMM YYYY)
+        patient.dateOfBirth = moment(patient.dateOfBirth, 'DD MMM YYYY').format('DD-MMM-YYYY');
+        patient.search = `${patient.documentNumber},${patient.homePhone},${patient.mobilePhone},${patient.englishSurname},${patient.englishGivenName},${patient.englishSurname},${patient.chineseName}`;
+        if (this.state.isUpdate) {
+            let params = {
+                contactPersonList: contactPersonList,
+                patient: patient
+            };
+            this.props.dispatch({type: 'UPDATE_PATIENT', params});
+        } else {
+            patient.patientId = parseInt(uuid(), 10)/*(new Date()).getTime()*/;
+            _.forEach(contactPersonList, item => item.patientId = patient.patientId);
+            let params = {
+                contactPersonVoList: contactPersonList,
+                patient: patient
+            };
+            this.props.dispatch({type: 'REGISTER_PATIENT', params});
+        }
+        this.setState({loading: true, patient: _.cloneDeep(patientBasic), contactPersonList: [], isUpdate: false});
+    };
+    doCancel = () => {
+        this.setState({patient: _.cloneDeep(patientBasic), contactPersonList: [], isUpdate: false});
+    };
+    search = (value) => {
+        if (value) {
+            // 去除空格,大写搜索
+            value = value.replace(' ', '');
+            const params = { searchData: value };
+            this.props.dispatch({type: 'SEARCH_PATIENT', params});
+        }
+    };
+    selectPatient = (item) => {
+        if (JSON.stringify(item) === '{}'){
+            item.patient = _.cloneDeep(patientBasic);
+            item.contactPersonList = [];
+        } else {
+            _.forEach(item.patient, (value, key) => {
+                if (!item.patient[key]) {
+                    item.patient[key] = '';
+                }
+            });
+            item.patient.dateOfBirth = moment(item.patient.dateOfBirth, 'DD-MMM-YYYY').format('DD MMM YYYY');
+            if (item.contactPersonList.length > 0) {
+                _.forEach(item.contactPersonList, eve => {
+                    _.forEach(eve, (value, key) => {
+                        if (!eve[key]) {
+                            eve[key] = '';
+                        }
+                    });
+                });
+            }
+            this.setState({patient: item.patient, isUpdate: true, contactPersonList: item.contactPersonList});
+        }
+    };
+    closeDialog = () => {
+        this.setState({loading: false}, () => this.props.dispatch({type: 'CLOSE_PATIENT_LOADING'}));
     };
 
     render() {
         const { classes } = this.props;
+        const basicInputs = [{
+            label: 'Document Number',
+            isRequire: true,
+            name: 'documentNumber',
+            style: 'form50'
+        }, {
+            label: 'Surname',
+            isRequire: true,
+            name: 'englishSurname',
+            style: 'form50'
+        }, {
+            label: 'Given Name',
+            isRequire: true,
+            name: 'englishGivenName',
+            style: 'form50'
+        }, {
+            label: '中文名字',
+            isRequire: false,
+            name: 'chineseName',
+            style: 'form50'
+        }];
+        const addressInputs = [{
+            label: 'Room/Flat',
+            isRequire: false,
+            name: 'room',
+            style: 'form33'
+        }, {
+            label: 'Floor',
+            isRequire: false,
+            name: 'floor',
+            style: 'form33'
+        }, {
+            label: 'Block',
+            isRequire: false,
+            name: 'block',
+            style: 'form34'
+        }, {
+            label: 'Building',
+            isRequire: false,
+            name: 'building',
+            style: 'form116'
+        }, {
+            label: 'Estate/Village',
+            isRequire: false,
+            name: 'estate',
+            style: 'form66'
+        }, {
+            label: 'Street',
+            isRequire: false,
+            name: 'street',
+            style: 'form34'
+        }];
         return (
-            <div className={'nephele_main_body'}>
-                <div className={'nephele_content_body'}>
-                    <Paper className={classes.root} elevation={1}>
-                        <InputBase className={classes.input} placeholder="Search by ID/ Name/ Phone" />
-                        <IconButton className={classes.iconButton} aria-label="Search" color={'primary'}>
-                            <Search />
-                        </IconButton>
-                    </Paper>
-                    <div className={styles.form2}>
-                        <div>Document Type<span style={{color: 'red'}}>*</span></div>
-                        <select className={styles.select_input} value={this.state.patient.dtype} onChange={(...arg) => this.changeLoginInformation(...arg, 'dtype')}>
-                            <option value={1}>123</option>
-                            <option value={2}>234</option>
-                        </select>
-                    </div>
-                    <div className={styles.form2}>
-                        <div>Document Number<span style={{color: 'red'}}>*</span></div>
-                        <InputBase className={classes.form_input} value={this.state.patient.dtype} onChange={(...arg) => this.changeLoginInformation(...arg, 'dtype')}/>
-                    </div>
-                    <div className={styles.form2}>
-                        <div>Surname<span style={{color: 'red'}}>*</span></div>
-                        <InputBase className={classes.form_input} value={this.state.patient.dtype} onChange={(...arg) => this.changeLoginInformation(...arg, 'dtype')}/>
-                    </div>
-                    <div className={styles.form2}>
-                        <div>Given Name<span style={{color: 'red'}}>*</span></div>
-                        <InputBase className={classes.form_input} value={this.state.patient.dtype} onChange={(...arg) => this.changeLoginInformation(...arg, 'dtype')}/>
-                    </div>
-                    <div className={styles.form2}>
-                        <div>中文姓名</div>
-                        <InputBase className={classes.form_input} value={this.state.patient.dtype} onChange={(...arg) => this.changeLoginInformation(...arg, 'dtype')}/>
-                    </div>
-                    <div className={styles.form2}>
-                        <div>Date of Birth<span style={{color: 'red'}}>*</span></div>
-                        <InputBase type={'date'} className={classes.form_input} value={this.state.patient.dtype} onChange={(...arg) => this.changeLoginInformation(...arg, 'dtype')}/>
-                    </div>
-                    <div className={styles.form2}>
-                        <div>Sex</div>
-                        <div>
-                            <Radio className={classes.radio} checked={this.state.patient.sex === 'male'} value={'male'} color="default" onChange={(...arg) => this.changeRadio(...arg, 'sex')}/>Male
-                            <Radio className={classes.radio} checked={this.state.patient.sex === 'female'} value={'female'} color="default" onChange={(...arg) => this.changeRadio(...arg, 'sex')}/>Female
-                            <Radio className={classes.radio} checked={this.state.patient.sex === 'unknown'} value={'unknown'} color="default" onChange={(...arg) => this.changeRadio(...arg, 'sex')}/>Unknown
-                        </div>
-                    </div>
-                </div>
-                <Tabs value={this.state.tabValue} onChange={this.changeTabValue} indicatorColor="primary" textColor="primary">
-                    <Tab label="Contact Information"/>
-                    <Tab label="Contact Person" />
-                </Tabs>
-                <div className={'nephele_content_body'}>
-                    {this.state.tabValue === 0 && <Typography component={'div'}>
-                        <div className={styles.form3}>
-                            <div>Mobile Phone(SMS)</div>
-                            <div>
-                                <select className={styles.phone_select_input} value={this.state.patient.dtype} onChange={(...arg) => this.changeLoginInformation(...arg, 'dtype')}>
-                                    <option value={1}>852</option>
-                                    <option value={2}>234</option>
+                <div className={'detail_warp'}>
+                    <div className={'nephele_content_body'}>
+                        <SearchInput change={this.search} patientList={this.props.patientList} selectPatient={this.selectPatient}/>
+                        <form>
+                            <div className={styles.form50}>
+                                <div>Document Type<span style={{color: 'red'}}>*</span></div>
+                                <select className={'select_input'} value={this.state.patient.documentType} onChange={(...arg) => this.changeInformation(...arg, 'documentType')}>
+                                    {
+                                        doumentTypeList.map((item, index) => <option key={index} value={item}>{item}</option>)
+                                    }
                                 </select>
-                                <InputBase className={classes.phone_form_input} value={this.state.patient.dtype} onChange={(...arg) => this.changeLoginInformation(...arg, 'dtype')}/>
                             </div>
-                        </div>
-                        <div className={styles.form3}>
-                            <div>Home Phone</div>
-                            <div>
-                                <select className={styles.phone_select_input} value={this.state.patient.dtype} onChange={(...arg) => this.changeLoginInformation(...arg, 'dtype')}>
-                                    <option value={1}>852</option>
-                                    <option value={2}>234</option>
-                                </select>
-                                <InputBase className={classes.phone_form_input} value={this.state.patient.dtype} onChange={(...arg) => this.changeLoginInformation(...arg, 'dtype')}/>
+                            {
+                                basicInputs.map(item => {
+                                    return (<FormInput type={item.type} key={item.name} style={item.style} isRequire={item.isRequire} name={item.name} label={item.label} value={this.state.patient[item.name]} change={this.changeInformation}/>);
+                                })
+                            }
+                            <div className={styles.form50}>
+                                <div>Date of Birth<span style={{color: 'red'}}>*</span></div>
+                                <InputBase type={'date'} className={classes.form_input} value={moment(this.state.patient.dateOfBirth, 'DD MMM YYYY').format('YYYY-MM-DD')} onChange={(...arg) => this.changeInformation(...arg, 'dateOfBirth')}/>
+                                <InputBase value={this.state.patient.dateOfBirth} className={classes.cover}/>
                             </div>
-                        </div>
-                        <div className={styles.form3}>
-                            <div>Email</div>
-                            <InputBase type={'email'} className={classes.form_input} value={this.state.patient.dtype} onChange={(...arg) => this.changeLoginInformation(...arg, 'dtype')}/>
-                        </div>
-                        <div className={styles.form_body}>
-                            <div className={styles.form_title}>
-                                Address
-                                <IconButton className={classes.close_icon} aria-label="close" fontSize="small" onClick={this.closeAddress}>
-                                    <Close/>
-                                </IconButton>
+                            <div className={styles.form50}>
+                                <div>Sex</div>
+                                <RadioGroup value={this.state.patient.sex} onChange={(...arg) => this.changeRadio(...arg, 'sex')} row>
+                                    <FormControlLabel value="male" control={<Radio color={'primary'}/>} label="Male" />
+                                    <FormControlLabel value="female" control={<Radio color={'primary'}/>} label="Female" />
+                                    <FormControlLabel value="unknown" control={<Radio color={'primary'}/>} label="Unknown" />
+                                </RadioGroup>
                             </div>
-                            <div className={styles.form_content}>
-                                <div className={styles.form3}>
-                                    <div>Room/Flat</div>
-                                    <InputBase type={'email'} className={classes.form_input} value={this.state.patient.dtype} onChange={(...arg) => this.changeLoginInformation(...arg, 'dtype')}/>
-                                </div>
-                                <div className={styles.form3}>
-                                    <div>Floor</div>
-                                    <InputBase type={'email'} className={classes.form_input} value={this.state.patient.dtype} onChange={(...arg) => this.changeLoginInformation(...arg, 'dtype')}/>
-                                </div>
-                                <div className={styles.form3}>
-                                    <div>Block</div>
-                                    <InputBase type={'email'} className={classes.form_input} value={this.state.patient.dtype} onChange={(...arg) => this.changeLoginInformation(...arg, 'dtype')}/>
-                                </div>
-                                <div className={styles.form1}>
-                                    <div>Building</div>
-                                    <InputBase type={'email'} className={classes.form_input} value={this.state.patient.dtype} onChange={(...arg) => this.changeLoginInformation(...arg, 'dtype')}/>
-                                </div>
-                                <div className={styles.form3}>
-                                    <div>Street No.</div>
-                                    <InputBase type={'email'} className={classes.form_input} value={this.state.patient.dtype} onChange={(...arg) => this.changeLoginInformation(...arg, 'dtype')}/>
-                                </div>
-                                <div className={styles.form20}>
-                                    <div>Estate/Village</div>
-                                    <InputBase type={'email'} className={classes.form_input} value={this.state.patient.dtype} onChange={(...arg) => this.changeLoginInformation(...arg, 'dtype')}/>
-                                </div>
-                                <div className={styles.form46}>
-                                    <div>Street/Road</div>
-                                    <select className={styles.select_input} value={this.state.patient.dtype} onChange={(...arg) => this.changeLoginInformation(...arg, 'dtype')}>
-                                        <option value={1}>123</option>
-                                        <option value={2}>234</option>
-                                    </select>
-                                </div>
-                                <div className={styles.form15}>
-                                    <div>Region</div>
-                                    <select className={styles.select_input} value={this.state.patient.dtype} onChange={(...arg) => this.changeLoginInformation(...arg, 'dtype')}>
-                                        <option value={1}>123</option>
-                                        <option value={2}>234</option>
-                                    </select>
-                                </div>
-                                <div className={styles.form38}>
-                                    <div>District</div>
-                                    <InputBase type={'email'} className={classes.form_input} value={this.state.patient.dtype} onChange={(...arg) => this.changeLoginInformation(...arg, 'dtype')}/>
-                                </div>
+                            <Tabs value={this.state.tabValue} onChange={this.changeTabValue} indicatorColor={'primary'} textColor={'primary'}>
+                                <Tab label="Contact Information"/>
+                                <Tab label="Contact Person" />
+                            </Tabs>
+                            <div className={'nephele_content_body'}>
+                                {this.state.tabValue === 0 && <Typography component={'div'}>
+                                    <div className={styles.form33}>
+                                        <div>Mobile Phone(SMS)</div>
+                                        <div>
+                                            <select className={'phone_select_input'} value={this.state.patient.mobilePhoneAreaCode} onChange={(...arg) => this.changeInformation(...arg, 'mobilePhoneAreaCode')}>
+                                                {
+                                                    countryCodeList.map((item, index) => <option key={index} value={item}>{item}</option>)
+                                                }
+                                            </select>
+                                            <InputBase type={'number'} className={classes.phone_form_input} value={this.state.patient.mobilePhone} onChange={(...arg) => this.changeInformation(...arg, 'mobilePhone')}/>
+                                        </div>
+                                    </div>
+                                    <div className={styles.form33}>
+                                        <div>Home Phone</div>
+                                        <div>
+                                            <select className={'phone_select_input'} value={this.state.patient.homePhoneAreaCode} onChange={(...arg) => this.changeInformation(...arg, 'homePhoneAreaCode')}>
+                                                {
+                                                    countryCodeList.map((item, index) => <option key={index} value={item}>{item}</option>)
+                                                }
+                                            </select>
+                                            <InputBase type={'number'} className={classes.phone_form_input} value={this.state.patient.homePhone} onChange={(...arg) => this.changeInformation(...arg, 'homePhone')}/>
+                                        </div>
+                                    </div>
+                                    {/*<FormInput style={'form33'} name={'email'} label={'Email'} type={'email'} value={this.state.patient.email} change={this.changeInformation}/>*/}
+                                    <div className={styles.form_body}>
+                                        <div className={styles.form_title}>
+                                            Address
+                                            {
+                                                this.state.showAddress ?
+                                                    <Remove className={classes.close_icon} color={'primary'} fontSize="small" onClick={this.closeAddress}>
+                                                        <Close/>
+                                                    </Remove> :
+                                                    <Add className={classes.close_icon} color={'primary'} fontSize="small" onClick={this.closeAddress}>
+                                                        <Close/>
+                                                    </Add>
+                                            }
+                                        </div>
+                                        {
+                                            this.state.showAddress ?
+                                                <div className={styles.form_content}>
+                                                    {
+                                                        addressInputs.map(item => {
+                                                            return (<FormInput type={item.type} key={item.name} style={item.style} isRequire={item.isRequire} name={item.name} label={item.label} value={this.state.patient[item.name]} change={this.changeInformation}/>);
+                                                        })
+                                                    }
+                                                    <div className={styles.form15}>
+                                                        <div>Region</div>
+                                                        <select className={'select_input'} value={this.state.patient.region} onChange={(...arg) => this.changeInformation(...arg, 'region')}>
+                                                            <option value={'HK'}>HK</option>
+                                                        </select>
+                                                    </div>
+                                                    <div className={styles.form38}>
+                                                        <div>District</div>
+                                                        <select className={'select_input'} value={this.state.patient.district} onChange={(...arg) => this.changeInformation(...arg, 'district')}>
+                                                            {
+                                                                districtList.map((item, index) => <option key={index} value={item}>{item}</option>)
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                </div>: null
+                                        }
+                                    </div>
+                                </Typography>}
+                                {this.state.tabValue === 1 && <Typography component={'div'}>
+                                    {
+                                        this.state.contactPersonList.length > 0 ? this.state.contactPersonList.map((item, index) =>
+                                            <Contact key={index} index={index} contact={item} style={style} change={this.changeContact}/>) : null
+                                    }
+                                    <div title={'add contact person'} className={'f_mt10'} onClick={this.addContact}>
+                                        <Add className={classes.add_icon} color={'primary'} /><span>Add more contact person</span>
+                                    </div>
+                                </Typography>}
                             </div>
-                        </div>
-                    </Typography>}
-                    {this.state.tabValue === 1 && <Typography>
-                        <div className={styles.form2}>
-                            <div>Date of Birth<span style={{color: 'red'}}>*</span></div>
-                            <InputBase className={classes.form_input} value={this.state.patient.dtype} onChange={(...arg) => this.changeLoginInformation(...arg, 'dtype')}/>
-                        </div>
-                        <div className={styles.form2}>
-                            <div>Date of Birth<span style={{color: 'red'}}>*</span></div>
-                            <InputBase className={classes.form_input} value={this.state.patient.dtype} onChange={(...arg) => this.changeLoginInformation(...arg, 'dtype')}/>
-                        </div>
-                    </Typography>}
+                            <div className={'f_fr'}>
+                                <Button type={'submit'} style={{width: '80px', marginRight: '10px'}} variant={'outlined'} size={'small'} color={'primary'} onClick={this.doRegister}>Save</Button>
+                                <Button style={{width: '80px'}} variant={'outlined'} size={'small'} color={'primary'} onClick={this.doCancel}>Cancel</Button>
+                            </div>
+                        </form>
+                    </div>
+                    <Dialog open={this.state.loading && this.props.patientLoading}>
+                        {
+                            this.props.patientErrorMessage === '' ?
+                                <img src={timg} alt={''}/> : <DialogContent>{this.props.patientErrorMessage}</DialogContent>
+                        }
+                        {
+                            this.props.patientErrorMessage !== '' ? <DialogActions>
+                                <Button onClick={this.closeDialog} color="primary">
+                                    OK
+                                </Button>
+                            </DialogActions> : null
+                        }
+                    </Dialog>
                 </div>
-            </div>
         );
     }
 }

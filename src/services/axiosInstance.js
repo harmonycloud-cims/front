@@ -1,15 +1,20 @@
 import axios from 'axios';
-import { delCookie } from './utils';
-import configure from '../store/storeConfig';
+import Promise from 'babel-polyfill';
+// import configureStore from '../store/storeConfig';
+import configureStore from '../store/storeConfig';
 
-const { store } = configure({});
+/*const { persistor, store } = configureStore({});*/
+// To add to window  解决promise 在ie中未定义的问题
+if (!window.Promise) {
+    window.Promise = Promise;
+}
 
+// axios.defaults.headers.common['Authorization'] = window.sessionStorage.getItem('token') ? ('Bearer ' +  window.sessionStorage.getItem('token')) : null;
 axios.interceptors.request.use(
     config => {
-        /*console.log(123123,store.state.token)
-        if (store.state.token === null) {  // 判断是否存在token，如果存在的话，则每个http header都加上token
-            config.headers.Authorization = store.state.token;
-        }*/
+        if (!(config.url.indexOf('/login') > -1 ||　config.url.indexOf('/user') > -1)) {
+            config.headers.Authorization = `Bearer ${window.sessionStorage.getItem('token')}`;
+        }
         return config;
     },
     err => {
@@ -26,7 +31,11 @@ axios.interceptors.response.use(
         if (err && err.response) {
             switch (err.response.status) {
                 case 400: err.message = '请求错误(400)' ; break;
-                case 401: err.message = '未授权，请重新登录(401)'; setTimeout(() => window.location.href='/', 100); delCookie('userName'); break;
+                case 401:
+                    err.message = '未授权，请重新登录(401)';
+                    // configureStore().store.dispatch({type: 'LOGOUT'});
+                    /*setTimeout(() => window.location.href='/', 100);*/
+                    break;
                 case 403: err.message = '拒绝访问(403)'; break;
                 case 404: err.message = '请求出错(404)'; break;
                 case 408: err.message = '请求超时(408)'; break;

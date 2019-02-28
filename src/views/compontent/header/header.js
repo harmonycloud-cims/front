@@ -3,8 +3,7 @@ import { withRouter, Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { PersonAdd, DateRange, LocalHospital, EventAvailable, Adb,
     ArrowForwardIos, Home, Person, Edit, EventNote } from '@material-ui/icons';
-import moment from 'moment'
-import { allMenuList } from "../../../services/staticData";
+import moment from 'moment';
 
 const components = {
     welcome: Home,
@@ -15,7 +14,7 @@ const components = {
     drug: Adb,
     assessment: Person,
     investigation: Edit,
-    result: EventNote,
+    result: EventNote
 };
 
 function mapStateToProps(state) {
@@ -23,6 +22,7 @@ function mapStateToProps(state) {
         user: state.updateUser.user,
         menuList: state.updateUser.menuList,
         activeMenu: state.updateUser.activeMenu,
+        reLogin: state.updateUser.reLogin,
     };
 }
 
@@ -31,16 +31,15 @@ class CommonHeader extends Component {
         super(props);
         this.state = {
             time: moment(new Date().getTime()).format('DD-MMM-YYYY, HH:mm')
-        }
+        };
     }
     changeMenu = (item) => {
-        console.log(item);
         this.props.dispatch({type: 'CHANGE_MENU', activeMenu: item.accessRightName});
         this.props.history.push(item.url);
     };
     logout = () => {
         this.props.dispatch({type: 'LOGOUT'});
-        this.props.history.push('/');
+        this.props.history.push('/login');
     };
     render() {
         return (
@@ -49,17 +48,16 @@ class CommonHeader extends Component {
                     {
                         this.props.menuList.map((item, index) => {
                             let Icon = components[item.icon];
-                            return (<Link to={item.url} key={index} className="menu_item">
+                            return (<Link to={item.url} key={index} className="menu_item" onClick={() => this.changeMenu(item)}>
                                 <Icon fontSize="default" color="action" className="menu_icon"/>
-                                <span className={this.props.activeMenu === item.accessRightName ? 'menu_font_selected' : 'menu_font'}
-                                    onClick={() => this.changeMenu(item)}>{item.accessRightName}</span>
-                            </Link>)
+                                <span className={this.props.activeMenu === item.accessRightName ? 'menu_font_selected' : 'menu_font'}>{item.name}</span>
+                            </Link>);
                         })
                     }
                 </div>
                 <div className="com_header_right_warp">
                     <div onClick={() => this.logout()} className="com_header_right_warp_item" title={'Logout'}>
-                            <span className="menu_font" style={{color: '#46A0DE'}}>Logout</span>
+                            <span className="menu_font" style={{color: '#4052B2'}}>Logout</span>
                             <ArrowForwardIos fontSize="default" color="action" className="menu_icon"/>
                     </div>
                     <div className="com_header_right_warp_item">

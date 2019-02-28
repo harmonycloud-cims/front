@@ -10,7 +10,9 @@ class IndexWarp extends Component {
         return (
             <div className={'main_body'}>
                 <CommonHeader/>
-                {this.props.children}
+                <div className={'nephele_main_body'}>
+                    {this.props.children}
+                </div>
             </div>
         );
     }

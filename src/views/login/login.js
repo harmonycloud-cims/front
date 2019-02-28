@@ -12,13 +12,13 @@ function mapStateToProps(state) {
         user: state.updateUser.user,
         clinicList: state.updateUser.clinicList,
         loginMessageShow: state.updateLogin.loginMessageShow,
-        loginMessage: state.updateLogin.loginMessage,
+        loginMessage: state.updateLogin.loginMessage
     };
 }
 const style = {
     input: {
         paddingLeft: 10
-    },
+    }
 };
 
 class Login extends Component {
@@ -26,17 +26,19 @@ class Login extends Component {
         super(props);
         this.state = {
             ifLogin: true,
-            clinicid: 0,
+            clinicid: 1,
             loginname: '',
-            password: '',
+            password: ''
         };
     }
 
     componentDidMount() {
-        this.props.dispatch({type:'GET_CLINICLIST'});
+        document.addEventListener('keypress',this.handleEnterKey);
+        /*if (this.props.clinicList.length < 1) */this.props.dispatch({type:'GET_CLINICLIST'});
     }
 
-    doLogin = () => {
+    doLogin = (e) => {
+        e.preventDefault();
         const params = {
             clinicid: this.state.clinicid,
             loginname: this.state.loginname,
@@ -44,19 +46,24 @@ class Login extends Component {
         };
         this.props.dispatch({type:'DO_LOGIN', params});
     };
-
     changeLoginInformation = (e, name) => {
         this.setState({[name]: e.target.value});
     };
+    handleEnterKey = (e) => {
+        if(e.keyCode === 13){ //主要区别就是这里，可以直接获取到keyCode的值
+            this.doLogin(e);
+        }
+    };
     render() {
         const { classes } = this.props;
+        if (this.props.ifLogin) {
+            return <Redirect to={'/index'}/>
+        }
         return (
-            <div>
-                {
-                    this.props.ifLogin ? <div className={styles.login}>
+            <div className={styles.login}>
                         <div className={styles.login_contain}>
                             <img src={loginPic} alt={''}/>
-                            <div className={styles.login_information}>
+                            <form className={styles.login_information} onSubmit={(e) => this.doLogin(e)}>
                                 <div className={'f_mt15'}>Clinic:</div>
                                     <select value={this.state.clinicid} onChange={(...arg) => this.changeLoginInformation(...arg, 'clinicid')} className={styles.select_boder}>
                                         {
@@ -64,18 +71,18 @@ class Login extends Component {
                                         }
                                     </select>
                                 <div className={'f_mt15'}>Login ID:</div>
-                                <Input className={classes.input} value={this.state.loginname} onChange={(...arg) => this.changeLoginInformation(...arg, 'loginname')}/>
+                                <Input required className={classes.input} value={this.state.loginname} onChange={(...arg) => this.changeLoginInformation(...arg, 'loginname')} onKeyUp={(e) => this.handleEnterKey(e)}/>
                                 <div className={'f_mt15'}>Password:</div>
-                                <Input className={classes.input} type={'password'} value={this.state.password} onChange={(...arg) => this.changeLoginInformation(...arg, 'password')}/>
+                                <Input required className={classes.input} type={'password'} value={this.state.password} onChange={(...arg) => this.changeLoginInformation(...arg, 'password')} onKeyUp={(e) => this.handleEnterKey(e)}/>
                                 {
                                     this.props.loginMessageShow ?
                                         <div style={{color: 'red', fontSize: '14px'}}>{this.props.loginMessage}</div> : null
                                 }
                                 <div className={styles.float_margint}>
                                     <div className={styles.forget_password}>Forget your password</div>
-                                    <Button style={{width: '120px'}} variant={'outlined'} size={'small'} color={'primary'} onClick={this.doLogin}>Sign in</Button>
+                                    <Button type={'submit'} style={{width: '120px'}} variant={'outlined'} size={'small'} color={'primary'}>Sign in</Button>
                                 </div>
-                            </div>
+                            </form>
                             <div className={'f_mt15'}>Important Note</div>
                             <div className={styles.login_notes}>
                                 <div>1. All patient information is strictly confidential</div>
@@ -86,9 +93,7 @@ class Login extends Component {
                                 <div>6. Please change your password on a regular basis</div>
                             </div>
                         </div>
-                    </div> : <Redirect to={'/index'}/>
-                }
-            </div>
+                    </div>
         );
     }
 }
