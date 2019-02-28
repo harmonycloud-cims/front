@@ -19,6 +19,7 @@ function mapStateToProps(state) {
         encounterTypeList: state.updateUser.encounterTypeList,
         encounterType: state.updateUser.encounterType,
         roomList: state.updateUser.roomList,
+        selectCalendar: state.updateAppointment.selectCalendar,
         calendarList: state.updateAppointment.calendarList,
         bookHistoryList: state.updateAppointment.bookHistoryList,
         bookCompareResult: state.updateAppointment.bookCompareResult,
@@ -51,8 +52,8 @@ const style = {
     },
     border1: {
         border: '2px solid #B8BCB9',
-        height: 'calc(100vh - 150px)',
-        minHeight: 200
+        /*height: 'calc(100vh - 150px)',
+        minHeight: 200*/
     },
     border_title: {
         backgroundColor: '#B8BCB9',
@@ -100,6 +101,16 @@ const style = {
         fontSize: 20,
         fontWeight: 500,
         textAlign: 'center'
+    },
+    cover: {
+        top: 283,
+        position: 'absolute',
+        backgroundColor: '#fff',
+        width: 100,
+        fontSize: 14,
+        left: '74%',
+        height: 20,
+        padding: '4px 0 0 0'
     }
 };
 class Appointment extends Component {
@@ -115,60 +126,80 @@ class Appointment extends Component {
             isSelected: false,
             patient: {},
             monthYear: moment().format('MMM YYYY'),
-            date: moment().format('DD MMM YYYY'),
+            date: moment().add(1, 'days').format('DD MMM YYYY'),
             time: '09:00'
         };
     }
     componentDidMount() {
-        this.initData();
+        this.initData(this.props);
     }
     componentWillReceiveProps(nextProps) {
-
+        if ((nextProps.selectCalendar !== this.props.selectCalendar) && nextProps.selectCalendar) {
+            this.setState({showRoomList: nextProps.roomList}, () => this.initData(nextProps));
+        }
+        if (nextProps.roomList !== this.props.roomList) {
+            this.setState({showRoomList: nextProps.roomList, room: nextProps.roomList[0]})
+        }
     }
-    initData = () => {
+
+    /* 日历模块 */
+    initData = (props) => {
         let roomIdList = [];
         _.forEach(this.state.showRoomList, item => {
             if (item.checked) roomIdList.push(item.roomId);
         });
         let { dateList, numberWeek } = caluDate(this.state.monthYear);
         let params = {
-            clinicId: this.state.clinic.clinicId,
-            encounterTypeId: this.state.encounterType.encounterTypeId,
+            clinicId: props.clinic.clinicId,
+            encounterTypeId: props.encounterType.encounterTypeId,
             monthYear: moment(this.state.monthYear, 'MMM YYYY').format('MMM-YYYY'),
             roomId: roomIdList
         };
         //dateList每个月非周末的日期, numberWeek为dateList[0]是星期中的第几天(1为周一,5为周五)
         this.props.dispatch({type: 'GET_CALENDAR', params, dateList, numberWeek});
     };
-    changeMoth = (e) => {
-        this.setState({month: e}, () => this.initData());
+    //切换月份
+    changeMoth = (name) => {
+        let { monthYear } = this.state;
+        if (name === 'subtract') {
+            monthYear = moment(monthYear, 'MMM YYYY').subtract(1, 'months').format('MMM YYYY');
+        } else {
+            monthYear = moment(monthYear, 'MMM YYYY').add(1, 'months').format('MMM YYYY');
+        }
+        this.setState({ monthYear }, () => this.initData(this.props));
     };
-    changeInformation = (e) => {
-        let encounterType = _.find(this.props.encounterList, item => item.encounterTypeId === parseInt(e.target.value));
-        this.setState({encounterType}, () => {
-            if (!this.state.isSelected) this.initData();
-        });
+    // 切换encounterType
+    changeEncounterType = (e) => {
+        let encounterType = _.find(this.props.encounterTypeList, item => item.encounterTypeId === parseInt(e.target.value, 10));
+        this.props.dispatch({ type: 'CHANGE_ENCOUNTERTYPE', encounterType, clinicId: this.props.clinic.clinicId, encounterTypeId: e.target.value });
     };
-    changeClinic = (e, name) =>{
-        let clinic = _.find(this.props.clinicList, item => item.clinicId === e.target.value);
-        let clinicRoomList = _.takeWhile(this.props.roomList, item => item.clinicId === parseInt(e.target.value));
-        _.forEach(clinicRoomList, item => item.checked = true);
-        this.setState({[name]: clinic, clinicRoomList, room: clinicRoomList[0] }, () => {
-            if (!this.state.isSelected) this.initData();
-        });
+    // 切换clinic
+    changeClinic = (e) =>{
+        let clinic = _.find(this.props.clinicList, item => item.clinicId === parseInt(e.target.value, 10));
+        this.props.dispatch({ type: 'CHANGE_CLINIC', clinicId: e.target.value, clinic});
     };
+    // 选中或取消room
     checkChange = (e, checked, item, id) => {
-        let clinicRoomList = _.cloneDeep(this.state.clinicRoomList);
-        _.find(clinicRoomList, eve => eve.roomId === id).checked = checked;
-        this.setState({ clinicRoomList });
+        let showRoomList = _.cloneDeep(this.state.showRoomList);
+        _.find(showRoomList, eve => eve.roomId === id).checked = checked;
+        this.setState({ showRoomList }, () => this.initData(this.props));
     };
+
+    /* 预约模块 */
     changeRoom = (e) => {
-        let room = _.find(this.state.clinicRoomList, item => item.roomId === parseInt(e.target.value));
+        let room = _.find(this.state.showRoomList, item => item.roomId === parseInt(e.target.value));
         this.setState({room});
     };
     changeDateTime = (e, name) => {
-        this.setState({[name]: e.target.value});
+        if (name === 'date') {
+            let value = moment(e.target.value, 'YYYY-MM-DD').format('DD MMM YYYY');
+            this.setState({ date: value });
+        } else {
+            this.setState({[name]: e.target.value});
+        }
     };
+
+    /* 搜索patient */
     search = (value) => {
         const params = { searchData: value };
         this.props.dispatch({type: 'SEARCH_PATIENT', params});
@@ -183,21 +214,23 @@ class Appointment extends Component {
     closePatient = () => {
         this.setState({patient: {}, isSelected: false});
     };
+
     bookCompare = () => {
         const params = {
             patientId: this.state.patient.patientId,
-            encounterTypeId: this.state.encounterType.encounterTypeId,
+            encounterTypeId: this.props.encounterType.encounterTypeId,
             roomId: this.state.room.roomId
         };
         this.props.dispatch({type: 'BOOK_COMPARE', params});
     };
     bookAppointment = () => {
+        let date = `${moment(this.state.date, 'DD MMM YYYY').format('DD-MMM-YYYY')} ${this.state.time}`;
         const params = {
-            clinicId: this.state.clinic.clinicId,
-            clinicName: this.state.clinic.clinicName,
-            date: this.state.time,
-            encounterTypeId: this.state.encounterType.encounterTypeId,
-            encounterTypeName: this.state.encounterType.encounterType,
+            clinicId: this.props.clinic.clinicId,
+            clinicName: this.props.clinic.clinicName,
+            date: date,
+            encounterTypeId: this.props.encounterType.encounterTypeId,
+            encounterTypeName: this.props.encounterType.encounterType,
             patientDoc: this.state.patient.documentNumber,
             patientId: this.state.patient.patientId,
             patientName: `${this.state.patient.englishSurname}, ${this.state.patient.englishGivenName}`,
@@ -265,7 +298,7 @@ class Appointment extends Component {
                                         </Typography>
                                         <FormGroup>
                                             <Typography component={'div'}>Clinic</Typography>
-                                            <select className={'select_input_full'} value={this.state.clinic.clinicId} onChange={(...arg) => this.changeClinic(...arg, 'clinic')}>
+                                            <select className={'select_input_full'} value={this.props.clinic.clinicId} onChange={(...arg) => this.changeClinic(...arg)}>
                                                 {
                                                     this.props.clinicList.map(item => <option key={item.clinicId} value={item.clinicId}>{item.clinicName}</option>)
                                                 }
@@ -274,7 +307,7 @@ class Appointment extends Component {
                                         <Grid container className={classes.border3}>
                                             <Grid item xs={3}>
                                                 <Typography component={'div'}>Encounter Type</Typography>
-                                                <select className={'select_input'} value={this.state.encounterType.encounterTypeId} onChange={(...arg) => this.changeInformation(...arg, 'encounterType')}>
+                                                <select className={'select_input'} value={this.props.encounterType.encounterTypeId} onChange={(...arg) => this.changeEncounterType(...arg)}>
                                                     {
                                                         this.props.encounterTypeList.map(item => <option key={item.encounterTypeId} value={item.encounterTypeId}>{item.encounterType}</option>)
                                                     }
@@ -282,16 +315,17 @@ class Appointment extends Component {
                                             </Grid>
                                             <Grid item xs={3}>
                                                 <Typography component={'div'}>Room</Typography>
-                                                <select style={{width: 120}} className={'select_input'} value={this.state.room.roomId} onChange={(...arg) => this.changeRoom(...arg, 'room')}>
+                                                <select style={{width: 120}} className={'select_input'} value={this.state.room.roomId} onChange={(...arg) => this.changeRoom(...arg)}>
                                                     {
-                                                        this.state.roomList.map(item => <option key={item.roomId} value={item.roomId}>{item.roomName}</option>)
+                                                        this.state.showRoomList.map(item => <option key={item.roomId} value={item.roomId}>{item.roomName}</option>)
                                                     }
                                                 </select>
                                             </Grid>
                                             <Grid item xs={6}>
                                                 <Typography component={'div'}>Date/Time</Typography>
-                                                <InputBase style={{width: 140}} type={'date'} className={'phone_select_input'} value={this.state.date} onChange={(...arg) => this.changeDateTime(...arg, 'date')}/>
-                                                <InputBase style={{width: 100}} type={'time'} className={'phone_select_input'} value={this.state.time} onChange={(...arg) => this.changeDateTime(...arg, 'time')}/>
+                                                <InputBase style={{width: 130}} inputRef= {node => {this.anchorel = node;}} type={'date'} className={'phone_select_input'} value={moment(this.state.date, 'DD MMM YYYY').format('YYYY-MM-DD')} onChange={(...arg) => this.changeDateTime(...arg, 'date')}/>
+                                                <InputBase value={this.state.date} anchorEl={this.anchorel} className={classes.cover}/>
+                                                <InputBase style={{width: 80}} type={'time'} className={'phone_select_input'} value={this.state.time} onChange={(...arg) => this.changeDateTime(...arg, 'time')}/>
                                             </Grid>
                                         </Grid>
                                     </FormGroup>
@@ -311,7 +345,7 @@ class Appointment extends Component {
                                 </div>
                                 <div className={'f_mt10'}>
                                     <div>Clinic</div>
-                                    <select className={'select_input'} value={this.state.clinic.clinicId} onChange={(...arg) => this.changeClinic(...arg, 'clinic')}>
+                                    <select className={'select_input'} value={this.props.clinic.clinicId} onChange={(...arg) => this.changeClinic(...arg, 'clinic')}>
                                         {
                                             this.props.clinicList.map(item => <option key={item.clinicId} value={item.clinicId}>{item.clinicName}</option>)
                                         }
@@ -319,28 +353,28 @@ class Appointment extends Component {
                                 </div>
                                 <div className={'f_mt10'}>
                                     <div>Encounter Type</div>
-                                   {/* <select className={'select_input'} value={this.state.encounterType.encounterTypeId} onChange={(...arg) => this.changeInformation(...arg, 'encounterType')}>
+                                    <select className={'select_input'} value={this.props.encounterType.encounterTypeId} onChange={(...arg) => this.changeEncounterType(...arg)}>
                                         {
                                             this.props.encounterTypeList.map(item => <option key={item.encounterTypeId} value={item.encounterTypeId}>{item.encounterType}</option>)
                                         }
-                                    </select>*/}
+                                    </select>
                                 </div>
                                 <div className={'f_mt10'}>
-                                    {/* <div>Room</div>
+                                     <div>Room</div>
                                     {
-                                        this.state.clinicRoomList.map((item, index) =>
+                                        this.state.showRoomList.map((item, index) =>
                                             <FormControlLabel className={classes.controller} key={index} label={item.roomName}
                                                               control={<Checkbox label={item.roomName} value={item.roomName} checked={item.checked} color={'primary'} onChange={(...arg) => this.checkChange(...arg, item, item.roomId)}/>}
                                             />)
-                                    } */}
+                                    }
                                 </div>
                             </Grid>
                             <Grid item xs={9} className={classes.main}>
                                 <Grid container>
                                     <Grid item xs={9}>
                                         <FormGroup row>
-                                            <ChevronLeft onClick={() => this.changeMoth(0)}/>
-                                            <ChevronRight onClick={() => this.changeMoth(1)}/>
+                                            <ChevronLeft onClick={() => this.changeMoth('subtract')}/>
+                                            <ChevronRight onClick={() => this.changeMoth('add')}/>
                                             <div>{this.state.monthYear}</div>
                                         </FormGroup>
                                     </Grid>
@@ -351,12 +385,12 @@ class Appointment extends Component {
                                 <Grid container spacing={16}>
                                     {
                                         this.props.calendarList.map((item,index) =>
-                                            _.find(this.state.clinicRoomList, eve => item.roomId === eve.roomId).checked ?
+                                            _.find(this.state.showRoomList, eve => item.roomId === eve.roomId).checked ?
                                             <Grid key={index} item xs={6}>
                                                 <Typography component={'div'} className={classes.room_title}>
-                                                {_.find(this.state.clinicRoomList, eve => item.roomId === eve.roomId).roomName}
+                                                {_.find(this.state.showRoomList, eve => item.roomId === eve.roomId).roomName}
                                             </Typography>
-                                            <Calendar calendarList={item.appointmentQuotaquotabo}/>
+                                            <Calendar calendarList={item.appointmentCalendar}/>
                                             </Grid> : null
                                         )
                                     }
@@ -379,13 +413,13 @@ class Appointment extends Component {
                             {this.state.patient.documentNumber}
                         </Typography>
                         <Typography component={'div'} className={classes.dialog_text}>
-                            {this.state.clinic.clinicName}
+                            {this.props.clinic.clinicName}
                         </Typography>
                         <Typography component={'div'} className={classes.dialog_text}>
-                            {this.state.encounterType.encounterType} - {this.state.room.roomName}
+                            {this.props.encounterType.encounterType} - {this.state.room.roomName}
                         </Typography>
                         <Typography component={'div'} className={classes.dialog_text}>
-                            Date: {this.state.dateSend} {this.state.timeSend}
+                            Date: {this.state.date} {this.state.time}
                         </Typography>
                     </DialogContent>
                     {

@@ -5,12 +5,14 @@ import { Button, Input } from '@material-ui/core';
 import loginPic from '../../images/login.png';
 import styles from './login.module.scss';
 import { withStyles } from '@material-ui/core/styles';
+import _ from 'lodash';
 
 function mapStateToProps(state) {
     return {
         ifLogin: state.updateUser.ifLogin,
         user: state.updateUser.user,
         clinicList: state.updateUser.clinicList,
+        clinic: state.updateUser.clinic,
         loginMessageShow: state.updateLogin.loginMessageShow,
         loginMessage: state.updateLogin.loginMessage
     };
@@ -20,33 +22,34 @@ const style = {
         paddingLeft: 10
     }
 };
-
 class Login extends Component {
     constructor(props) {
         super(props);
         this.state = {
             ifLogin: true,
-            clinicid: 1,
+            clinicId: this.props.clinic.clinicId,
             loginname: '',
             password: ''
         };
     }
-
     componentDidMount() {
         document.addEventListener('keypress',this.handleEnterKey);
         /*if (this.props.clinicList.length < 1) */this.props.dispatch({type:'GET_CLINICLIST'});
     }
-
     doLogin = (e) => {
         e.preventDefault();
         const params = {
-            clinicid: this.state.clinicid,
+            clinicId: this.state.clinicId,
             loginname: this.state.loginname,
             password: this.state.password
         };
         this.props.dispatch({type:'DO_LOGIN', params});
     };
     changeLoginInformation = (e, name) => {
+        if (name === 'clinicId') {
+            let clinic = _.find(this.props.clinicList, item => item.clinicId === parseInt(e.target.value, 10));
+            this.props.dispatch({type:'LOGIN_CHANGE_CLINIC', clinicId: e.target.value, clinic});
+        }
         this.setState({[name]: e.target.value});
     };
     handleEnterKey = (e) => {
@@ -65,7 +68,7 @@ class Login extends Component {
                             <img src={loginPic} alt={''}/>
                             <form className={styles.login_information} onSubmit={(e) => this.doLogin(e)}>
                                 <div className={'f_mt15'}>Clinic:</div>
-                                    <select value={this.state.clinicid} onChange={(...arg) => this.changeLoginInformation(...arg, 'clinicid')} className={styles.select_boder}>
+                                    <select value={this.state.clinicId} onChange={(...arg) => this.changeLoginInformation(...arg, 'clinicId')} className={styles.select_boder}>
                                         {
                                             this.props.clinicList.map(item => <option key={item.clinicId} value={item.clinicId}>{item.clinicName}</option>)
                                         }

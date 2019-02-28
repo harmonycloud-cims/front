@@ -98,18 +98,41 @@ const appointmentState = {
     calendarList: [],
     bookHistoryList: [],
     bookCompareResult: true,
-    bookAppointmentDialog: false
+    bookAppointmentDialog: false,
+    selectCalendar: false,
+    attendanceList: [],
 };
 const updateAppointment = (state = appointmentState, action = {}) => {
     switch (action.type) {
         case 'CALENDARLIST':
             let dateList = action.dateList;
             let numberWeek = action.numberWeek;
+            let calendarList = action.data;
+            _.forEach(calendarList, item => {
+                item.appointmentCalendar = [];
+                _.forEach(dateList, eve => {
+                    let appointmentQuo = {
+                        day: eve,
+                        holiday: false,
+                        quota: 0,
+                        appointmentDate: '',
+                        noData: true,
+                    };
+                    _.forEach(item.appointmentQuotaquotabo, quo => {
+                        if (eve === parseInt(quo.appointmentDate.split('-')[0], 10)) {
+                            appointmentQuo.holiday = quo.holiday;
+                            appointmentQuo.quota = quo.quota;
+                            appointmentQuo.appointmentDate = quo.appointmentDate;
+                            appointmentQuo.noData = false;
+                        }
+                    }) ;
+                    item.appointmentCalendar.push(appointmentQuo);
+                })
+            });
             if (numberWeek !== 1) {
                 for (let i = 1; i < numberWeek; i++) {
-                    _.forEach(action.data, item => {
-                        item.appointmentQuotaquotabo.unshift({});
-                        /*_.forEach(dateList,)*/
+                    _.forEach(calendarList, item => {
+                        item.appointmentCalendar.unshift({});
                     });
                 }
             }
@@ -120,6 +143,10 @@ const updateAppointment = (state = appointmentState, action = {}) => {
             return {...state, bookCompareResult: action.data, bookAppointmentDialog: true};
         case 'BOOK_COMPARE_RESULT_CLOSE':
             return {...state, bookAppointmentDialog: false};
+        case 'SELECT_CALENDAR':
+            return {...state, selectCalendar: action.data};
+        case 'GET_ATTENDANCELIST':
+            return {...state, attendanceList: action.data};
         default:
             return state;
     }

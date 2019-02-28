@@ -3,15 +3,15 @@ import axios from '../../services/axiosInstance';
 
 function* getEncounterType(){
     while(true) {
-        let { clinic } = yield take( 'GET_ENCOUNTERTYPE_LIST');
-        let params = {clinicId: clinic.clinicId};
+        let { clinicId } = yield take( 'GET_ENCOUNTERTYPE_LIST');
+        let params = { clinicId };
         try {
             let {data} = yield call(axios.get, '/user/listEncounterType', {params: params});
             if (data.success) {
                 let encounterType = data.data[0];
-                yield put({type: 'UPDATE_ENCOUNTERTYPE', encounterTypeList: data.data, encounterType});
-                yield put({type: 'UPDATE_ENCOUNTERTYPELIST', encounterType});
-                yield put({type: 'GET_ROOM_LIST', clinic, encounterType})
+                yield put({type: 'UPDATE_ENCOUNTERTYPELIST', encounterTypeList: data.data});
+                yield put({type: 'UPDATE_ENCOUNTERTYPE', encounterType});
+                yield put({type: 'GET_ROOM_LIST', clinicId, encounterTypeId:encounterType.encounterTypeId})
             } else {
                 console.log(data.errorMessage);
             }
@@ -20,18 +20,24 @@ function* getEncounterType(){
         }
     }
 }
+function* changeEncounterType() {
+    while(true) {
+        let { encounterType, encounterTypeId, clinicId } = yield take( 'CHANGE_ENCOUNTERTYPE');
+        yield put ({type: 'SELECT_CALENDAR', data: false});
+        yield put({type: 'UPDATE_ENCOUNTERTYPE', encounterType});
+        yield put({type: 'GET_ROOM_LIST', clinicId, encounterTypeId});
+    }
+}
 //根据clinicId, encounterTypeId获取roomList
 function* getRoom(){
     while(true) {
-        let { clinic, encounterType } = yield take( 'GET_ROOM_LIST');
-        let params = {
-            clinicId: clinic.clinicId,
-            encounterTypeId: encounterType.encounterTypeId,
-        };
+        let { clinicId, encounterTypeId } = yield take( 'GET_ROOM_LIST');
+        let params = { clinicId, encounterTypeId };
         try {
             let {data} = yield call(axios.get, '/user/listRoom', {params: params});
             if (data.success) {
                 yield put({type: 'UPDATE_ROOM', roomList: data.data}); //发起一个action，类似于dispatch
+                yield put ({type: 'SELECT_CALENDAR', data: true});
             } else {
                 console.log(data.errorMessage);
             }
@@ -43,8 +49,8 @@ function* getRoom(){
 //只根据clinicId获取roomList
 function* getAllRoom(){
     while(true) {
-        let { clinic } = yield take( 'GET_ALL_ROOM_LIST');
-        let params = {clinicId: clinic.clinicId};
+        let { clinicId } = yield take( 'GET_ALL_ROOM_LIST');
+        let params = { clinicId };
         try {
             let {data} = yield call(axios.get, '/user/getRoomList', {params: params});
             if (data.success) {
@@ -64,15 +70,34 @@ function* getClinicList() {
             let { data } = yield call(axios.get, '/user/listClinic');
             if (data.success) {
                 let clinic = data.data[0];
-                yield put({ type: 'UPDATE_CLINICLIST', clinicList: data.data, clinic }); //发起一个action，类似于dispatch
-                yield put({ type: 'GET_ENCOUNTERTYPE_LIST', clinic});
-                yield put({ type: 'GET_ALL_ROOM_LIST', clinic});
+                yield put({ type: 'UPDATE_CLINICLIST', clinicList: data.data}); //发起一个action，类似于dispatch
+                yield put({ type: 'UPDATE_CLINIC', clinic }); //发起一个action，类似于dispatch
+                yield put({ type: 'GET_ENCOUNTERTYPE_LIST', clinicId: clinic.clinicId});
+                yield put({ type: 'GET_ALL_ROOM_LIST', clinicId: clinic.clinicId});
             } else {
                 console.log(data.errorMessage);
             }
         } catch(error) {
             console.log(error);
         }
+    }
+}
+//改变clinic
+function* changeClinic() {
+    while(true) {
+        let { clinicId, clinic } = yield take( 'CHANGE_CLINIC');
+        yield put ({type: 'SELECT_CALENDAR', data: false});
+        yield put({ type: 'UPDATE_CLINIC', clinic }); //发起一个action，类似于dispatch
+        yield put({ type: 'GET_ENCOUNTERTYPE_LIST', clinicId});
+    }
+}
+//login改变clinic
+function* loginChangeClinic() {
+    while(true) {
+        let { clinicId, clinic } = yield take( 'LOGIN_CHANGE_CLINIC');
+        yield put({ type: 'UPDATE_CLINIC', clinic }); //发起一个action，类似于dispatch
+        yield put({ type: 'GET_ENCOUNTERTYPE_LIST', clinicId});
+        yield put({ type: 'GET_ALL_ROOM_LIST', clinicId});
     }
 }
 function* doLogin() {
@@ -220,16 +245,21 @@ function* bookAppointment() {
 
 export default function* rootSaga() {
   yield fork(getClinicList);
+  yield fork(changeClinic);
+  yield fork(loginChangeClinic);
   yield fork(getEncounterType);
+  yield fork(changeEncounterType);
   yield fork(getRoom);
   yield fork(getAllRoom);
   yield fork(doLogin);
   yield fork(updateMenu);
   yield fork(logout);
+
   yield fork(seachPatient);
   yield fork(updatePatient);
   yield fork(savePatient);
   yield fork(closeError);
+
   yield fork(getClendar);
   yield fork(getBookHistory);
   yield fork(bookCompare);

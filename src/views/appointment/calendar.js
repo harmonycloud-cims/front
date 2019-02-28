@@ -50,6 +50,14 @@ const style = {
         paddingTop: 20,
         textAlign: 'center',
     },
+    table_body_cell_body_nodata: {
+        backgroundColor: '#fff',
+        width: 'calc(100% - 1px)',
+        height: 39,
+        marginLeft: 0.5,
+        paddingTop: 20,
+        textAlign: 'center',
+    },
     table_body_cell_body_full: {
         backgroundColor: '#B8BCB9',
         width: 'calc(100% - 1px)',
@@ -78,8 +86,9 @@ class Calendar extends Component {
                                 {
                                     JSON.stringify(item) === '{}' ? <Typography className={classes.table_body_cell_body}/> :
                                         <div>
-                                        <Typography className={classes.table_body_cell_title}>{item.appointmentDate.split('-')[0]}</Typography>
+                                        <Typography className={classes.table_body_cell_title}>{item.day}</Typography>
                                         {
+                                            item.noData ? <Typography className={classes.table_body_cell_body_nodata}>No data</Typography> :
                                             item.holiday ? <Typography className={classes.table_body_cell_body_holiday}>Holiday</Typography> :
                                             item.quota === 0 ? <Typography className={classes.table_body_cell_body_full}/> :
                                             <Typography className={classes.table_body_cell_body}>{item.quota}</Typography>

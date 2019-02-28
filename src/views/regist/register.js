@@ -125,8 +125,8 @@ class Register extends Component {
             };
             this.props.dispatch({type: 'UPDATE_PATIENT', params});
         } else {
-            patient.patientId = parseInt(uuid(), 10)/*(new Date()).getTime()*/;
-            _.forEach(contactPersonList, item => item.patientId = patient.patientId);
+            /*patient.patientId = parseInt(uuid(), 10)/!*(new Date()).getTime()*!/;
+            _.forEach(contactPersonList, item => item.patientId = patient.patientId);*/
             let params = {
                 contactPersonVoList: contactPersonList,
                 patient: patient

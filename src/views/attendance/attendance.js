@@ -11,8 +11,8 @@ function mapStateToProps(state) {
         patientList: state.updatePatient.patientList,
         clinicList: state.updateUser.clinicList,
         encounterList: state.updateUser.encounterList,
-        roomList: state.updateUser.roomList,
-        attendList: [],
+        allRoomList: state.updateUser.allRoomList,
+        attendanceList: state.updateAppointment.attendanceList,
     };
 }
 const style = {
@@ -96,9 +96,9 @@ class Attendance extends Component {
     constructor(props){
         super(props);
         this.state = {
-            room: this.props.roomList[0],
+            roomId: this.props.roomList[0].roomId,
             attendStatus: 'all',
-            date: moment(new Date().getTime()).format('YYYY-MM-DD'),
+            date: moment(new Date().getTime()).format('DD MMM YYYY'),
         }
     }
     search = (value) => {
@@ -110,6 +110,11 @@ class Attendance extends Component {
         this.setState({patient: item.patient, isSelected: true});
         this.props.dispatch({type: 'GET_BOOK_HISTORY', params});
     };
+
+    changeDate = (e) => {
+        let value = moment(e.target.value, 'YYYY-MM-DD').format('DD MMM YYYY');
+        this.setState({date: value});
+    };
     render() {
         const { classes } = this.props;
         return (
@@ -118,7 +123,8 @@ class Attendance extends Component {
                     <Grid item xs={3}>
                         <div className={'f_mt10'}>
                             <div>Date</div>
-                            <InputBase type={'date'} className={'select_input'} value={this.state.date} onChange={(...arg) => this.changeInformation(...arg, 'date')}/>
+                            <InputBase type={'date'} className={'select_input'} value={moment(this.state.date, 'DD MMM YYYY').format('YYYY-MM-DD')} onChange={(...arg) => this.changeDate(...arg)}/>
+                            <InputBase value={this.state.date} anchorEl={this.anchorel} className={classes.cover}/>
                         </div>
                         <div className={'f_mt10'}>
                             <div>Attend Status</div>
@@ -130,7 +136,8 @@ class Attendance extends Component {
                         </div>
                         <div className={'f_mt10'}>
                             <div>Room</div>
-                            <select className={'select_input'} value={this.state.room.roomId} onChange={(...arg) => this.changeInformation(...arg, 'room')}>
+                            <select className={'select_input'} value={this.state.room.roomId} onChange={(...arg) => this.changeInformation(...arg)}>
+                                <option value={'all'}> All </option>
                                 {
                                     this.props.roomList.map(item => <option key={item.roomId} value={item.roomId}>{item.roomName}</option>)
                                 }
