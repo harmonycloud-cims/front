@@ -128,7 +128,7 @@ class Register extends Component {
             /*patient.patientId = parseInt(uuid(), 10)/!*(new Date()).getTime()*!/;
             _.forEach(contactPersonList, item => item.patientId = patient.patientId);*/
             let params = {
-                contactPersonVoList: contactPersonList,
+                contactPersonList: contactPersonList,
                 patient: patient
             };
             this.props.dispatch({type: 'REGISTER_PATIENT', params});

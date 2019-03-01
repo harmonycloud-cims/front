@@ -68,12 +68,11 @@ const style = {
         paddingLeft: 12,
         fontWeight: 600
     },
-    table_row: {
-        height: 31
-    },
     table_header: {
-        fontSize: 15,
-        fontWeight: 600
+        fontSize: 14,
+        fontWeight: 600,
+        color: 'rgba(0, 0, 0, 0.7)',
+        padding: '0, 0, 0, 10'
     },
     right: {
         marginTop: 20,
@@ -219,7 +218,9 @@ class Appointment extends Component {
         const params = {
             patientId: this.state.patient.patientId,
             encounterTypeId: this.props.encounterType.encounterTypeId,
-            roomId: this.state.room.roomId
+            roomId: this.state.room.roomId,
+            clinicId: this.state.clinic.clinicId,
+            appointmentDate: moment(this.state.date, 'DD MMM YYYY').format('DD-MMM-YYYY')
         };
         this.props.dispatch({type: 'BOOK_COMPARE', params});
     };
@@ -263,22 +264,22 @@ class Appointment extends Component {
                                 <Table>
                                     <TableHead>
                                         <TableRow>
-                                            <TableCell>Date</TableCell>
-                                            <TableCell >Clinic</TableCell>
-                                            <TableCell >Encounter Type</TableCell>
-                                            <TableCell >Room</TableCell>
-                                            <TableCell >Status</TableCell>
+                                            <TableCell style={{paddingLeft: '15px'}} padding={'none'} className={classes.table_header}>Date</TableCell>
+                                            <TableCell padding={'none'} className={classes.table_header}>Clinic</TableCell>
+                                            <TableCell padding={'none'} className={classes.table_header}>Encounter Type</TableCell>
+                                            <TableCell padding={'none'} className={classes.table_header}>Room</TableCell>
+                                            <TableCell padding={'none'} className={classes.table_header}>Status</TableCell>
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
                                         {
                                             this.props.bookHistoryList.map((item, index) =>
-                                                <TableRow key={index} className={classes.table_row}>
-                                                    <TableCell>{item.appointmentDate}</TableCell>
-                                                    <TableCell>{item.clinicName}</TableCell>
-                                                    <TableCell>{item.encounterTypeName}</TableCell>
-                                                    <TableCell>{item.roomName}</TableCell>
-                                                    <TableCell>{item.attendanceStatus}</TableCell>
+                                                <TableRow key={index}>
+                                                    <TableCell style={{paddingLeft: '15px'}} padding={'none'}>{item.appointmentDate}</TableCell>
+                                                    <TableCell padding={'none'}>{item.clinicName}</TableCell>
+                                                    <TableCell padding={'none'}>{item.encounterTypeName}</TableCell>
+                                                    <TableCell padding={'none'}>{item.roomName}</TableCell>
+                                                    <TableCell padding={'none'}>{item.attendanceStatus}</TableCell>
                                                 </TableRow>
                                             )
                                         }
@@ -315,7 +316,7 @@ class Appointment extends Component {
                                             </Grid>
                                             <Grid item xs={3}>
                                                 <Typography component={'div'}>Room</Typography>
-                                                <select style={{width: 120}} className={'select_input'} value={this.state.room.roomId} onChange={(...arg) => this.changeRoom(...arg)}>
+                                                <select className={'select_input'} value={this.state.room.roomId} onChange={(...arg) => this.changeRoom(...arg)}>
                                                     {
                                                         this.state.showRoomList.map(item => <option key={item.roomId} value={item.roomId}>{item.roomName}</option>)
                                                     }
@@ -323,8 +324,8 @@ class Appointment extends Component {
                                             </Grid>
                                             <Grid item xs={6}>
                                                 <Typography component={'div'}>Date/Time</Typography>
-                                                <InputBase style={{width: 130}} inputRef= {node => {this.anchorel = node;}} type={'date'} className={'phone_select_input'} value={moment(this.state.date, 'DD MMM YYYY').format('YYYY-MM-DD')} onChange={(...arg) => this.changeDateTime(...arg, 'date')}/>
-                                                <InputBase value={this.state.date} anchorEl={this.anchorel} className={classes.cover}/>
+                                                <InputBase style={{width: 130}} type={'date'} className={'phone_select_input'} value={moment(this.state.date, 'DD MMM YYYY').format('YYYY-MM-DD')} onChange={(...arg) => this.changeDateTime(...arg, 'date')}/>
+                                                <InputBase value={this.state.date} className={classes.cover}/>
                                                 <InputBase style={{width: 80}} type={'time'} className={'phone_select_input'} value={this.state.time} onChange={(...arg) => this.changeDateTime(...arg, 'time')}/>
                                             </Grid>
                                         </Grid>

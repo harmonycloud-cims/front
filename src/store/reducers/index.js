@@ -4,7 +4,6 @@ import _ from 'lodash';
 
 global.token = '';
 export const initState = {
-    token: null,
     ifLogin: false,
     clinicList: [],
     clinic: {},
@@ -29,8 +28,7 @@ const updateUser = (state = initState, action = {}) => {
                });
             });
             action.data.data.user.accessRights.unshift(allMenuList[0]);
-            window.sessionStorage.setItem('token', action.data.data.token);
-            return {...state, user: action.data.data.user, menuList: action.data.data.user.accessRights, ifLogin: true, token: action.data.data.token};
+            return {...state, user: action.data.data.user, menuList: action.data.data.user.accessRights, ifLogin: true};
         case 'UPDATE_CLINICLIST':
             return {...state, clinicList: action.clinicList};
         case 'UPDATE_CLINIC':
@@ -145,8 +143,8 @@ const updateAppointment = (state = appointmentState, action = {}) => {
             return {...state, bookAppointmentDialog: false};
         case 'SELECT_CALENDAR':
             return {...state, selectCalendar: action.data};
-        case 'GET_ATTENDANCELIST':
-            return {...state, attendanceList: action.data};
+        case 'UPDATE_ATTENDANCELIST':
+            return {...state, attendanceList: action.attendanceList};
         default:
             return state;
     }

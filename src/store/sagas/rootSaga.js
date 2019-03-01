@@ -100,13 +100,27 @@ function* loginChangeClinic() {
         yield put({ type: 'GET_ALL_ROOM_LIST', clinicId});
     }
 }
+
+function* refreshToken() {
+    while(true) {
+        yield take('REFRESH_TOKEN');
+        yield call(setInterval, function*(){
+            let params = { oldToken: window.sessionStorage.getItem('token') };
+            let { data } = yield call (axios.post, '/user/refreshToken', params);
+            window.sessionStorage.setItem('token', data.data);
+            console.log('123');
+        }, 60*1000);
+    }
+}
 function* doLogin() {
     while(true) {
         const {params} = yield take('DO_LOGIN');
         try {
             let { data } = yield call(axios.post, '/user/login', params); //阻塞，请求后台数据
             if (data.success) {
+                window.sessionStorage.setItem('token', data.data.token);
                 yield put({type: 'UPDATE_LOGIN_USER', data}); //发起一个action，类似于dispatch
+                yield put({type: 'REFRESH_TOKEN'})
             } else {
                 yield put({ type: 'LOGIN_ERROR', error: data.errorMessage });
             }
@@ -235,7 +249,32 @@ function* bookAppointment() {
         try {
             let { data } = yield call(axios.post, '/appointment/book', params); //阻塞，请求后台数据
             yield put({type: 'BOOK_COMPARE_RESULT_CLOSE'});
-            console.log(data);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+}
+function* getAttendance() {
+    while(true) {
+        let { params } = yield take( 'GET_ATTENDANCELIST');
+        try {
+            let { data } = yield call(axios.post, '/appointment/appointmentlist', params); //阻塞，请求后台数据
+            if (data.success) {
+                yield put({type: 'UPDATE_ATTENDANCELIST', attendanceList: data.data});
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+}
+function* attend() {
+    while(true) {
+        let { params, params1 } = yield take( 'ATTEND');
+        try {
+            let { data } = yield call(axios.get, '/appointment/attend', {params: params}); //阻塞，请求后台数据
+            if (data.success) {
+                yield put({type: 'GET_ATTENDANCELIST', params: params1});
+            }
         } catch (error) {
             console.log(error);
         }
@@ -251,7 +290,9 @@ export default function* rootSaga() {
   yield fork(changeEncounterType);
   yield fork(getRoom);
   yield fork(getAllRoom);
+
   yield fork(doLogin);
+  yield fork(refreshToken);
   yield fork(updateMenu);
   yield fork(logout);
 
@@ -265,4 +306,6 @@ export default function* rootSaga() {
   yield fork(bookCompare);
   yield fork(bookCompareClose);
   yield fork(bookAppointment);
+  yield fork(getAttendance);
+  yield fork(attend);
 }
