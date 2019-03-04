@@ -11,7 +11,6 @@ import SearchInput from '../compontent/input/searchInput';
 import Contact from './contact';
 import _ from 'lodash';
 import timg from '../../images/timg.gif';
-import { uuid } from '../../services/utils';
 import { doumentTypeList, contactBasic, patientBasic, countryCodeList, districtList } from '../../services/staticData';
 import moment from 'moment';
 
