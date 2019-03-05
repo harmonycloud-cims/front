@@ -83,7 +83,7 @@ class Login extends Component {
                                 }
                                 <div className={styles.float_margint}>
                                     <div className={styles.forget_password}>Forget your password</div>
-                                    <Button type={'submit'} style={{width: '120px'}} variant={'outlined'} size={'small'} color={'primary'}>Sign in</Button>
+                                    <Button type={'submit'} style={{width: '125px'}} variant={'outlined'} size={'small'} color={'primary'}>Sign in</Button>
                                 </div>
                             </form>
                             <div className={'f_mt15'}>Important Note</div>

@@ -22,7 +22,7 @@ function mapStateToProps(state) {
         user: state.updateUser.user,
         menuList: state.updateUser.menuList,
         activeMenu: state.updateUser.activeMenu,
-        reLogin: state.updateUser.reLogin,
+        reLogin: state.updateUser.reLogin
     };
 }
 
@@ -30,8 +30,21 @@ class CommonHeader extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            timer: null,
             time: moment(new Date().getTime()).format('DD-MMM-YYYY, HH:mm')
         };
+    }
+
+    componentDidMount() {
+        let timer = setInterval(() => {
+            this.props.dispatch({type: 'REFRESH_TOKEN'});
+        }, 25*60000);
+        this.setState({timer});
+    }
+    componentWillUnmount() {
+        if(this.state.timer !== null){
+            this.setState({timer: null});
+        }
     }
     changeMenu = (item) => {
         this.props.dispatch({type: 'CHANGE_MENU', activeMenu: item.accessRightName});

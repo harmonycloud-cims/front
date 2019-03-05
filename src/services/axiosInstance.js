@@ -9,7 +9,6 @@ if (!window.Promise) {
     window.Promise = Promise;
 }
 
-// axios.defaults.headers.common['Authorization'] = window.sessionStorage.getItem('token') ? ('Bearer ' +  window.sessionStorage.getItem('token')) : null;
 axios.interceptors.request.use(
     config => {
         if (!(config.url.indexOf('/login') > -1 ||　config.url.indexOf('/user') > -1)) {
@@ -33,7 +32,7 @@ axios.interceptors.response.use(
                 case 400: err.message = '请求错误(400)' ; break;
                 case 401:
                     err.message = '未授权，请重新登录(401)';
-                    // configureStore().store.dispatch({type: 'LOGOUT'});
+                    configureStore().store.dispatch({type: 'LOGOUT'});
                     /*setTimeout(() => window.location.href='/', 100);*/
                     break;
                 case 403: err.message = '拒绝访问(403)'; break;

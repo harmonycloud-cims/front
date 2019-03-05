@@ -2,13 +2,14 @@ import React, { Component } from 'react';
 import { FormGroup, Typography, Grid } from '@material-ui/core';
 import { Close } from '@material-ui/icons';
 import { withStyles } from '@material-ui/core/styles';
+import moment from 'moment';
 
 const style = {
     root: {
         backgroundColor: '#CFECFA',
         height: 60,
         padding: '10px 20px',
-        width: 'calc(100% - 40px)'
+        width: 'calc(100%)'
     },
     item: {
         marginRight: 20
@@ -31,7 +32,8 @@ class Patient extends Component {
                     <FormGroup row>
                         <Typography className={classes.item}>{this.props.patient.documentType}: {this.props.patient.documentNumber}</Typography>
                         <Typography className={classes.item}>DOB: {this.props.patient.dateOfBirth}</Typography>
-                        {/*<Typography className={classes.item}>Age: {this.props.patient.age}Y</Typography>*/}
+                        <Typography className={classes.item}>Age: {moment(this.props.patient.dateOfBirth, 'DD-MMM-YYYY').diff(moment(), 'years')}Y</Typography>
+                        <Typography className={classes.item}>Sex: {this.props.patient.sex}</Typography>
                     </FormGroup>
                 </Grid>
                 <Grid item xs={3}>

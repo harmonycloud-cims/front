@@ -7,7 +7,7 @@ import SearchInput from '../compontent/input/searchInput';
 import Calendar from './calendar';
 import _ from 'lodash';
 import { ChevronRight, ChevronLeft, Warning } from '@material-ui/icons';
-import Patient from './patient';
+import Patient from '../compontent/patient';
 import moment from 'moment';
 import { caluDate } from '../../services/utils';
 
@@ -51,7 +51,7 @@ const style = {
         textAlign: 'center'
     },
     border1: {
-        border: '2px solid #B8BCB9',
+        border: '2px solid #B8BCB9'
         /*height: 'calc(100vh - 150px)',
         minHeight: 200*/
     },
@@ -132,12 +132,12 @@ class Appointment extends Component {
     componentDidMount() {
         this.initData(this.props);
     }
-    componentWillReceiveProps(nextProps) {
+    UNSAFE_componentWillReceiveProps(nextProps) {
         if ((nextProps.selectCalendar !== this.props.selectCalendar) && nextProps.selectCalendar) {
             this.setState({showRoomList: nextProps.roomList}, () => this.initData(nextProps));
         }
         if (nextProps.roomList !== this.props.roomList) {
-            this.setState({showRoomList: nextProps.roomList, room: nextProps.roomList[0]})
+            this.setState({showRoomList: nextProps.roomList, room: nextProps.roomList[0]});
         }
     }
 
@@ -326,7 +326,7 @@ class Appointment extends Component {
                                                 <Typography component={'div'}>Date/Time</Typography>
                                                 <InputBase style={{width: 130}} type={'date'} className={'phone_select_input'} value={moment(this.state.date, 'DD MMM YYYY').format('YYYY-MM-DD')} onChange={(...arg) => this.changeDateTime(...arg, 'date')}/>
                                                 <InputBase value={this.state.date} className={classes.cover}/>
-                                                <InputBase style={{width: 80}} type={'time'} className={'phone_select_input'} value={this.state.time} onChange={(...arg) => this.changeDateTime(...arg, 'time')}/>
+                                                <InputBase style={{width: 120}} type={'time'} className={'phone_select_input'} value={this.state.time} onChange={(...arg) => this.changeDateTime(...arg, 'time')}/>
                                             </Grid>
                                         </Grid>
                                     </FormGroup>
@@ -364,9 +364,7 @@ class Appointment extends Component {
                                      <div>Room</div>
                                     {
                                         this.state.showRoomList.map((item, index) =>
-                                            <FormControlLabel className={classes.controller} key={index} label={item.roomName}
-                                                              control={<Checkbox label={item.roomName} value={item.roomName} checked={item.checked} color={'primary'} onChange={(...arg) => this.checkChange(...arg, item, item.roomId)}/>}
-                                            />)
+                                            <FormControlLabel className={classes.controller} key={index} label={item.roomName} control={<Checkbox label={item.roomName} value={item.roomName} checked={item.checked} color={'primary'} onChange={(...arg) => this.checkChange(...arg, item, item.roomId)}/>}/>)
                                     }
                                 </div>
                             </Grid>

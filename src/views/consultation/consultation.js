@@ -1,19 +1,21 @@
 import React, { Component } from 'react';
 import {connect} from 'react-redux';
-import { Grid, RadioGroup, FormControlLabel, Radio, Table, TableRow,
+import { Grid, RadioGroup, FormControlLabel, Radio, Table, TableRow, Tabs, Tab,
     TableCell, TableHead, TableBody, Button, InputBase, IconButton, Paper} from '@material-ui/core';
 import { Search } from '@material-ui/icons';
 import _ from 'lodash';
-import {withStyles} from "@material-ui/core/styles/index";
+import {withStyles} from '@material-ui/core/styles';
 import moment from 'moment';
-
+import Patient from '../compontent/patient';
+import Note from './note';
 function mapStateToProps(state) {
     return {
         patientList: state.updatePatient.patientList,
+        patientById: state.updatePatient.patientById,
         clinicList: state.updateUser.clinicList,
-        encounterList: state.updateUser.encounterList,
         allRoomList: state.updateUser.allRoomList,
         attendanceList: state.updateAppointment.attendanceList,
+        medicalRecordList: state.updateConsultation.medicalRecordList
     };
 }
 const style = {
@@ -37,15 +39,6 @@ const style = {
         height: 20,
         padding: '4px 0 0 0'
     },
-    root: {
-        padding: '2px 4px',
-        display: 'flex',
-        alignItems: 'center',
-        borderRadius: '15px',
-        border: '1px solid rgba(0,0,0,0.2)',
-        height: 25,
-        width: 400
-    },
     input: {
         marginLeft: 8,
         flex: 1,
@@ -65,15 +58,28 @@ class Consulatation extends Component {
             date: '13 Mar 2019',
             attendanceList: this.props.attendanceList,
             value: '',
-        }
+            ifSelected: true,
+            tabValue: 0,
+            record: {}
+        };
     }
 
     componentDidMount() {
+        if(this.props.medicalRecordList.length > 0){
+            this.setState({record: this.props.medicalRecordList[0]});
+        }
         this.initData();
     }
-    componentWillReceiveProps(nextProps) {
+    UNSAFE_componentWillReceiveProps(nextProps) {
         if (nextProps.attendanceList !== this.props.attendanceList) {
             this.setState({attendanceList: nextProps.attendanceList, value: ''});
+        }
+        if (nextProps.medicalRecordList !== this.props.medicalRecordList) {
+            if(nextProps.medicalRecordList.length > 0) {
+                this.setState({record: nextProps.medicalRecordList[0]});
+            } else {
+                this.setState({record: {}});
+            }
         }
     }
 
@@ -83,42 +89,62 @@ class Consulatation extends Component {
             attendanceStatus: this.state.attendanceStatus,
             roomId: parseInt(this.state.roomId, 10)
         };
-        this.props.dispatch({type: 'GET_ATTENDANCELIST', params})
+        this.props.dispatch({type: 'GET_ATTENDANCELIST', params});
     };
 
-    // 选择
+    /* select页面 */
+    // 选择页面
     changeDate = (e) => {
         let value = moment(e.target.value, 'YYYY-MM-DD').format('DD MMM YYYY');
         this.setState({date: value}, () => this.initData());
     };
     changeAttendanceStatus = (e, checked) => {
         if (checked) {
-            this.setState({attendanceStatus: e.target.value}, () => this.initData())
+            this.setState({attendanceStatus: e.target.value}, () => this.initData());
         }
     };
     changeInformation = (e, name) => {
-        this.setState({[name]: e.target.value}, () => this.initData())
+        this.setState({[name]: e.target.value}, () => this.initData());
     };
-
-    select = (id) => {
-        console.log(id)
+    // select patient
+    select = (item) => {
+        const params = {patientId: item.patientId};
+        this.props.dispatch({type: 'GET_PATINET_BY_ID', params});
+        this.setState({ ifSelected: true });
     };
-
+    // 快捷搜索
     handleToggle = (e) => {
         let value = e.target.value.replace(' ', '');
         value = _.toUpper(value);
         let attend = _.cloneDeep(this.props.attendanceList);
         _.remove(attend, item => {
-            return !((item.patientDoc).indexOf(value) > -1 || (item.patientName.replace(' ', '')).indexOf(value) > -1)
+            return !((item.patientDoc).indexOf(value) > -1 || (item.patientName.replace(' ', '')).indexOf(value) > -1);
         });
-        this.setState({value: e.target.value, attendanceList: attend})
+        this.setState({value: e.target.value, attendanceList: attend});
+    };
+
+    /* consultation */
+    // tab change
+    changeTabValue = (event, value) => {
+        this.setState({ tabValue: value});
+    };
+    closePatient = () => {
+        this.setState({patient: {}, ifSelected: false});
     };
 
     render() {
         const { classes } = this.props;
         return (
             <div className={'detail_warp'}>
-                <Grid container>
+            {
+                this.state.ifSelected ? <div>
+                    <Patient patient={this.props.patientById} close={this.closePatient}/>
+                    <Tabs value={this.state.tabValue} onChange={this.changeTabValue} indicatorColor={'primary'} textColor={'primary'}>
+                        <Tab label="Note/Diagnosis"/>
+                        <Tab label="Prescription"/>
+                    </Tabs>
+                    {this.state.tabValue === 0 && <Note medicalRecordList={this.props.medicalRecordList} record={this.state.record}/>}
+                </div> : <Grid container>
                     <Grid item xs={3}>
                         <div className={'f_mt10'}>
                             <div>Date</div>
@@ -175,7 +201,7 @@ class Consulatation extends Component {
                                             <TableCell padding={'dense'}>{item.roomName}</TableCell>
                                             <TableCell padding={'dense'}>{item.attendanceStatus}</TableCell>
                                             <TableCell padding={'dense'}>
-                                                <Button variant={'outlined'} color={'primary'} size={'small'} onClick={() => this.select(item.appointmentId)}> Select </Button>
+                                                <Button variant={'outlined'} color={'primary'} size={'small'} onClick={() => this.select(item)}> Select </Button>
                                             </TableCell>
                                         </TableRow>
                                     )
@@ -184,6 +210,7 @@ class Consulatation extends Component {
                         </Table>
                     </Grid>
                 </Grid>
+            }
             </div>
         );
     }

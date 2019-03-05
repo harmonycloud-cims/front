@@ -37,12 +37,13 @@ const updateUser = (state = initState, action = {}) => {
             return {...state, encounterTypeList: action.encounterTypeList};
         case 'UPDATE_ENCOUNTERTYPE':
             return {...state, encounterType: action.encounterType};
-        case 'UPDATE_ROOM':
+        case 'UPDATE_ROOM': {
             let roomList = action.roomList;
-            _.forEach(roomList, (item, index) => item.checked = true );
+            _.forEach(roomList, (item) => item.checked = true );
             return {...state, roomList};
+        }
         case 'UPDATE_ALL_ROOM':
-            return {...state, allRoomList: action.allRoomList,};
+            return {...state, allRoomList: action.allRoomList};
         case 'UPDATE_MENU':
             return {...state, activeMenu: action.activeMenu};
         case 'CLEAR_INFORMATION':
@@ -76,12 +77,15 @@ const updateLogin = (state = loginState, action = {}) => {
 const patientState = {
     patientList: [],
     patientLoading: false,
-    patientErrorMessage: ''
+    patientErrorMessage: '',
+    patientById: {}
 };
 const updatePatient = (state = patientState, action = {}) => {
     switch (action.type) {
         case 'PATIENTLIST':
             return {...state, patientList: action.data};
+        case 'PATIENT_BY_ID':
+            return {...state, patientById: action.patientById};
         case 'PATIENT_LOADING':
             return {...state, patientLoading: action.data};
         case 'PATIENT_LOADING_ERROR':
@@ -98,11 +102,12 @@ const appointmentState = {
     bookCompareResult: true,
     bookAppointmentDialog: false,
     selectCalendar: false,
-    attendanceList: [],
+    attendanceList: []
 };
 const updateAppointment = (state = appointmentState, action = {}) => {
     switch (action.type) {
         case 'CALENDARLIST':
+        {
             let dateList = action.dateList;
             let numberWeek = action.numberWeek;
             let calendarList = action.data;
@@ -114,7 +119,7 @@ const updateAppointment = (state = appointmentState, action = {}) => {
                         holiday: false,
                         quota: 0,
                         appointmentDate: '',
-                        noData: true,
+                        noData: true
                     };
                     _.forEach(item.appointmentQuotaquotabo, quo => {
                         if (eve === parseInt(quo.appointmentDate.split('-')[0], 10)) {
@@ -125,7 +130,7 @@ const updateAppointment = (state = appointmentState, action = {}) => {
                         }
                     }) ;
                     item.appointmentCalendar.push(appointmentQuo);
-                })
+                });
             });
             if (numberWeek !== 1) {
                 for (let i = 1; i < numberWeek; i++) {
@@ -135,6 +140,7 @@ const updateAppointment = (state = appointmentState, action = {}) => {
                 }
             }
             return {...state, calendarList: action.data};
+        }
         case 'BOOK_HISTORY':
             return {...state, bookHistoryList: action.data};
         case 'BOOK_COMPARE_RESULT':
@@ -149,12 +155,24 @@ const updateAppointment = (state = appointmentState, action = {}) => {
             return state;
     }
 };
+const consultationState = {
+    medicalRecordList: []
+};
+const updateConsultation = (state = consultationState, action = {}) => {
+    switch (action.type) {
+        case 'MEDICAL_RECORD':
+            return {...state, medicalRecordList: action.data};
+        default:
+            return state;
+    }
+};
 const rootReducer = combineReducers({
     config: (state = {}) => state,
     updateUser,
     updateLogin,
     updatePatient,
-    updateAppointment
+    updateAppointment,
+    updateConsultation
 });
 
 export default rootReducer;

@@ -1,6 +1,8 @@
 import {take, call, put, fork} from 'redux-saga/effects';
 import axios from '../../services/axiosInstance';
 
+
+/* user */
 function* getEncounterType(){
     while(true) {
         let { clinicId } = yield take( 'GET_ENCOUNTERTYPE_LIST');
@@ -11,7 +13,7 @@ function* getEncounterType(){
                 let encounterType = data.data[0];
                 yield put({type: 'UPDATE_ENCOUNTERTYPELIST', encounterTypeList: data.data});
                 yield put({type: 'UPDATE_ENCOUNTERTYPE', encounterType});
-                yield put({type: 'GET_ROOM_LIST', clinicId, encounterTypeId:encounterType.encounterTypeId})
+                yield put({type: 'GET_ROOM_LIST', clinicId, encounterTypeId:encounterType.encounterTypeId});
             } else {
                 console.log(data.errorMessage);
             }
@@ -23,7 +25,7 @@ function* getEncounterType(){
 function* changeEncounterType() {
     while(true) {
         let { encounterType, encounterTypeId, clinicId } = yield take( 'CHANGE_ENCOUNTERTYPE');
-        yield put ({type: 'SELECT_CALENDAR', data: false});
+        yield put({type: 'SELECT_CALENDAR', data: false});
         yield put({type: 'UPDATE_ENCOUNTERTYPE', encounterType});
         yield put({type: 'GET_ROOM_LIST', clinicId, encounterTypeId});
     }
@@ -37,7 +39,7 @@ function* getRoom(){
             let {data} = yield call(axios.get, '/user/listRoom', {params: params});
             if (data.success) {
                 yield put({type: 'UPDATE_ROOM', roomList: data.data}); //发起一个action，类似于dispatch
-                yield put ({type: 'SELECT_CALENDAR', data: true});
+                yield put({type: 'SELECT_CALENDAR', data: true});
             } else {
                 console.log(data.errorMessage);
             }
@@ -86,7 +88,7 @@ function* getClinicList() {
 function* changeClinic() {
     while(true) {
         let { clinicId, clinic } = yield take( 'CHANGE_CLINIC');
-        yield put ({type: 'SELECT_CALENDAR', data: false});
+        yield put({type: 'SELECT_CALENDAR', data: false});
         yield put({ type: 'UPDATE_CLINIC', clinic }); //发起一个action，类似于dispatch
         yield put({ type: 'GET_ENCOUNTERTYPE_LIST', clinicId});
     }
@@ -104,12 +106,10 @@ function* loginChangeClinic() {
 function* refreshToken() {
     while(true) {
         yield take('REFRESH_TOKEN');
-        yield call(setInterval, function*(){
-            let params = { oldToken: window.sessionStorage.getItem('token') };
-            let { data } = yield call (axios.post, '/user/refreshToken', params);
-            window.sessionStorage.setItem('token', data.data);
-            console.log('123');
-        }, 60*1000);
+        let params = { oldToken: window.sessionStorage.getItem('token') };
+        console.log(params,'141234123431312424444');
+        let { data } = yield call(axios.post, '/user/refreshToken', params);
+        window.sessionStorage.setItem('token', data.data);
     }
 }
 function* doLogin() {
@@ -120,7 +120,6 @@ function* doLogin() {
             if (data.success) {
                 window.sessionStorage.setItem('token', data.data.token);
                 yield put({type: 'UPDATE_LOGIN_USER', data}); //发起一个action，类似于dispatch
-                yield put({type: 'REFRESH_TOKEN'})
             } else {
                 yield put({ type: 'LOGIN_ERROR', error: data.errorMessage });
             }
@@ -142,6 +141,7 @@ function* logout() {
     }
 }
 
+/* patient */
 function* seachPatient() {
     while(true) {
         let { params } = yield take( 'SEARCH_PATIENT');
@@ -154,6 +154,21 @@ function* seachPatient() {
             }
         } catch (error) {
             console.log(error);
+        }
+    }
+}
+function* getPatient() {
+    while(true) {
+        let { params } = yield take( 'GET_PATINET_BY_ID');
+        try {
+            let { data } = yield call(axios.get, '/patient/getPatient', {params: params}); //阻塞，请求后台数据
+            if (data.success) {
+                yield put({type: 'PATIENT_BY_ID', patientById: data.data});
+            } else {
+                console.log(data.errorMessage);
+            }
+        } catch (error) {
+            yield put({ type: 'PATIENT_LOADING_ERROR', data: error});
         }
     }
 }
@@ -196,6 +211,8 @@ function* closeError() {
     }
 }
 
+
+/* appointment */
 function* getClendar() {
     while(true) {
         let { params, dateList, numberWeek } = yield take( 'GET_CALENDAR');
@@ -247,7 +264,7 @@ function* bookAppointment() {
     while(true) {
         let { params } = yield take( 'BOOK_APPOINTMENT');
         try {
-            let { data } = yield call(axios.post, '/appointment/book', params); //阻塞，请求后台数据
+            yield call(axios.post, '/appointment/book', params); //阻塞，请求后台数据
             yield put({type: 'BOOK_COMPARE_RESULT_CLOSE'});
         } catch (error) {
             console.log(error);
@@ -297,6 +314,7 @@ export default function* rootSaga() {
   yield fork(logout);
 
   yield fork(seachPatient);
+  yield fork(getPatient);
   yield fork(updatePatient);
   yield fork(savePatient);
   yield fork(closeError);
