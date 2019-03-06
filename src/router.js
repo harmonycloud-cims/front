@@ -6,7 +6,6 @@ import IndexWarp from './views/index';
 import Welcome from './views/welcome';
 import Register from './views/regist/register';
 import Appointment from './views/appointment/appointment';
-import AppointmentBook from './views/appointment/appointmentBook';
 import Attendance from './views/attendance/attendance';
 import Consultation from './views/consultation/consultation';
 import Drug from './views/drug/drug';
@@ -17,9 +16,6 @@ import Result from './views/result/result';
 const routes = (
     <Switch>
         <Route path="/login" component={Login}/>
-        <Route path="/register" component={Register}/>
-        <Route path="/appointment" component={Appointment}/>
-        <Route path="/appointmentBook" component={AppointmentBook}/>
         <Redirect exact from="/" to="/login"/>
         <Route path="/index" render={(props) => (
             <IndexWarp>

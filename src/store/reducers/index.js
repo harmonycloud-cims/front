@@ -100,6 +100,7 @@ const appointmentState = {
     calendarList: [],
     bookHistoryList: [],
     bookCompareResult: true,
+    bookCompareResultError: '',
     bookAppointmentDialog: false,
     selectCalendar: false,
     attendanceList: []
@@ -122,7 +123,7 @@ const updateAppointment = (state = appointmentState, action = {}) => {
                         noData: true
                     };
                     _.forEach(item.appointmentQuotaquotabo, quo => {
-                        if (eve === parseInt(quo.appointmentDate.split('-')[0], 10)) {
+                        if (eve === parseInt(quo.appointmentDate.split('-')[2], 10)) {
                             appointmentQuo.holiday = quo.holiday;
                             appointmentQuo.quota = quo.quota;
                             appointmentQuo.appointmentDate = quo.appointmentDate;
@@ -145,6 +146,8 @@ const updateAppointment = (state = appointmentState, action = {}) => {
             return {...state, bookHistoryList: action.data};
         case 'BOOK_COMPARE_RESULT':
             return {...state, bookCompareResult: action.data, bookAppointmentDialog: true};
+        case 'BOOK_COMPARE_RESULT_ERROR':
+                return {...state, bookCompareResult: action.data, bookAppointmentDialog: true, bookCompareResultError: action.error};
         case 'BOOK_COMPARE_RESULT_CLOSE':
             return {...state, bookAppointmentDialog: false};
         case 'SELECT_CALENDAR':

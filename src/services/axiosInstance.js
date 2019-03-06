@@ -1,9 +1,7 @@
 import axios from 'axios';
 import Promise from 'babel-polyfill';
 // import configureStore from '../store/storeConfig';
-import configureStore from '../store/storeConfig';
 
-/*const { persistor, store } = configureStore({});*/
 // To add to window  解决promise 在ie中未定义的问题
 if (!window.Promise) {
     window.Promise = Promise;
@@ -32,8 +30,8 @@ axios.interceptors.response.use(
                 case 400: err.message = '请求错误(400)' ; break;
                 case 401:
                     err.message = '未授权，请重新登录(401)';
-                    configureStore().store.dispatch({type: 'LOGOUT'});
-                    /*setTimeout(() => window.location.href='/', 100);*/
+                    // configureStore().store.dispatch({type: 'LOGOUT'});
+                    // setTimeout(() => window.location.href='/', 100);
                     break;
                 case 403: err.message = '拒绝访问(403)'; break;
                 case 404: err.message = '请求出错(404)'; break;

@@ -19,6 +19,15 @@ function mapStateToProps(state) {
     };
 }
 const style = {
+    root: {
+        padding: '2px 4px',
+        display: 'flex',
+        alignItems: 'center',
+        borderRadius: '15px',
+        border: '1px solid rgba(0,0,0,0.2)',
+        height: 25,
+        width: 400
+    },
     controller: {
         marginLeft: 8,
         height: 28
@@ -37,7 +46,7 @@ const style = {
         fontSize: 14,
         left: 38,
         height: 20,
-        padding: '4px 0 0 0'
+        padding: '2px 0 0 0'
     },
     input: {
         marginLeft: 8,
@@ -54,8 +63,8 @@ class Consulatation extends Component {
         this.state = {
             roomId: '0',
             attendanceStatus: 'All',
-            // date: moment(new Date().getTime()).format('DD MMM YYYY'),
-            date: '13 Mar 2019',
+            date: moment(new Date().getTime()).format('DD MMM YYYY'),
+            // date: '13 Mar 2019',
             attendanceList: this.props.attendanceList,
             value: '',
             ifSelected: true,
@@ -69,6 +78,10 @@ class Consulatation extends Component {
             this.setState({record: this.props.medicalRecordList[0]});
         }
         this.initData();
+        let timer = setInterval(() => {
+            this.initData();
+        }, 60000);
+        this.setState({timer});
     }
     UNSAFE_componentWillReceiveProps(nextProps) {
         if (nextProps.attendanceList !== this.props.attendanceList) {
@@ -82,10 +95,15 @@ class Consulatation extends Component {
             }
         }
     }
+    componentWillUnmount() {
+        if(this.state.timer !== null){
+            clearInterval(this.state.timer);
+        }
+    }
 
     initData = () => {
         const params = {
-            appointmentDate: moment(this.state.date, 'DD MMM YYYY').format('DD-MMM-YYYY'),
+            appointmentDate: moment(this.state.date, 'DD MMM YYYY').format('YYYY-MM-DD'),
             attendanceStatus: this.state.attendanceStatus,
             roomId: parseInt(this.state.roomId, 10)
         };
@@ -195,7 +213,7 @@ class Consulatation extends Component {
                                         <TableRow key={index}>
                                             <TableCell style={{paddingLeft: '15px'}} padding={'none'}>{item.patientDoc}</TableCell>
                                             <TableCell padding={'dense'}>{item.patientName}</TableCell>
-                                            <TableCell padding={'dense'}>{item.appointmentDate}</TableCell>
+                                            <TableCell padding={'dense'}>{moment(item.appointmentDate).format('DD MMM YYYY HH:mm')}</TableCell>
                                             <TableCell padding={'dense'}>{item.attendanceTime}</TableCell>
                                             <TableCell padding={'dense'}>{item.encounterTypeName}</TableCell>
                                             <TableCell padding={'dense'}>{item.roomName}</TableCell>

@@ -4,7 +4,7 @@ import { Grid, RadioGroup, FormControlLabel, Radio, Table, TableRow,
     TableCell, TableHead, TableBody, Button, InputBase, IconButton, Paper} from '@material-ui/core';
 import { Search } from '@material-ui/icons';
 import _ from 'lodash';
-import {withStyles} from "@material-ui/core/styles/index";
+import {withStyles} from '@material-ui/core/styles/index';
 import moment from 'moment';
 
 function mapStateToProps(state) {
@@ -13,7 +13,7 @@ function mapStateToProps(state) {
         clinicList: state.updateUser.clinicList,
         encounterList: state.updateUser.encounterList,
         allRoomList: state.updateUser.allRoomList,
-        attendanceList: state.updateAppointment.attendanceList,
+        attendanceList: state.updateAppointment.attendanceList
     };
 }
 const style = {
@@ -34,8 +34,8 @@ const style = {
         width: 100,
         fontSize: 14,
         left: 38,
-        height: 20,
-        padding: '4px 0 0 0'
+        height: 20
+        // padding: '4px 0 0 0'
     },
     root: {
         padding: '2px 4px',
@@ -61,29 +61,38 @@ class Attendance extends Component {
         this.state = {
             roomId: '0',
             attendanceStatus: 'All',
-            // date: moment(new Date().getTime()).format('DD MMM YYYY'),
-            date: '13 Mar 2019',
+            date: moment(new Date().getTime()).format('DD MMM YYYY'),
             attendanceList: this.props.attendanceList,
             value: '',
-        }
+            timer: null
+        };
     }
 
     componentDidMount() {
         this.initData();
+        let timer = setInterval(() => {
+            this.initData();
+        }, 60000);
+        this.setState({timer});
     }
-    componentWillReceiveProps(nextProps) {
+    UNSAFE_componentWillReceiveProps(nextProps) {
         if (nextProps.attendanceList !== this.props.attendanceList) {
             this.setState({attendanceList: nextProps.attendanceList, value: ''});
+        }
+    }
+    componentWillUnmount() {
+        if(this.state.timer !== null){
+            clearInterval(this.state.timer);
         }
     }
 
     initData = () => {
         const params = {
-            appointmentDate: moment(this.state.date, 'DD MMM YYYY').format('DD-MMM-YYYY'),
+            appointmentDate: moment(this.state.date, 'DD MMM YYYY').format('YYYY-MM-DD'),
             attendanceStatus: this.state.attendanceStatus,
             roomId: parseInt(this.state.roomId, 10)
         };
-        this.props.dispatch({type: 'GET_ATTENDANCELIST', params})
+        this.props.dispatch({type: 'GET_ATTENDANCELIST', params});
     };
 
     changeDate = (e) => {
@@ -92,17 +101,18 @@ class Attendance extends Component {
     };
     changeAttendanceStatus = (e, checked) => {
         if (checked) {
-            this.setState({attendanceStatus: e.target.value}, () => this.initData())
+            this.setState({attendanceStatus: e.target.value}, () => this.initData());
         }
     };
     changeInformation = (e, name) => {
-        this.setState({[name]: e.target.value}, () => this.initData())
+        this.setState({[name]: e.target.value}, () => this.initData());
     };
 
     attend = (id) => {
         const params = { id };
+        // 成功后刷新页面
         const params1 = {
-            appointmentDate: moment(this.state.date, 'DD MMM YYYY').format('DD-MMM-YYYY'),
+            appointmentDate: moment(this.state.date, 'DD MMM YYYY').format('YYYY-MM-DD'),
             attendanceStatus: this.state.attendanceStatus,
             roomId: parseInt(this.state.roomId, 10)
         };
@@ -114,9 +124,9 @@ class Attendance extends Component {
         value = _.toUpper(value);
         let attend = _.cloneDeep(this.props.attendanceList);
         _.remove(attend, item => {
-           return !((item.patientDoc).indexOf(value) > -1 || (item.patientName.replace(' ', '')).indexOf(value) > -1)
+           return !((item.patientDoc).indexOf(value) > -1 || (item.patientName.replace(' ', '')).indexOf(value) > -1);
         });
-        this.setState({value: e.target.value, attendanceList: attend})
+        this.setState({value: e.target.value, attendanceList: attend});
     };
 
     render() {
@@ -174,8 +184,8 @@ class Attendance extends Component {
                                         <TableRow key={index}>
                                             <TableCell style={{paddingLeft: '15px'}} padding={'none'}>{item.patientDoc}</TableCell>
                                             <TableCell padding={'dense'}>{item.patientName}</TableCell>
-                                            <TableCell padding={'dense'}>{item.appointmentDate}</TableCell>
-                                            <TableCell padding={'dense'}>{item.attendanceTime}</TableCell>
+                                            <TableCell padding={'dense'}>{moment(item.appointmentDate).format('DD MMM YYYY HH:mm')}</TableCell>
+                                            <TableCell padding={'dense'}>{item.attendanceTime ? moment(item.attendanceTime).format('DD MMM YYYY HH:mm') : null}</TableCell>
                                             <TableCell padding={'dense'}>{item.encounterTypeName}</TableCell>
                                             <TableCell padding={'dense'}>{item.roomName}</TableCell>
                                             <TableCell padding={'dense'}>{item.attendanceStatus}</TableCell>

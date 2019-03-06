@@ -23,6 +23,7 @@ function mapStateToProps(state) {
         calendarList: state.updateAppointment.calendarList,
         bookHistoryList: state.updateAppointment.bookHistoryList,
         bookCompareResult: state.updateAppointment.bookCompareResult,
+        bookCompareResultError: state.updateAppointment.bookCompareResultError,
         bookAppointmentDialog: state.updateAppointment.bookAppointmentDialog
     };
 }
@@ -102,7 +103,7 @@ const style = {
         textAlign: 'center'
     },
     cover: {
-        top: 283,
+        top: 282,
         position: 'absolute',
         backgroundColor: '#fff',
         width: 100,
@@ -151,7 +152,7 @@ class Appointment extends Component {
         let params = {
             clinicId: props.clinic.clinicId,
             encounterTypeId: props.encounterType.encounterTypeId,
-            monthYear: moment(this.state.monthYear, 'MMM YYYY').format('MMM-YYYY'),
+            monthYear: moment(this.state.monthYear, 'MMM YYYY').format('YYYY-MM'),
             roomId: roomIdList
         };
         //dateList每个月非周末的日期, numberWeek为dateList[0]是星期中的第几天(1为周一,5为周五)
@@ -220,12 +221,12 @@ class Appointment extends Component {
             encounterTypeId: this.props.encounterType.encounterTypeId,
             roomId: this.state.room.roomId,
             clinicId: this.state.clinic.clinicId,
-            appointmentDate: moment(this.state.date, 'DD MMM YYYY').format('DD-MMM-YYYY')
+            appointmentDate: moment(this.state.date, 'DD MMM YYYY').format('YYYY/MM/DD')
         };
         this.props.dispatch({type: 'BOOK_COMPARE', params});
     };
     bookAppointment = () => {
-        let date = `${moment(this.state.date, 'DD MMM YYYY').format('DD-MMM-YYYY')} ${this.state.time}`;
+        let date = moment(`${this.state.date} ${this.state.time}`, 'DD MMM YYYY HH:mm').format('YYYY-MM-DDTHH:mm:ss.sss');
         const params = {
             clinicId: this.props.clinic.clinicId,
             clinicName: this.props.clinic.clinicName,
@@ -275,7 +276,7 @@ class Appointment extends Component {
                                         {
                                             this.props.bookHistoryList.map((item, index) =>
                                                 <TableRow key={index}>
-                                                    <TableCell style={{paddingLeft: '15px'}} padding={'none'}>{item.appointmentDate}</TableCell>
+                                                    <TableCell style={{paddingLeft: '15px'}} padding={'none'}>{moment(item.appointmentDate).format('DD MMM YYYY HH:mm')}</TableCell>
                                                     <TableCell padding={'none'}>{item.clinicName}</TableCell>
                                                     <TableCell padding={'none'}>{item.encounterTypeName}</TableCell>
                                                     <TableCell padding={'none'}>{item.roomName}</TableCell>
@@ -401,12 +402,12 @@ class Appointment extends Component {
                     {
                         !this.props.bookCompareResult ? <DialogTitle className={classes.dialog_title}>
                             <Warning className={classes.dialog_button}/>
-                            Duplicate booking found for this client, please check!
+                            {this.props.bookCompareResultError}
                         </DialogTitle> : null
                     }
                     <DialogContent>
                         <Typography component={'div'} className={classes.dialog_text}>
-                            {this.state.patient.englishSurname}, {this.state.patient.englishGivenName} ({this.state.patient.chineseName})
+                            {this.state.patient.englishSurname}, {this.state.patient.englishGivenName} {this.state.patient.chineseName ? (this.state.patient.chineseName) : null}
                         </Typography>
                         <Typography component={'div'} className={classes.dialog_text}>
                             {this.state.patient.documentNumber}

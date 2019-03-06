@@ -163,7 +163,7 @@ class Note extends Component {
                         <Grid container spacing={24}>
                             <Grid item xs={8}>
                                 <Typography component="div" className={classes.title}>Clinical Note</Typography>
-                                <Typography component="textarea" className={classes.clinical_note_box}>23r234234234234</Typography>
+                                <Typography component="textarea" className={classes.clinical_note_box} defaultValue={'23r234234234234'}/>
                             </Grid>
                             <Grid item xs={3}>
                                 <Typography component="div" className={classes.title}>Template</Typography>

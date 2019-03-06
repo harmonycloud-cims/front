@@ -4,6 +4,8 @@ import { connect } from 'react-redux';
 import { PersonAdd, DateRange, LocalHospital, EventAvailable, Adb,
     ArrowForwardIos, Home, Person, Edit, EventNote } from '@material-ui/icons';
 import moment from 'moment';
+import { allMenuList } from '../../../services/staticData';
+import _ from 'lodash';
 
 const components = {
     welcome: Home,
@@ -36,20 +38,38 @@ class CommonHeader extends Component {
     }
 
     componentDidMount() {
+        this.props.dispatch({type: 'REFRESH_TOKEN'});
         let timer = setInterval(() => {
             this.props.dispatch({type: 'REFRESH_TOKEN'});
-        }, 25*60000);
+        }, 14*60000);
         this.setState({timer});
+    }
+    UNSAFE_componentWillReceiveProps(nextProps){
+        if(nextProps.location.pathname !== this.props.location.pathname) {
+            if(nextProps.location.pathname === '/' || nextProps.location.pathname === '/login'){
+                console.log('shijianguola');
+                this.props.dispatch({type: 'LOGOUT'});
+                this.props.history.push('/login');
+            } else {
+                this.urlChangeReduxUpdate(nextProps.location.pathname);
+            }
+        }
     }
     componentWillUnmount() {
         if(this.state.timer !== null){
-            this.setState({timer: null});
+            clearInterval(this.state.timer);
         }
     }
     changeMenu = (item) => {
         this.props.dispatch({type: 'CHANGE_MENU', activeMenu: item.accessRightName});
-        this.props.history.push(item.url);
+        // this.props.history.push(item.url);
     };
+    urlChangeReduxUpdate = (url) => {
+        let menu = _.find(allMenuList, item => {
+            return item.url === url;
+        });
+        this.props.dispatch({type: 'CHANGE_MENU', activeMenu: menu.accessRightName});
+    }
     logout = () => {
         this.props.dispatch({type: 'LOGOUT'});
         this.props.history.push('/login');

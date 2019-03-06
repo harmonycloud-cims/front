@@ -33,7 +33,7 @@ class Login extends Component {
         };
     }
     componentDidMount() {
-        document.addEventListener('keypress',this.handleEnterKey);
+        // document.addEventListener('keypress',this.handleEnterKey);
         /*if (this.props.clinicList.length < 1) */this.props.dispatch({type:'GET_CLINICLIST'});
     }
     doLogin = (e) => {
@@ -60,7 +60,7 @@ class Login extends Component {
     render() {
         const { classes } = this.props;
         if (this.props.ifLogin) {
-            return <Redirect to={'/index'}/>
+            return <Redirect to={'/index'}/>;
         }
         return (
             <div className={styles.login}>

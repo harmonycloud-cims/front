@@ -106,9 +106,15 @@ function* loginChangeClinic() {
 function* refreshToken() {
     while(true) {
         yield take('REFRESH_TOKEN');
+        let oldToken = window.sessionStorage.getItem('token');
         let params = { oldToken: window.sessionStorage.getItem('token') };
-        console.log(params,'141234123431312424444');
-        let { data } = yield call(axios.post, '/user/refreshToken', params);
+        let { data } = yield call(axios.post, '/user/refreshToken', params, {
+            transformRequest: [
+                function() {
+                    let ret = 'oldToken=' + oldToken;
+                    return ret;
+                }
+            ]});
         window.sessionStorage.setItem('token', data.data);
     }
 }
@@ -248,7 +254,11 @@ function* bookCompare() {
         let { params } = yield take( 'BOOK_COMPARE');
         try {
             let { data } = yield call(axios.get, '/appointment/isduplicated', {params: params}); //阻塞，请求后台数据
-            yield put({type: 'BOOK_COMPARE_RESULT', data: data.success});
+            if(data.success) {
+                yield put({type: 'BOOK_COMPARE_RESULT', data: data.success});
+            } else {
+                yield put({type: 'BOOK_COMPARE_RESULT_ERROR', data: data.success, error: data.errorMessage});
+            }
         } catch (error) {
             console.log(error);
         }
@@ -275,7 +285,7 @@ function* getAttendance() {
     while(true) {
         let { params } = yield take( 'GET_ATTENDANCELIST');
         try {
-            let { data } = yield call(axios.post, '/appointment/appointmentlist', params); //阻塞，请求后台数据
+            let { data } = yield call(axios.post, '/appointment/appointmentList', params); //阻塞，请求后台数据
             if (data.success) {
                 yield put({type: 'UPDATE_ATTENDANCELIST', attendanceList: data.data});
             }

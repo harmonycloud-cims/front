@@ -1,23 +1,30 @@
 # README
 ---
 
-> 该项目基于create-react-app(v6.4.1)构建
+> 该项目基于create-react-app(v2.1.0)构建
 > 目前各个依赖库版本
 >  {
-> 	"react": "16.8.2",
-> 	"react-dom": "16.8.2",
-> 	"react-router-dom": "4.2.2"
-> 	"react-scripts": "2.1.5",
-> 	"redux": "3.7.2",
-> 	"react-redux": "5.0.7"
-> 	"axios": "0.18.0",
-> 	"material-ui/core": "3.9.2",
-> }
+> 	"@material-ui/core": "3.9.2",
+    "@material-ui/icons": "3.0.2",
+    "axios": "0.18.0",
+    "babel-polyfill": "6.26.0",
+    "lodash": "4.17.11",
+    "moment": "2.24.0",
+    "react": "16.8.2",
+    "react-dom": "16.8.2",
+    "react-redux": "6.0.0",
+    "react-router-dom": "4.3.1",
+    "react-scripts": "2.1.5",
+    "redux": "4.0.1",
+    "redux-logger": "3.0.6",
+    "redux-persist": "5.10.0",
+    "redux-saga": "1.0.1"
+  }
 
 ## 1. 项目结构
 	- store是redux状态管理
 	- services提供公共方法
-	- components提供全局/公共组件
+	- style公共样式
 	- views提供业务支持
 ## 2. Eslint
 	

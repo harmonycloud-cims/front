@@ -114,22 +114,16 @@ class Register extends Component {
     doRegister = (e) => {
         e.preventDefault();
         let { patient, contactPersonList } = this.state;
-        // 后台格式(dd-MMM-YYYY), 前台格式(DD MMM YYYY)
-        patient.dateOfBirth = moment(patient.dateOfBirth, 'DD MMM YYYY').format('DD-MMM-YYYY');
+        // 后台格式(YYYY-MM-DD), 前台格式(DD MMM YYYY)
+        patient.dateOfBirth = moment(patient.dateOfBirth, 'DD MMM YYYY').format('YYYY-MM-DD');
         patient.search = `${patient.documentNumber},${patient.homePhone},${patient.mobilePhone},${patient.englishSurname},${patient.englishGivenName},${patient.englishSurname},${patient.chineseName}`;
+        let params = {
+            contactPersonList: contactPersonList,
+            patient: patient
+        };
         if (this.state.isUpdate) {
-            let params = {
-                contactPersonList: contactPersonList,
-                patient: patient
-            };
             this.props.dispatch({type: 'UPDATE_PATIENT', params});
         } else {
-            /*patient.patientId = parseInt(uuid(), 10)/!*(new Date()).getTime()*!/;
-            _.forEach(contactPersonList, item => item.patientId = patient.patientId);*/
-            let params = {
-                contactPersonList: contactPersonList,
-                patient: patient
-            };
             this.props.dispatch({type: 'REGISTER_PATIENT', params});
         }
         this.setState({loading: true, patient: _.cloneDeep(patientBasic), contactPersonList: [], isUpdate: false});
@@ -155,7 +149,7 @@ class Register extends Component {
                     item.patient[key] = '';
                 }
             });
-            item.patient.dateOfBirth = moment(item.patient.dateOfBirth, 'DD-MMM-YYYY').format('DD MMM YYYY');
+            item.patient.dateOfBirth = moment(item.patient.dateOfBirth, 'YYYY-MM-DD').format('DD MMM YYYY');
             if (item.contactPersonList.length > 0) {
                 _.forEach(item.contactPersonList, eve => {
                     _.forEach(eve, (value, key) => {

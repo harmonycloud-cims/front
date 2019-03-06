@@ -31,8 +31,8 @@ class Patient extends Component {
                     </Typography>
                     <FormGroup row>
                         <Typography className={classes.item}>{this.props.patient.documentType}: {this.props.patient.documentNumber}</Typography>
-                        <Typography className={classes.item}>DOB: {this.props.patient.dateOfBirth}</Typography>
-                        <Typography className={classes.item}>Age: {moment(this.props.patient.dateOfBirth, 'DD-MMM-YYYY').diff(moment(), 'years')}Y</Typography>
+                        <Typography className={classes.item}>DOB: {moment(this.props.patient.dateOfBirth).format('DD MMM YYYY')}</Typography>
+                        <Typography className={classes.item}>Age: {moment().diff(moment(this.props.patient.dateOfBirth, 'YYYY-MM-DD'), 'years')}Y</Typography>
                         <Typography className={classes.item}>Sex: {this.props.patient.sex}</Typography>
                     </FormGroup>
                 </Grid>
