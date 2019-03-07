@@ -17,6 +17,7 @@ import {
 import { Close, ArrowLeft, ArrowRight, Remove } from '@material-ui/icons';
 import { withStyles } from '@material-ui/core/styles';
 import _ from 'lodash';
+import moment from 'moment';
 
 const style = {
   table_header: {
@@ -43,6 +44,15 @@ const style = {
     border: '1px solid rgba(0,0,0,0.5)',
     marginBottom: 20,
     overflowY: 'auto'
+  },
+  table_row: {
+    height: 31,
+    cursor: 'pointer'
+  },
+  table_row_selected: {
+    height: 31,
+    cursor: 'pointer',
+    backgroundColor: 'lightgoldenrodyellow'
   },
   table_head: {
     height: 30
@@ -101,7 +111,8 @@ const style = {
     height: 220,
     width: 'calc(100% - 40px)',
     padding: 15,
-    marginLeft: 10
+    marginLeft: 10,
+    overflowY: 'auto'
   },
   template_icon: {
     float: 'left'
@@ -118,7 +129,8 @@ class Note extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      medicalRecord: { noteContent: '123skdjaksfhaksf' },
+      medicalRecordList: this.props.medicalRecordList,
+      medicalRecord: {},
       templateList: this.props.templateList,
       selectTemplate: [],
       clinicalNotes: ''
@@ -126,31 +138,39 @@ class Note extends Component {
   }
   componentDidMount() {
     if (this.props.medicalRecordList.length > 0) {
-      this.setState({ medicalRecord: this.state.medicalRecordList[0] });
+      this.setState({ medicalRecord: this.props.medicalRecordList[0] });
     }
     let templateList = _.cloneDeep(this.props.templateList);
     if (templateList.length > 0) {
       _.forEach(templateList, item => {
         item.checked = false;
       });
-      console.log(templateList);
       this.setState({ templateList });
     }
   }
   UNSAFE_componentWillReceiveProps(nextProps) {
     // medicalRecordList记录
     if (nextProps.medicalRecordList !== this.props.medicalRecordList) {
-      this.setState({ medicalRecord: nextProps.medicalRecordList });
+      this.setState(
+        {
+          medicalRecord: nextProps.medicalRecordList[0],
+          medicalRecordList: nextProps.medicalRecordList
+        }
+      );
     }
     // template
     if (nextProps.templateList !== this.props.templateList) {
-      this.setState({ templateList: nextProps.templateList }, () =>
-        console.log(this.state.templateList)
-      );
+      let templateList = _.cloneDeep(nextProps.templateList);
+      if (templateList.length > 0) {
+        _.forEach(templateList, item => {
+          item.checked = false;
+        });
+      }
+      this.setState({ templateList }, ()=>console.log(this.state.templateList));
     }
   }
   changeCheck = (e, checked, item) => {
-    console.log(e, checked, item);
+    console.log(checked);
     let templateList = _.cloneDeep(this.state.templateList);
     let clinicalNotes = _.cloneDeep(this.state.clinicalNotes);
     let template = _.find(templateList, eve => {
@@ -166,7 +186,10 @@ class Note extends Component {
       JSON.stringify(clinicalNotes).replace(item.templateContent, '');
     }
     template.checked = checked;
-    this.setState({ templateList, clinicalNotes });
+    this.setState({ templateList, clinicalNotes }, ()=> console.log(this.state.templateList));
+  };
+  changeMedicalRecord = medicalRecord => {
+    this.setState({ medicalRecord });
   };
   editClinicalNotes = e => {
     this.setState({ clinicalNotes: e.target.value });
@@ -176,7 +199,11 @@ class Note extends Component {
     console.log(JSON.stringify(this.state.clinicalNotes));
   };
   clear = () => {
-    this.setState({ clinicalNotes: '' });
+    let templateList = _.cloneDeep(this.props.templateList);
+    _.forEach(templateList, item => {
+      item.checked = false;
+    });
+    this.setState({ templateList, clinicalNotes: '' }, () => console.log(this.state.templateList));
   };
   copy = () => {
     let notes = this.state.medicalRecord.noteContent;
@@ -214,12 +241,21 @@ class Note extends Component {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {this.props.medicalRecordList.map((item, index) => (
-                  <TableRow key={index}>
+                {this.state.medicalRecordList.map((item, index) => (
+                  <TableRow
+                      key={index}
+                      onClick={() => this.changeMedicalRecord(item)}
+                      className={
+                      item.clinicalNoteId ===
+                      this.state.medicalRecord.clinicalNoteId
+                        ? classes.table_row_selected
+                        : classes.table_row
+                    }
+                  >
                     <TableCell style={{ paddingLeft: '15px' }} padding={'none'}>
-                      {item.createDate}
+                      {moment(item.createDate).format('DD MMM YYYY HH:mm')}
                     </TableCell>
-                    <TableCell padding={'dense'}>{item.type}</TableCell>
+                    <TableCell padding={'dense'}>{item.recordType}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

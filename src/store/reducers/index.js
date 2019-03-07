@@ -45,6 +45,7 @@ const updateUser = (state = initState, action = {}) => {
     case 'UPDATE_ROOM': {
       let roomList = action.roomList;
       _.forEach(roomList, item => (item.checked = true));
+      // console.log('roomlist', roomList);
       return { ...state, roomList };
     }
     case 'UPDATE_ALL_ROOM':
@@ -201,7 +202,7 @@ const consultationState = {
 const updateConsultation = (state = consultationState, action = {}) => {
   switch (action.type) {
     case 'UPDATE_MEDICAL_RECORD':
-      return { ...state, medicalRecordList: action.data };
+      return { ...state, medicalRecordList: action.medicalRecordList };
     case 'UPDATE_TEMPLATELIST':
       return { ...state, templateList: action.templateList };
     default:

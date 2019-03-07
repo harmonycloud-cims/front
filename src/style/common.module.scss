@@ -166,13 +166,14 @@ $buttonColor: #4052b2;
     float: left;
     height: $headerHeight;
     line-height: $headerHeight;
-    width: 74%;
+    width: calc(100% - 310px);
   }
   .com_header_right_warp {
     display: inline-block;
     height: $headerHeight;
     line-height: $headerHeight;
     float: right;
+    width: 310px;
   }
   .menu_item {
     text-decoration: none; //去掉下划线
@@ -207,7 +208,7 @@ $buttonColor: #4052b2;
     padding: 3px;
     border-radius: 5px;
   }
-  @media (min-width: 1000px) {
+  @media (min-width: 800px) {
     .com_header_menu_list {
       @include com_header_menu_list_basic;
       overflow: auto;

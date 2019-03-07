@@ -351,7 +351,7 @@ function* getMedicalRecordList() {
   while (true) {
     let { params } = yield take('GET_MEDICAL_RECORD');
     try {
-      let { data } = yield call(axios.get, '/clinicalnote/listClinicalNote', {
+      let { data } = yield call(axios.get, '/clinicalnote/listClinicNote', {
         params: params
       }); //阻塞，请求后台数据
       if (data.success) {

@@ -119,7 +119,6 @@ class Consulatation extends Component {
       this.initData();
     }, 60000);
     this.setState({ timer });
-    console.log(this.state.templateList);
   }
   UNSAFE_componentWillReceiveProps(nextProps) {
     // select页面attendaceList变换
@@ -128,13 +127,11 @@ class Consulatation extends Component {
     }
     // medicalRecordList记录
     if (nextProps.medicalRecordList !== this.props.medicalRecordList) {
-      this.setState({ medicalRecord: nextProps.medicalRecordList });
+      this.setState({ medicalRecordList: nextProps.medicalRecordList });
     }
     // template
     if (nextProps.templateList !== this.props.templateList) {
-      this.setState({ templateList: nextProps.templateList }, () =>
-        console.log(this.state.templateList)
-      );
+      this.setState({ templateList: nextProps.templateList });
     }
   }
   componentWillUnmount() {

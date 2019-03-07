@@ -181,6 +181,10 @@ class Register extends Component {
     if (JSON.stringify(item) === '{}') {
       item.patient = _.cloneDeep(patientBasic);
       item.contactPersonList = [];
+      this.setState({
+        patient: item.patient,
+        contactPersonList: item.contactPersonList
+      });
     } else {
       _.forEach(item.patient, (value, key) => {
         if (!item.patient[key]) {

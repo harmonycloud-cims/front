@@ -281,7 +281,7 @@ class Appointment extends Component {
     let date = moment(
       `${this.state.date} ${this.state.time}`,
       'DD MMM YYYY HH:mm'
-    ).format('YYYY-MM-DDTHH:mm:ss.sss');
+    ).format('YYYY-MM-DDTHH:mm:ss.sssZ');
     const params = {
       clinicId: this.props.clinic.clinicId,
       clinicName: this.props.clinic.clinicName,
@@ -583,21 +583,26 @@ class Appointment extends Component {
                   _.find(
                     this.state.showRoomList,
                     eve => item.roomId === eve.roomId
-                  ).checked ? (
-                    <Grid key={index} item xs={6}>
-                      <Typography
-                          component={'div'}
-                          className={classes.room_title}
-                      >
-                        {
-                          _.find(
-                            this.state.showRoomList,
-                            eve => item.roomId === eve.roomId
-                          ).roomName
-                        }
-                      </Typography>
-                      <Calendar calendarList={item.appointmentCalendar} />
-                    </Grid>
+                  ) ? (
+                    _.find(
+                      this.state.showRoomList,
+                      eve => item.roomId === eve.roomId
+                    ).checked ? (
+                      <Grid key={index} item xs={6}>
+                        <Typography
+                            component={'div'}
+                            className={classes.room_title}
+                        >
+                          {
+                            _.find(
+                              this.state.showRoomList,
+                              eve => item.roomId === eve.roomId
+                            ).roomName
+                          }
+                        </Typography>
+                        <Calendar calendarList={item.appointmentCalendar} />
+                      </Grid>
+                    ) : null
                   ) : null
                 )}
               </Grid>

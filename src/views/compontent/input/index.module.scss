@@ -9,7 +9,7 @@
   color: rgba(0, 0, 0, 0.87);
   padding-top: 10px;
 }
-.form100{
+.form100 {
   @include form_controller;
   width: 100%;
 }
