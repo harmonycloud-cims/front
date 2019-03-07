@@ -14,27 +14,29 @@ import Investigation from './views/investigation/investigation';
 import Result from './views/result/result';
 
 const routes = (
-    <Switch>
-        <Route path="/login" component={Login}/>
-        <Route path="/consultation" component={Consultation}/>
-        <Redirect exact from="/" to="/login"/>
-        <Route path="/index" render={() => (
-            <IndexWarp>
-                <Switch>
-                    <Redirect exact from="/index" to="/index/welcome"/>
-                    <Route path="/index/welcome" component={Welcome}/>
-                    <Route path="/index/register" component={Register}/>
-                    <Route path="/index/appointment" component={Appointment}/>
-                    <Route path="/index/attendance" component={Attendance}/>
-                    <Route path="/index/consultation" component={Consultation}/>
-                    <Route path="/index/drug" component={Drug}/>
-                    <Route path="/index/assessment" component={Assessment}/>
-                    <Route path="/index/investigation" component={Investigation}/>
-                    <Route path="/index/result" component={Result}/>
-                </Switch>
-            </IndexWarp>
-        )} />
-    </Switch>
+  <Switch>
+    <Route path="/login" component={Login} />
+    <Redirect exact from="/" to="/login" />
+    <Route
+        path="/index"
+        render={() => (
+        <IndexWarp>
+          <Switch>
+            <Redirect exact from="/index" to="/index/welcome" />
+            <Route path="/index/welcome" component={Welcome} />
+            <Route path="/index/register" component={Register} />
+            <Route path="/index/appointment" component={Appointment} />
+            <Route path="/index/attendance" component={Attendance} />
+            <Route path="/index/consultation" component={Consultation} />
+            <Route path="/index/drug" component={Drug} />
+            <Route path="/index/assessment" component={Assessment} />
+            <Route path="/index/investigation" component={Investigation} />
+            <Route path="/index/result" component={Result} />
+          </Switch>
+        </IndexWarp>
+      )}
+    />
+  </Switch>
 );
 
 export default routes;

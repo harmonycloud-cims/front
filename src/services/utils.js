@@ -51,34 +51,39 @@ export const fn = {
     };
   }
 };
-export const getCookie = (name) => {
-    let arr = document.cookie.match(new RegExp('(^| )'+name+'=([^;]*)(;|$)'));
-    if(arr) return unescape(arr[2]); return null;
+export const getCookie = name => {
+  let arr = document.cookie.match(new RegExp('(^| )' + name + '=([^;]*)(;|$)'));
+  if (arr) return unescape(arr[2]);
+  return null;
 };
 //删除cookie
-export const delCookie = (name) => {
-    let exp = new Date();
-    exp.setTime(exp.getTime() - 1);
-    let cval = getCookie(name);
-    if(cval) document.cookie = name + '=' + cval + ';expires=' + exp.toGMTString();
+export const delCookie = name => {
+  let exp = new Date();
+  exp.setTime(exp.getTime() - 1);
+  let cval = getCookie(name);
+  if (cval)
+    document.cookie = name + '=' + cval + ';expires=' + exp.toGMTString();
 };
-export const caluDate = (date) => {
+export const caluDate = date => {
   let first = `01 ${date}`;
   let start = 1;
   let numberWeek = parseInt(moment(first, 'DD MMM YYYY').format('d'), 10);
-  let last = moment(first, 'DD MMM YYYY').add(1, 'months').subtract(1, 'days').format('D');
+  let last = moment(first, 'DD MMM YYYY')
+    .add(1, 'months')
+    .subtract(1, 'days')
+    .format('D');
   let dateList = [];
-  if(numberWeek === 0) {
+  if (numberWeek === 0) {
     start = 2;
     numberWeek = 1;
   } else if (numberWeek === 6) {
     start = 3;
     numberWeek = 1;
   }
-  for(let i=0; i<=(last-start); i++) {
-    if ( !((((i+numberWeek)%7) === 6) || (((i+numberWeek)%7) === 0)) ) {
+  for (let i = 0; i <= last - start; i++) {
+    if (!((i + numberWeek) % 7 === 6 || (i + numberWeek) % 7 === 0)) {
       dateList.push(start + i);
     }
   }
-  return {dateList, numberWeek};
+  return { dateList, numberWeek };
 };

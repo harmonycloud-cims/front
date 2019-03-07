@@ -11,14 +11,13 @@ import { PersistGate } from 'redux-persist/integration/react';
 
 const { persistor, store } = configure({});
 
-ReactDOM.render((
-    <Provider store={store}>
-        <PersistGate loading={null} persistor={persistor}>
-            <Router>
-                {routes}
-            </Router>
-        </PersistGate>
-    </Provider>
-), document.getElementById('root'));
+ReactDOM.render(
+  <Provider store={store}>
+    <PersistGate loading={null} persistor={persistor}>
+      <Router>{routes}</Router>
+    </PersistGate>
+  </Provider>,
+  document.getElementById('root')
+);
 document.title = 'CIMS';
 serviceWorker.unregister();

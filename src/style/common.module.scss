@@ -1,216 +1,282 @@
-$headerHeight : 50px;
-$color : rgba(0,0,0,0.8);
-$buttonColor: #4052B2;
+$headerHeight: 50px;
+$color: rgba(0, 0, 0, 0.8);
+$buttonColor: #4052b2;
 :global {
-    /* 字体大小 */
-    .s_fs_12 { font-size:12px; }
-    .s_fs_13 { font-size:13px; }
-    .s_fs_14 { font-size:14px; }
-    .s_fs_16 { font-size:16px; }
-    .s_fs_18 { font-size:18px; }
-    .s_fs_20 { font-size:20px; }
-    .s_fs_22 { font-size:22px; }
-    .s_fs_24 { font-size:24px; }
-    .s_fs_26 { font-size:26px; }
-    .s_fs_40 { font-size: 40px; }
-    /* margins */
-    .f_mb5 { margin-bottom:5px; }
-    .f_mr5 { margin-right:5px;  }
-    .f_ml5 { margin-left:5px; }
-    .f_mt5 { margin-top:5px; }
+  /* 字体大小 */
+  .s_fs_12 {
+    font-size: 12px;
+  }
+  .s_fs_13 {
+    font-size: 13px;
+  }
+  .s_fs_14 {
+    font-size: 14px;
+  }
+  .s_fs_16 {
+    font-size: 16px;
+  }
+  .s_fs_18 {
+    font-size: 18px;
+  }
+  .s_fs_20 {
+    font-size: 20px;
+  }
+  .s_fs_22 {
+    font-size: 22px;
+  }
+  .s_fs_24 {
+    font-size: 24px;
+  }
+  .s_fs_26 {
+    font-size: 26px;
+  }
+  .s_fs_40 {
+    font-size: 40px;
+  }
+  /* margins */
+  .f_mb5 {
+    margin-bottom: 5px;
+  }
+  .f_mr5 {
+    margin-right: 5px;
+  }
+  .f_ml5 {
+    margin-left: 5px;
+  }
+  .f_mt5 {
+    margin-top: 5px;
+  }
 
-    .f_mb10 { margin-bottom:10px; }
-    .f_mr10 { margin-right:10px;  }
-    .f_ml10 { margin-left:10px; }
-    .f_mt10 { margin-top:10px; }
+  .f_mb10 {
+    margin-bottom: 10px;
+  }
+  .f_mr10 {
+    margin-right: 10px;
+  }
+  .f_ml10 {
+    margin-left: 10px;
+  }
+  .f_mt10 {
+    margin-top: 10px;
+  }
 
-    .f_mb15 { margin-bottom:15px; }
-    .f_mr15 { margin-right:15px;  }
-    .f_ml15 { margin-left:15px; }
-    .f_mt15 { margin-top:15px; }
+  .f_mb15 {
+    margin-bottom: 15px;
+  }
+  .f_mr15 {
+    margin-right: 15px;
+  }
+  .f_ml15 {
+    margin-left: 15px;
+  }
+  .f_mt15 {
+    margin-top: 15px;
+  }
 
-    .f_mb20 { margin-bottom:20px; }
-    .f_mr20 { margin-right:20px;  }
-    .f_ml20 { margin-left:20px; }
-    .f_mt20 { margin-top:20px; }
+  .f_mb20 {
+    margin-bottom: 20px;
+  }
+  .f_mr20 {
+    margin-right: 20px;
+  }
+  .f_ml20 {
+    margin-left: 20px;
+  }
+  .f_mt20 {
+    margin-top: 20px;
+  }
 
-    .f_mb40 { margin-bottom:40px; }
-    .f_mr40 { margin-right:40px;  }
-    .f_ml40 { margin-left:40px; }
-    .f_mt40 { margin-top:40px; }
-    /* paddding */
-    .f_padding_10 {
-        padding: 10px;
-    }
-    /* 浮动float */
-    .f_over_hide{overflow: hidden;}
-    .f_fl{float:left;}
-    .f_fr{float:right;}
-    .select_custome {
-        height: 32px;
-        border: 1px solid;
-    }
+  .f_mb40 {
+    margin-bottom: 40px;
+  }
+  .f_mr40 {
+    margin-right: 40px;
+  }
+  .f_ml40 {
+    margin-left: 40px;
+  }
+  .f_mt40 {
+    margin-top: 40px;
+  }
+  /* paddding */
+  .f_padding_10 {
+    padding: 10px;
+  }
+  /* 浮动float */
+  .f_over_hide {
+    overflow: hidden;
+  }
+  .f_fl {
+    float: left;
+  }
+  .f_fr {
+    float: right;
+  }
+  .select_custome {
+    height: 32px;
+    border: 1px solid;
+  }
 
-    .border {
-        border: 1px solid #e6e6e6;
-    }
+  .border {
+    border: 1px solid #e6e6e6;
+  }
 
-    /* body */
-    .main_body {
-        width: 100vw;
-        height: 100vh;
-        overflow: hidden;
+  /* body */
+  .main_body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+  .nephele_main_body {
+    width: calc(100% - 40px);
+    height: calc(100% - 80px);
+    //background: #EDF2F4;
+    overflow-y: auto;
+    margin-top: $headerHeight;
+    padding: 20px;
+    position: relative;
+  }
+  .detail_warp {
+    height: 100%;
+    width: 100%;
+  }
+  .nephele_content_body {
+    width: calc(100% - 42px);
+    padding: 10px 20px;
+    background-color: white;
+    border: 1px solid #e6e6e6;
+    overflow-y: auto;
+    overflow-x: hidden;
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+  /* header */
+  .com_header {
+    width: 100%;
+    height: $headerHeight;
+    background-color: #ffffff;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    border-bottom: 1px solid #dcdcdc;
+  }
+  @mixin com_header_menu_list_basic {
+    display: inline-block;
+    float: left;
+    height: $headerHeight;
+    line-height: $headerHeight;
+    width: 74%;
+  }
+  .com_header_right_warp {
+    display: inline-block;
+    height: $headerHeight;
+    line-height: $headerHeight;
+    float: right;
+  }
+  .menu_item {
+    text-decoration: none; //去掉下划线
+    height: 30px;
+    padding: 10px 0px 10px 10px;
+    color: $buttonColor;
+  }
+  .menu_icon {
+    vertical-align: middle;
+  }
+  .com_header_right_warp_item {
+    float: right;
+    height: $headerHeight;
+    margin-left: 10px;
+    cursor: pointer;
+  }
+  @mixin com_header_right_warp_name_basic {
+    height: 30px;
+    line-height: 30px;
+    color: $color;
+    font-weight: 500;
+  }
+  @mixin com_header_right_warp_time_basic {
+    height: 20px;
+    line-height: 20px;
+    color: $color;
+    font-weight: 400;
+  }
+  @mixin menu_font_basic {
+    font-weight: 600;
+    vertical-align: middle;
+    padding: 3px;
+    border-radius: 5px;
+  }
+  @media (min-width: 1000px) {
+    .com_header_menu_list {
+      @include com_header_menu_list_basic;
+      overflow: auto;
     }
-    .nephele_main_body {
-        width: calc(100% - 40px);
-        height: calc(100% - 80px);
-        //background: #EDF2F4;
-        overflow-y: auto;
-        margin-top: $headerHeight;
-        padding: 20px;
-        position: relative;
+    .menu_font {
+      @include menu_font_basic;
+      font-size: x-small;
     }
-    .detail_warp {
-        height: 100%;
-        width: 100%;
+    .menu_font_selected {
+      @include menu_font_basic;
+      font-size: x-small;
+      background-color: $buttonColor;
+      color: #fff;
     }
-    .nephele_content_body {
-        width: calc(100% - 42px);
-        padding: 10px 20px;
-        background-color: white;
-        border: 1px solid #e6e6e6;
-        overflow-y: auto;
-        overflow-x: hidden;
-        font-size: 14px;
-        margin-bottom: 10px;
+    .com_header_right_warp_name {
+      @include com_header_right_warp_name_basic;
+      font-size: 15px;
     }
-    /* header */
-    .com_header {
-        width: 100%;
-        height: $headerHeight;
-        background-color: #ffffff;
-        position: absolute;
-        top: 0;
-        left: 0;
-        z-index: 10;
-        border-bottom: 1px solid #dcdcdc;
+    .com_header_right_warp_time {
+      @include com_header_right_warp_time_basic;
+      font-size: x-small;
     }
-    @mixin com_header_menu_list_basic {
-        display: inline-block;
-        float: left;
-        height: $headerHeight;
-        line-height: $headerHeight;
-        width: 74%;
+  }
+  @media (min-width: 1280px) {
+    .com_header_menu_list {
+      @include com_header_menu_list_basic;
+      overflow: hidden;
     }
-    .com_header_right_warp {
-        display: inline-block;
-        height: $headerHeight;
-        line-height: $headerHeight;
-        float: right;
+  }
+  @media (min-width: 1360px) {
+    .menu_font {
+      @include menu_font_basic;
+      font-size: 14px;
     }
-    .menu_item {
-        text-decoration:none; //去掉下划线
-        height: 30px;
-        padding: 10px 0px 10px 10px;
-        color: $buttonColor;
+    .menu_font_selected {
+      @include menu_font_basic;
+      font-size: 14px;
+      background-color: $buttonColor;
+      color: #fff;
     }
-    .menu_icon {
-        vertical-align: middle;
+    .com_header_right_warp_name {
+      @include com_header_right_warp_name_basic;
+      font-size: 17px;
     }
-    .com_header_right_warp_item {
-        float: right;
-        height: $headerHeight;
-        margin-left: 10px;
-        cursor: pointer;
+    .com_header_right_warp_time {
+      @include com_header_right_warp_time_basic;
+      font-size: 14px;
     }
-    @mixin com_header_right_warp_name_basic {
-        height: 30px;
-        line-height: 30px;
-        color: $color;
-        font-weight: 500;
-    }
-    @mixin com_header_right_warp_time_basic {
-        height: 20px;
-        line-height: 20px;
-        color:$color;
-        font-weight: 400;
-    }
-    @mixin menu_font_basic {
-        font-weight: 600;
-        vertical-align: middle;
-        padding: 3px;
-        border-radius: 5px;
-    }
-    @media (min-width: 1000px) {
-        .com_header_menu_list {
-            @include com_header_menu_list_basic;
-            overflow: auto;
-        }
-        .menu_font {
-            @include menu_font_basic;
-            font-size: x-small;
-        }
-        .menu_font_selected {
-            @include menu_font_basic;
-            font-size: x-small;
-            background-color: $buttonColor;
-            color: #fff;
-        }
-        .com_header_right_warp_name {
-            @include com_header_right_warp_name_basic;
-            font-size: 15px;
-        }
-        .com_header_right_warp_time {
-            @include com_header_right_warp_time_basic;
-            font-size: x-small;
-        }
-    }
-    @media (min-width: 1280px) {
-        .com_header_menu_list {
-            @include com_header_menu_list_basic;
-            overflow: hidden;
-        }
-    }
-    @media (min-width: 1360px) {
-        .menu_font {
-            @include menu_font_basic;
-            font-size: 14px;
-        }
-        .menu_font_selected {
-            @include menu_font_basic;
-            font-size: 14px;
-            background-color: $buttonColor;
-            color: #fff;
-        }
-        .com_header_right_warp_name {
-            @include com_header_right_warp_name_basic;
-            font-size: 17px;
-        }
-        .com_header_right_warp_time {
-            @include com_header_right_warp_time_basic;
-            font-size: 14px;
-        }
-    }
+  }
 
-    @mixin select_input_basic {
-        margin-left: 10px;
-        border: 1px solid rgba(0,0,0,0.2);
-        padding-left: 8px;
-        border-radius: 2px;
-        font-size: 14px;
-        height: 31px;
-    }
-    .select_input_full {
-        @include select_input_basic;
-        margin-left: 0;
-        width: 100%;
-    }
-    .select_input {
-        @include select_input_basic;
-        width: calc(80% + 8px);
-    }
-    .phone_select_input {
-        @include select_input_basic;
-        width: 65px;
-    }
+  @mixin select_input_basic {
+    margin-left: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    padding-left: 8px;
+    border-radius: 2px;
+    font-size: 14px;
+    height: 31px;
+  }
+  .select_input_full {
+    @include select_input_basic;
+    margin-left: 0;
+    width: 100%;
+  }
+  .select_input {
+    @include select_input_basic;
+    width: calc(80% + 8px);
+  }
+  .phone_select_input {
+    @include select_input_basic;
+    width: 65px;
+  }
 }
