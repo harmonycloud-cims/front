@@ -10,7 +10,7 @@ const sagamiddleware = createSagaMiddleware();
 const storageConfig = {
     key: 'root', // 必须有的
     storage: storage, // storage is now required
-    blacklist: ['updateLogin', 'updatePatient' , 'updateAppointment'] // reducer 里不持久化的数据
+    blacklist: ['updateLogin', 'updatePatient' , 'updateAppointment', 'updateConsultation'] // reducer 里不持久化的数据
 };
 
 export default function configureStore(initState = {}) {

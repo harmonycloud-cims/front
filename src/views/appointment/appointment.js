@@ -240,7 +240,7 @@ class Appointment extends Component {
             roomName: this.state.room.roomName
         };
         this.props.dispatch({type: 'BOOK_APPOINTMENT', params});
-        this.setState({isSelected: false, patient: {}});
+        this.setState({isSelected: false});
     };
     closeDialog = () => {
         this.props.dispatch({type: 'BOOK_COMPARE_CLOSE'});

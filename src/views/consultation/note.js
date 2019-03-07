@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import { Grid, Table, TableRow, Typography, TableCell, TableHead, TableBody, Button, 
-    FormGroup, FormControl, InputBase} from '@material-ui/core';
-import { Close, ArrowLeft, ArrowRight } from '@material-ui/icons';
+import { Grid, Table, TableRow, Typography, TableCell, TableHead, TableBody, Button, Checkbox, FormControlLabel, FormGroup, FormControl, InputBase} from '@material-ui/core';
+import { Close, ArrowLeft, ArrowRight, Remove, Add } from '@material-ui/icons';
 import {withStyles} from '@material-ui/core/styles';
+import _ from 'lodash';
 
 const style = {
     table_header: {
@@ -88,10 +88,91 @@ const style = {
         width: 'calc(100% - 40px)',
         padding: 15,
         marginLeft: 10
+    },
+    template_icon: {
+        float: 'left'
+    },
+    template_button_group: {
+        paddingLeft: 18
+    },
+    template_button: {
+        height: 31
     }
 };
 
 class Note extends Component {
+    constructor(props){
+        super(props);
+        this.state = {
+            medicalRecord: {noteContent: '123skdjaksfhaksf'},
+            templateList: this.props.templateList,
+            selectTemplate: [],
+            clinicalNotes: ''
+        };
+    }
+    componentDidMount(){
+        if(this.props.medicalRecordList.length > 0) {
+            this.setState({medicalRecord: this.state.medicalRecordList[0]});
+        }
+        let templateList = _.cloneDeep(this.props.templateList);
+        if(templateList.length > 0) {
+            _.forEach(templateList, item => {
+                item.checked = false;
+            });
+            console.log(templateList);
+            this.setState({templateList});
+        }
+    }
+    UNSAFE_componentWillReceiveProps(nextProps) {
+        // medicalRecordList记录
+        if (nextProps.medicalRecordList !== this.props.medicalRecordList) {
+            this.setState({medicalRecord: nextProps.medicalRecordList});
+        }
+        // template
+        if (nextProps.templateList !== this.props.templateList) {
+            this.setState({templateList: nextProps.templateList}, () => console.log(this.state.templateList));
+        }
+    }
+    changeCheck = (e, checked, item) => {
+        console.log(e, checked, item);
+        let templateList = _.cloneDeep(this.state.templateList);
+        let clinicalNotes = _.cloneDeep(this.state.clinicalNotes);
+        let template = _.find(templateList, eve => {
+            return eve.clinicalNoteTemplateId === item.clinicalNoteTemplateId;
+        });
+        if(checked) {
+            if(clinicalNotes === ''){
+                clinicalNotes = clinicalNotes + item.templateContent;
+            } else {
+                clinicalNotes = clinicalNotes + '\n' + item.templateContent;
+            }
+        } else {
+            JSON.stringify(clinicalNotes).replace(item.templateContent, '');
+        }
+        template.checked = checked;
+        this.setState({templateList, clinicalNotes});
+    }
+    editClinicalNotes = (e) => {
+        this.setState({clinicalNotes: e.target.value});
+    }
+    save = () => {
+        // console.log(this.state.clinicalNotes);
+        console.log(JSON.stringify(this.state.clinicalNotes));
+    }
+    clear = () => {
+        this.setState({clinicalNotes: ''});
+    }
+    copy = () => {
+        let notes = this.state.medicalRecord.noteContent;
+        let clinicalNotes = _.cloneDeep(this.state.clinicalNotes);
+        if(clinicalNotes === ''){
+            clinicalNotes = clinicalNotes + notes;
+        } else {
+            clinicalNotes = clinicalNotes + '\n' + notes;
+        }
+        this.setState({clinicalNotes});
+    }
+
     render() {
         const { classes } = this.props;
         return(
@@ -120,9 +201,9 @@ class Note extends Component {
                     </Typography>
                     <Typography component="div" className={classes.title}>Record Detail</Typography>
                     <Typography component="div" className={classes.table} style={{padding: 15, height: 220, color: '#4052B2'}}>
-                        {this.props.record.noteContent}1245634567
+                        {this.state.medicalRecord.noteContent}
                     </Typography>
-                    <Button className={classes.button} variant="outlined" color="primary" size="small"> Copy </Button>
+                    <Button className={classes.button} variant="outlined" color="primary" size="small" onClick={this.copy}> Copy </Button>
                 </Grid>
                 <Grid item xs={9}>
                     <FormGroup row className={classes.alert}>
@@ -163,17 +244,25 @@ class Note extends Component {
                         <Grid container spacing={24}>
                             <Grid item xs={8}>
                                 <Typography component="div" className={classes.title}>Clinical Note</Typography>
-                                <Typography component="textarea" className={classes.clinical_note_box} defaultValue={'23r234234234234'}/>
+                                <Typography component="textarea" className={classes.clinical_note_box} value={this.state.clinicalNotes} onChange={this.editClinicalNotes} />
                             </Grid>
                             <Grid item xs={3}>
                                 <Typography component="div" className={classes.title}>Template</Typography>
-                                <Typography component="div" className={classes.clinical_note_box}>23r234234234234</Typography>
+                                <Typography component="div" className={classes.clinical_note_box}>
+                                    <Typography component="div" color="primary"><Remove color="primary" fontSize="small" className={classes.template_icon} />By Diseases</Typography>
+                                    <FormGroup className={classes.template_button_group}>
+                                    {
+                                        this.state.templateList.map((item, index) =>
+                                        <FormControlLabel className={classes.template_button} key={index} label={item.templateName} control={<Checkbox label={item.templateName} value={item.templateName} defaultChecked={item.checked} color={'primary'} onChange={(...arg) => this.changeCheck(...arg, item)}/>}/>)
+                                    }
+                                    </FormGroup>
+                                </Typography>
                             </Grid>
                         </Grid>
                         <Grid container spacing={24}>
                             <Grid item xs={11} className={classes.button_save_clear}>
-                                <Button style={{marginTop: 8}} className={classes.button} variant="outlined" color="primary" size="small"> Clear </Button>
-                                <Button style={{marginTop: 8, marginRight: 10}} className={classes.button} variant="outlined" color="primary" size="small"> Save </Button>
+                                <Button style={{marginTop: 8}} className={classes.button} variant="outlined" color="primary" size="small" onClick={this.clear}> Clear </Button>
+                                <Button style={{marginTop: 8, marginRight: 10}} className={classes.button} variant="outlined" color="primary" size="small" onClick={this.save}> Save </Button>
                             </Grid>
                         </Grid>
                     </Typography>

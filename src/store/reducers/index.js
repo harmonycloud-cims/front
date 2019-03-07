@@ -152,19 +152,44 @@ const updateAppointment = (state = appointmentState, action = {}) => {
             return {...state, bookAppointmentDialog: false};
         case 'SELECT_CALENDAR':
             return {...state, selectCalendar: action.data};
-        case 'UPDATE_ATTENDANCELIST':
-            return {...state, attendanceList: action.attendanceList};
+        case 'UPDATE_ATTENDANCELIST': {
+            let notAttend =  action.attendanceList;
+            let attend = _.remove(notAttend, item => {
+                return item.attendanceStatus === 'Attend';
+            });
+            notAttend.sort(function(a, b){
+                if(a.appointmentDate > b.appointmentDate) {
+                    return 1;
+                } else if(a.appointmentDate < b.appointmentDate) {
+                    return -1;
+                }
+                return 0;
+            });
+            attend.sort(function(a, b){
+                if(a.attendanceTime > b.attendanceTime) {
+                    return 1;
+                } else if(a.attendanceTime < b.attendanceTime) {
+                    return -1;
+                }
+                return 0;
+            });
+            let attendanceList = attend.concat(notAttend);
+            return {...state, attendanceList};
+        }
         default:
             return state;
     }
 };
 const consultationState = {
-    medicalRecordList: []
+    medicalRecordList: [],
+    templateList: []
 };
 const updateConsultation = (state = consultationState, action = {}) => {
     switch (action.type) {
-        case 'MEDICAL_RECORD':
+        case 'UPDATE_MEDICAL_RECORD':
             return {...state, medicalRecordList: action.data};
+        case 'UPDATE_TEMPLATELIST':
+                return {...state, templateList: action.templateList};
         default:
             return state;
     }

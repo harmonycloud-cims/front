@@ -308,6 +308,38 @@ function* attend() {
     }
 }
 
+/* consultation */
+function* getMedicalRecordList() {
+    while(true) {
+        let { params } = yield take( 'GET_MEDICAL_RECORD');
+        try {
+            let { data } = yield call(axios.get, '/clinicalnote/listClinicalNote', {params: params}); //阻塞，请求后台数据
+            if (data.success) {
+                yield put({type: 'UPDATE_MEDICAL_RECORD', medicalRecordList: data.data});
+            } else {
+                console.log(data.errorMessage);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+}
+function* getTemplateList() {
+    while(true) {
+        let { params } = yield take( 'GET_TEMPLATE');
+        try {
+            let { data } = yield call(axios.get, '/clinicalnote/listTemplate', {params: params}); //阻塞，请求后台数据
+            if (data.success) {
+                yield put({type: 'UPDATE_TEMPLATELIST', templateList: data.data});
+            } else {
+                console.log(data.errorMessage);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+}
+
 
 export default function* rootSaga() {
   yield fork(getClinicList);
@@ -336,4 +368,7 @@ export default function* rootSaga() {
   yield fork(bookAppointment);
   yield fork(getAttendance);
   yield fork(attend);
+
+  yield fork(getMedicalRecordList);
+  yield fork(getTemplateList);
 }

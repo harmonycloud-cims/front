@@ -16,8 +16,9 @@ import Result from './views/result/result';
 const routes = (
     <Switch>
         <Route path="/login" component={Login}/>
+        <Route path="/consultation" component={Consultation}/>
         <Redirect exact from="/" to="/login"/>
-        <Route path="/index" render={(props) => (
+        <Route path="/index" render={() => (
             <IndexWarp>
                 <Switch>
                     <Redirect exact from="/index" to="/index/welcome"/>

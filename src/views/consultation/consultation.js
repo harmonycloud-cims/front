@@ -15,7 +15,8 @@ function mapStateToProps(state) {
         clinicList: state.updateUser.clinicList,
         allRoomList: state.updateUser.allRoomList,
         attendanceList: state.updateAppointment.attendanceList,
-        medicalRecordList: state.updateConsultation.medicalRecordList
+        medicalRecordList: state.updateConsultation.medicalRecordList,
+        templateList: state.updateConsultation.templateList
     };
 }
 const style = {
@@ -57,6 +58,26 @@ const style = {
         padding: 10
     }
 };
+// const data = [
+//     {
+//       "clinicalNoteTemplateId": 1,
+//       "templateName": "Fever",
+//       "templateContent": "c/o fever, running nose and sore throat for 3 days, \nNo rash, no travel history\nSL given, FU prn",
+//       "clinicId": 1
+//     },
+//     {
+//       "clinicalNoteTemplateId": 2,
+//       "templateName": "URTI",
+//       "templateContent": "c/o coughing and yellowish sputum, running nose and fever for 3 days,\nSL given, FU prn",
+//       "clinicId": 1
+//     },
+//     {
+//       "clinicalNoteTemplateId": 3,
+//       "templateName": "GE",
+//       "templateContent": "c/o diarrhea after buffet 2 days ago,\rAdvise increased fluid intake",
+//       "clinicId": 1
+//     }
+// ];
 class Consulatation extends Component {
     constructor(props){
         super(props);
@@ -67,32 +88,36 @@ class Consulatation extends Component {
             // date: '13 Mar 2019',
             attendanceList: this.props.attendanceList,
             value: '',
-            ifSelected: true,
+            ifSelected: false,
             tabValue: 0,
-            record: {}
+
+            medicalRecordList: this.props.medicalRecordList,
+            // medicalRecordList: [],
+            templateList: this.props.templateList
+            // templateList: data
         };
     }
 
     componentDidMount() {
-        if(this.props.medicalRecordList.length > 0){
-            this.setState({record: this.props.medicalRecordList[0]});
-        }
         this.initData();
         let timer = setInterval(() => {
             this.initData();
         }, 60000);
         this.setState({timer});
+        console.log(this.state.templateList);
     }
     UNSAFE_componentWillReceiveProps(nextProps) {
+        // select页面attendaceList变换
         if (nextProps.attendanceList !== this.props.attendanceList) {
             this.setState({attendanceList: nextProps.attendanceList, value: ''});
         }
+        // medicalRecordList记录
         if (nextProps.medicalRecordList !== this.props.medicalRecordList) {
-            if(nextProps.medicalRecordList.length > 0) {
-                this.setState({record: nextProps.medicalRecordList[0]});
-            } else {
-                this.setState({record: {}});
-            }
+            this.setState({medicalRecord: nextProps.medicalRecordList});
+        }
+        // template
+        if (nextProps.templateList !== this.props.templateList) {
+            this.setState({templateList: nextProps.templateList}, () => console.log(this.state.templateList));
         }
     }
     componentWillUnmount() {
@@ -111,7 +136,6 @@ class Consulatation extends Component {
     };
 
     /* select页面 */
-    // 选择页面
     changeDate = (e) => {
         let value = moment(e.target.value, 'YYYY-MM-DD').format('DD MMM YYYY');
         this.setState({date: value}, () => this.initData());
@@ -127,8 +151,14 @@ class Consulatation extends Component {
     // select patient
     select = (item) => {
         const params = {patientId: item.patientId};
+        const params1 = {clinicId: item.clinicId};
         this.props.dispatch({type: 'GET_PATINET_BY_ID', params});
-        this.setState({ ifSelected: true });
+        this.props.dispatch({type: 'GET_MEDICAL_RECORD', params});
+        this.props.dispatch({type: 'GET_TEMPLATE', params: params1});
+        this.setState({ ifSelected: true, tabValue: 0 });
+    };
+    closePatient = () => {
+        this.setState({patient: {}, ifSelected: false});
     };
     // 快捷搜索
     handleToggle = (e) => {
@@ -146,9 +176,6 @@ class Consulatation extends Component {
     changeTabValue = (event, value) => {
         this.setState({ tabValue: value});
     };
-    closePatient = () => {
-        this.setState({patient: {}, ifSelected: false});
-    };
 
     render() {
         const { classes } = this.props;
@@ -161,7 +188,7 @@ class Consulatation extends Component {
                         <Tab label="Note/Diagnosis"/>
                         <Tab label="Prescription"/>
                     </Tabs>
-                    {this.state.tabValue === 0 && <Note medicalRecordList={this.props.medicalRecordList} record={this.state.record}/>}
+                    {this.state.tabValue === 0 && <Note medicalRecordList={this.state.medicalRecordList} templateList={this.state.templateList}/>}
                 </div> : <Grid container>
                     <Grid item xs={3}>
                         <div className={'f_mt10'}>
@@ -214,7 +241,7 @@ class Consulatation extends Component {
                                             <TableCell style={{paddingLeft: '15px'}} padding={'none'}>{item.patientDoc}</TableCell>
                                             <TableCell padding={'dense'}>{item.patientName}</TableCell>
                                             <TableCell padding={'dense'}>{moment(item.appointmentDate).format('DD MMM YYYY HH:mm')}</TableCell>
-                                            <TableCell padding={'dense'}>{item.attendanceTime}</TableCell>
+                                            <TableCell padding={'dense'}>{item.attendanceTime ? moment(item.attendanceTime).format('DD MMM YYYY HH:mm') : null}</TableCell>
                                             <TableCell padding={'dense'}>{item.encounterTypeName}</TableCell>
                                             <TableCell padding={'dense'}>{item.roomName}</TableCell>
                                             <TableCell padding={'dense'}>{item.attendanceStatus}</TableCell>
