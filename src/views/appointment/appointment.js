@@ -242,8 +242,15 @@ class Appointment extends Component {
   };
   changeDateTime = (e, name) => {
     if (name === 'date') {
-      let value = moment(e.target.value, 'YYYY-MM-DD').format('DD MMM YYYY');
-      this.setState({ date: value });
+      if (
+        window.navigator.userAgent.indexOf('Safari') > -1 &&
+        window.navigator.userAgent.indexOf('Chrome') < 0
+      ) {
+        this.setState({ date: e.target.value });
+      } else {
+        let value = moment(e.target.value, 'YYYY-MM-DD').format('DD MMM YYYY');
+        this.setState({ date: value });
+      }
     } else {
       this.setState({ [name]: e.target.value });
     }
@@ -297,7 +304,9 @@ class Appointment extends Component {
       roomName: this.state.room.roomName
     };
     this.props.dispatch({ type: 'BOOK_APPOINTMENT', params });
-    this.setState({ isSelected: false }, () => {this.initData(this.props);});
+    this.setState({ isSelected: false }, () => {
+      this.initData(this.props);
+    });
   };
   closeDialog = () => {
     this.props.dispatch({ type: 'BOOK_COMPARE_CLOSE' });
@@ -459,18 +468,29 @@ class Appointment extends Component {
                             style={{ width: 130 }}
                             type={'date'}
                             className={'phone_select_input'}
-                            value={moment(this.state.date, 'DD MMM YYYY').format(
+                            value={
+                            window.navigator.userAgent.indexOf('Safari') > -1 &&
+                            window.navigator.userAgent.indexOf('Chrome') < 0
+                              ? this.state.date
+                              : moment(this.state.date, 'DD MMM YYYY').format(
+                                  'YYYY-MM-DD'
+                                )
+                          }
+                            min={moment(new Date().getTime()).format(
                             'YYYY-MM-DD'
                           )}
-                            min={moment(new Date().getTime()).format('YYYY-MM-DD')}
                             onChange={(...arg) =>
                             this.changeDateTime(...arg, 'date')
                           }
                         />
-                        <InputBase
-                            value={this.state.date}
-                            className={classes.cover}
-                        />
+                        {window.navigator.userAgent.indexOf('Safari') > -1 &&
+                        window.navigator.userAgent.indexOf('Chrome') <
+                          0 ? null : (
+                          <InputBase
+                              value={this.state.date}
+                              className={classes.cover}
+                          />
+                        )}
                         <InputBase
                             style={{ width: 120 }}
                             type={'time'}

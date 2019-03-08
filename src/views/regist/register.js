@@ -100,9 +100,16 @@ class Register extends Component {
     ) {
       patient[name] = _.toUpper(e.target.value);
     } else if (name === 'dateOfBirth') {
-      patient[name] = moment(e.target.value, 'YYYY-MM-DD').format(
-        'DD MMM YYYY'
-      );
+      if (
+        window.navigator.userAgent.indexOf('Safari') > -1 &&
+        window.navigator.userAgent.indexOf('Chrome') < 0
+      ) {
+        patient[name] = e.target.value;
+      } else {
+        patient[name] = moment(e.target.value, 'YYYY-MM-DD').format(
+          'DD MMM YYYY'
+        );
+      }
     } else {
       patient[name] = e.target.value;
     }
@@ -331,18 +338,26 @@ class Register extends Component {
               <InputBase
                   type={'date'}
                   className={classes.form_input}
-                  value={moment(
-                  this.state.patient.dateOfBirth,
-                  'DD MMM YYYY'
-                ).format('YYYY-MM-DD')}
+                  value={
+                  window.navigator.userAgent.indexOf('Safari') > -1 &&
+                  window.navigator.userAgent.indexOf('Chrome') < 0
+                    ? this.state.patient.dateOfBirth
+                    : moment(
+                        this.state.patient.dateOfBirth,
+                        'DD MMM YYYY'
+                      ).format('YYYY-MM-DD')
+                }
                   onChange={(...arg) =>
                   this.changeInformation(...arg, 'dateOfBirth')
                 }
               />
-              <InputBase
-                  value={this.state.patient.dateOfBirth}
-                  className={classes.cover}
-              />
+              {window.navigator.userAgent.indexOf('Safari') > -1 &&
+              window.navigator.userAgent.indexOf('Chrome') < 0 ? null : (
+                <InputBase
+                    value={this.state.patient.dateOfBirth}
+                    className={classes.cover}
+                />
+              )}
             </div>
             <div className={styles.form50}>
               <div>Sex</div>

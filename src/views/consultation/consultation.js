@@ -142,8 +142,15 @@ class Consulatation extends Component {
 
   /* select页面 */
   changeDate = e => {
-    let value = moment(e.target.value, 'YYYY-MM-DD').format('DD MMM YYYY');
-    this.setState({ date: value }, () => this.initData());
+    if (
+      window.navigator.userAgent.indexOf('Safari') > -1 &&
+      window.navigator.userAgent.indexOf('Chrome') < 0
+    ) {
+      this.setState({ date: e.target.value }, () => this.initData());
+    } else {
+      let value = moment(e.target.value, 'YYYY-MM-DD').format('DD MMM YYYY');
+      this.setState({ date: value }, () => this.initData());
+    }
   };
   changeAttendanceStatus = (e, checked) => {
     if (checked) {
@@ -211,7 +218,10 @@ class Consulatation extends Component {
               <Tab label="Prescription" />
             </Tabs>
             {this.state.tabValue === 0 && (
-              <Note patientId={this.state.patientId} close={this.closePatient} />
+              <Note
+                  patientId={this.state.patientId}
+                  close={this.closePatient}
+              />
             )}
           </div>
         ) : (
@@ -222,12 +232,23 @@ class Consulatation extends Component {
                 <InputBase
                     type={'date'}
                     className={'select_input'}
-                    value={moment(this.state.date, 'DD MMM YYYY').format(
-                    'YYYY-MM-DD'
-                  )}
+                    value={
+                    window.navigator.userAgent.indexOf('Safari') > -1 &&
+                    window.navigator.userAgent.indexOf('Chrome') < 0
+                      ? this.state.date
+                      : moment(this.state.date, 'DD MMM YYYY').format(
+                          'YYYY-MM-DD'
+                        )
+                  }
                     onChange={(...arg) => this.changeDate(...arg)}
                 />
-                <InputBase value={this.state.date} className={classes.cover} />
+                {window.navigator.userAgent.indexOf('Safari') > -1 &&
+                window.navigator.userAgent.indexOf('Chrome') < 0 ? null : (
+                  <InputBase
+                      value={this.state.date}
+                      className={classes.cover}
+                  />
+                )}
               </div>
               <div className={'f_mt10'}>
                 <div>Attend Status</div>
