@@ -217,11 +217,11 @@ class Note extends Component {
       });
       this.setState({ templateList });
     }
-    if(JSON.stringify(this.props.encounter) !== '{}'){
-      let params = { encounterId: this.props.encounter.encounterId};
-      this.props.dispatch({type: 'GET_CLINIC_NOTE', params});
-      this.props.dispatch({type: 'GET_ATTENDING_PROBLEM', params});
-    }
+    // if(JSON.stringify(this.props.encounter) !== '{}'){
+    //   let params = { encounterId: this.props.encounter.encounterId};
+    //   this.props.dispatch({type: 'GET_CLINIC_NOTE', params});
+    //   this.props.dispatch({type: 'GET_ATTENDING_PROBLEM', params});
+    // }
   }
   UNSAFE_componentWillReceiveProps(nextProps) {
     // medicalRecordList记录
@@ -243,9 +243,7 @@ class Note extends Component {
           item.checked = false;
         });
       }
-      this.setState({ templateList }, () =>
-        console.log(this.state.templateList)
-      );
+      this.setState({ templateList });
     }
     // chronicProblem
     if (nextProps.chronicProblemList !== this.props.chronicProblemList) {
@@ -292,9 +290,7 @@ class Note extends Component {
         clinicalNotes += item.templateContent + '\n';
       }
     });
-    this.setState({ templateList, clinicalNotes }, () => {
-      console.log(this.state.templateList);
-    });
+    this.setState({ templateList, clinicalNotes });
   };
   changeMedicalRecord = medicalRecord => {
     this.setState({ medicalRecord });
@@ -303,8 +299,9 @@ class Note extends Component {
     this.setState({ clinicalNotes: e.target.value });
   };
   save = () => {
+
     // console.log(this.state.clinicalNotes);
-    console.log(JSON.stringify(this.state.clinicalNotes));
+    console.log(JSON.stringify(this.state.clinicalNotes), this.state.attendingProblemList, this.state.chronicProblemList);
   };
   clear = () => {
     let clinicalNotes = _.cloneDeep(this.state.clinicalNotesOrigin);
