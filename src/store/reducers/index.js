@@ -202,7 +202,9 @@ const consultationState = {
   diagnosisProblemList: [],
   encounter: {},
   clinicNote: '',
-  attendingProblemList: []
+  attendingProblemList: [],
+  closeDialog: false,
+  consulationErrorMessage: ''
 };
 const updateConsultation = (state = consultationState, action = {}) => {
   switch (action.type) {
@@ -220,6 +222,14 @@ const updateConsultation = (state = consultationState, action = {}) => {
       return { ...state, clinicNote: action.clinicNote };
     case 'UPDATE_ATTENDING_PROBLEM':
       return { ...state, attendingProblemList: action.attendingProblemList };
+    case 'OPEN_CONSULTATION_LOADING':
+      return { ...state, closeDialog: action.data };
+    case 'CONSULTATION_LOADING_SUCCESS':
+      return { ...state, consulationErrorMessage: '保存成功' };
+    case 'CLOSE_CONSULTATION_LOADING':
+      return { ...state, closeDialog: false, consulationErrorMessage: '' };
+    case 'CONSULTATION_LOADING_ERROR':
+      return { ...state, consulationErrorMessage: action.data };
     default:
       return state;
   }

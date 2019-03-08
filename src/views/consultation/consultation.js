@@ -105,7 +105,8 @@ class Consulatation extends Component {
       attendanceList: this.props.attendanceList,
       value: '',
       ifSelected: false,
-      tabValue: 0
+      tabValue: 0,
+      patientId: null
     };
   }
 
@@ -156,7 +157,8 @@ class Consulatation extends Component {
   };
   // select patient
   select = item => {
-    const params = { patientId: item.patientId };
+    const patientId = item.patientId;
+    const params = { patientId };
     const params1 = { clinicId: item.clinicId };
     const params2 = { appointmentId: item.appointmentId };
     this.props.dispatch({ type: 'GET_PATINET_BY_ID', params });
@@ -164,10 +166,10 @@ class Consulatation extends Component {
     this.props.dispatch({ type: 'GET_TEMPLATE', params: params1 });
     this.props.dispatch({ type: 'GET_CHRONICPROBLEM', params });
     this.props.dispatch({ type: 'GET_ENCOUNTERID', params: params2 });
-    this.setState({ ifSelected: true, tabValue: 0 });
+    this.setState({ ifSelected: true, tabValue: 0, patientId });
   };
   closePatient = () => {
-    this.setState({ patient: {}, ifSelected: false });
+    this.setState({ patient: {}, ifSelected: false, patientId: null });
   };
   // 快捷搜索
   handleToggle = e => {
@@ -209,7 +211,7 @@ class Consulatation extends Component {
               <Tab label="Prescription" />
             </Tabs>
             {this.state.tabValue === 0 && (
-              <Note />
+              <Note patientId={this.state.patientId} close={this.closePatient} />
             )}
           </div>
         ) : (

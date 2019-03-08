@@ -17,12 +17,16 @@ import {
   Popper,
   Paper,
   MenuItem,
-  Divider
+  Divider,
+  Dialog,
+  DialogActions,
+  DialogContent
 } from '@material-ui/core';
 import { Close, ArrowLeft, ArrowRight, Remove } from '@material-ui/icons';
 import { withStyles } from '@material-ui/core/styles';
 import _ from 'lodash';
 import moment from 'moment';
+import timg from '../../images/timg.gif';
 
 function mapStateToProps(state) {
   return {
@@ -32,7 +36,9 @@ function mapStateToProps(state) {
     diagnosisProblemList: state.updateConsultation.diagnosisProblemList,
     encounter: state.updateConsultation.encounter,
     clinicNote: state.updateConsultation.clinicNote,
-    attendingProblemList: state.updateConsultation.attendingProblemList
+    attendingProblemList: state.updateConsultation.attendingProblemList,
+    closeDialog: state.updateConsultation.closeDialog,
+    consulationErrorMessage: state.updateConsultation.consulationErrorMessage
   };
 }
 const style = {
@@ -203,10 +209,12 @@ class Note extends Component {
       searchValue: '',
       open: false,
       selectDiagnosis: {},
-      ifTransfer: 0 //0表示attending Problem 和chronicProblem不能互相copy，1.attending->chronic, 2.chronic->attending
+      ifTransfer: 0, //0表示attending Problem 和chronicProblem不能互相copy，1.attending->chronic, 2.chronic->attending
+      isUpdate: false
     };
   }
   componentDidMount() {
+    console.log(12312)
     if (this.props.medicalRecordList.length > 0) {
       this.setState({ medicalRecord: this.props.medicalRecordList[0] });
     }
@@ -253,30 +261,31 @@ class Note extends Component {
         chronicProblemListOrigin: chronicProblemList
       });
     }
-    // // encounter
-    // if (nextProps.chronicProblemList !== this.props.chronicProblemList) {
-    //   if(JSON.stringify(nextProps.encounter) !== '{}'){
-    //     let params = { encounterId: nextProps.encounter.encounterId};
-    //     this.props.dispatch({type: 'GET_CLINIC_NOTE', params});
-    //     this.props.dispatch({type: 'GET_ATTENDING_PROBLEM', params});
-    //   }
-    // }
-    // // clinicalNotes
-    // if (nextProps.clinicalNotes !== this.props.clinicalNotes) {
-    //   let clinicalNotes = _.cloneDeep(nextProps.clinicalNotes);
-    //   this.setState({
-    //     clinicalNotes,
-    //     clinicalNotesOrigin: clinicalNotes
-    //   });
-    // }
-    // // attendingProblem
-    // if (nextProps.attendingProblemList !== this.props.attendingProblemList) {
-    //   let attendingProblemList = _.cloneDeep(nextProps.attendingProblemList);
-    //   this.setState({
-    //     attendingProblemList,
-    //     attendingProblemListOrigin: attendingProblemList
-    //   });
-    // }
+    // encounter
+    if (nextProps.encounter !== this.props.encounter) {
+      if(nextProps.encounter && JSON.stringify(nextProps.encounter) !== '{}'){
+        let params = { encounterId: nextProps.encounter.encounterId};
+        this.props.dispatch({type: 'GET_CLINIC_NOTE', params});
+        this.props.dispatch({type: 'GET_ATTENDING_PROBLEM', params});
+      }
+    }
+    // clinicalNotes
+    if (nextProps.clinicalNotes && (nextProps.clinicalNotes !== this.props.clinicalNotes)) {
+      let clinicalNotes = _.cloneDeep(nextProps.clinicalNotes.noteContent);
+      this.setState({
+        clinicalNotes,
+        clinicalNotesOrigin: clinicalNotes,
+        isUpdate: true
+      });
+    }
+    // attendingProblem
+    if (nextProps.attendingProblemList !== this.props.attendingProblemList) {
+      let attendingProblemList = _.cloneDeep(nextProps.attendingProblemList);
+      this.setState({
+        attendingProblemList,
+        attendingProblemListOrigin: attendingProblemList
+      });
+    }
   }
   changeCheck = (e, checked, item) => {
     let templateList = _.cloneDeep(this.state.templateList);
@@ -299,19 +308,61 @@ class Note extends Component {
     this.setState({ clinicalNotes: e.target.value });
   };
   save = () => {
-
+    const patientId = this.props.patientId;
+    const encounterId = this.props.encounter.encounterId;
+    // const attendingDiagnosisList = _.cloneDeep(this.state.attendingProblemList);
+    // const chronicDiagnosisList = _.cloneDeep(this.state.chronicProblemList);
+    // _.forEach(attendingDiagnosisList, item => {
+    //   item.encounterId = encounterId;
+    //   item.patientId = patientId;
+    // });
+    // _.forEach(chronicDiagnosisList, item => {
+    //   item.encounterId = encounterId;
+    //   item.patientId = patientId;
+    // });
+    const attendingDiagnosisList = [];
+    const chronicDiagnosisList = [];
+    _.forEach(this.state.attendingProblemList, item => {
+      attendingDiagnosisList.push({
+        diagnosisId: item.diagnosisId,
+        encounterId,
+        patientId
+      });
+    });
+    _.forEach(this.state.chronicProblemList, item => {
+      chronicDiagnosisList.push({
+        status: item.status,
+        diagnosisId: item.diagnosisId,
+        encounterId,
+        patientId
+      });
+    });
+    const clinicalNote = {
+      encounterId,
+      noteContent: this.state.clinicalNotes,
+      patientId,
+      recordType: 'Dr Note'
+    };
+    const params = {
+      attendingDiagnosisList,
+      chronicDiagnosisList,
+      clinicalNote
+    };
+    console.log(params);
+    this.props.dispatch({type: 'SAVE_CONSULTATION', params});
     // console.log(this.state.clinicalNotes);
-    console.log(JSON.stringify(this.state.clinicalNotes), this.state.attendingProblemList, this.state.chronicProblemList);
+    // console.log(this.props.encounter, this.props.patientId, JSON.stringify(this.state.clinicalNotes), this.state.attendingProblemList, this.state.chronicProblemList);
   };
   clear = () => {
-    let clinicalNotes = _.cloneDeep(this.state.clinicalNotesOrigin);
-    let attendingProblemList = _.cloneDeep(this.state.attendingProblemListOrigin);
-    let chronicProblemList = _.cloneDeep(this.state.chronicProblemListOrigin);
-    let templateList = _.cloneDeep(this.state.templateList);
-    _.forEach(templateList, item => {
-      item.checked = false;
-    });
-    this.setState({templateList, clinicalNotes, attendingProblemList, chronicProblemList, searchValue: ''});
+    this.props.close();
+    // let clinicalNotes = _.cloneDeep(this.state.clinicalNotesOrigin);
+    // let attendingProblemList = _.cloneDeep(this.state.attendingProblemListOrigin);
+    // let chronicProblemList = _.cloneDeep(this.state.chronicProblemListOrigin);
+    // let templateList = _.cloneDeep(this.state.templateList);
+    // _.forEach(templateList, item => {
+    //   item.checked = false;
+    // });
+    // this.setState({templateList, clinicalNotes, attendingProblemList, chronicProblemList, searchValue: ''});
   };
   copy = () => {
     let notes = this.state.medicalRecord.noteContent;
@@ -427,7 +478,10 @@ class Note extends Component {
     problem.status = e.target.value;
     this.setState({chronicProblemList});
   }
-
+  closeDialog = () => {
+    this.props.dispatch({type: 'CLOSE_CONSULTATION_ERROR'});
+    this.props.close();
+  }
   render() {
     const { classes } = this.props;
     return (
@@ -724,6 +778,20 @@ class Note extends Component {
             </Grid>
           </Typography>
         </Grid>
+        <Dialog open={this.props.closeDialog}>
+          {this.props.consulationErrorMessage === '' ? (
+            <img src={timg} alt={''} />
+          ) : (
+            <DialogContent>{this.props.consulationErrorMessage}</DialogContent>
+          )}
+          {this.props.consulationErrorMessage !== '' ? (
+            <DialogActions>
+              <Button onClick={this.closeDialog} color="primary">
+                OK
+              </Button>
+            </DialogActions>
+          ) : null}
+        </Dialog>
       </Grid>
     );
   }

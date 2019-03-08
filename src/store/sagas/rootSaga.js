@@ -452,6 +452,22 @@ function* getClinicNote() {
     }
   }
 }
+function* saveConsultation() {
+  while (true) {
+    let { params } = yield take('SAVE_CONSULTATION');
+    yield put({type: 'OPEN_CONSULTATION_LOADING', data: true});
+    try {
+      let { data } = yield call(axios.post, '/bff/insert', params); //阻塞，请求后台数据
+      if (data.success) {
+        yield put({type: 'CONSULTATION_LOADING_SUCCESS'});
+      } else {
+        yield put({type: 'CONSULTATION_LOADING_ERROR', data: data.errorMessage});
+      }
+    } catch (error) {
+      yield put({type: 'CONSULTATION_LOADING_ERROR', data: error});
+    }
+  }
+}
 function* getAttendingProblem() {
   while (true) {
     let { params } = yield take('GET_ATTENDING_PROBLEM');
@@ -506,4 +522,5 @@ export default function* rootSaga() {
   yield fork(getEncounterId);
   yield fork(getClinicNote);
   yield fork(getAttendingProblem);
+  yield fork(saveConsultation);
 }
