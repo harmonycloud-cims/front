@@ -28,7 +28,7 @@
   "devDependencies": {
     "node-sass": "^4.11.0"
   },
-  "proxy": "http://10.10.103.61:33010",
+  "proxy": "http://gateway:80",
   "eslintConfig": {
     "extends": "react-app"
   },
