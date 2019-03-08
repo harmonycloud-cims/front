@@ -297,7 +297,7 @@ class Appointment extends Component {
       roomName: this.state.room.roomName
     };
     this.props.dispatch({ type: 'BOOK_APPOINTMENT', params });
-    this.setState({ isSelected: false });
+    this.setState({ isSelected: false }, () => {this.initData(this.props);});
   };
   closeDialog = () => {
     this.props.dispatch({ type: 'BOOK_COMPARE_CLOSE' });
@@ -462,6 +462,7 @@ class Appointment extends Component {
                             value={moment(this.state.date, 'DD MMM YYYY').format(
                             'YYYY-MM-DD'
                           )}
+                            min={moment(new Date().getTime()).format('YYYY-MM-DD')}
                             onChange={(...arg) =>
                             this.changeDateTime(...arg, 'date')
                           }

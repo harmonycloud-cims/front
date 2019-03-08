@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import {
   Grid,
   Table,
@@ -12,13 +13,28 @@ import {
   FormControlLabel,
   FormGroup,
   FormControl,
-  InputBase
+  InputBase,
+  Popper,
+  Paper,
+  MenuItem,
+  Divider
 } from '@material-ui/core';
 import { Close, ArrowLeft, ArrowRight, Remove } from '@material-ui/icons';
 import { withStyles } from '@material-ui/core/styles';
 import _ from 'lodash';
 import moment from 'moment';
 
+function mapStateToProps(state) {
+  return {
+    medicalRecordList: state.updateConsultation.medicalRecordList,
+    templateList: state.updateConsultation.templateList,
+    chronicProblemList: state.updateConsultation.chronicProblemList,
+    diagnosisProblemList: state.updateConsultation.diagnosisProblemList,
+    encounter: state.updateConsultation.encounter,
+    clinicNote: state.updateConsultation.clinicNote,
+    attendingProblemList: state.updateConsultation.attendingProblemList
+  };
+}
 const style = {
   table_header: {
     fontSize: 14,
@@ -91,13 +107,9 @@ const style = {
     borderBottom: '1px solid rgba(0,0,0,0.2)',
     width: 'calc(100% - 8px)'
   },
-  diagnosis_item: {
-    paddingLeft: 8,
-    borderBottom: '1px solid rgba(0,0,0,0.2)',
-    width: 'calc(100% - 8px)'
-  },
   diagnosis_close: {
-    float: 'right'
+    float: 'right',
+    height: 25
   },
   transfer_part2: {
     paddingTop: 50,
@@ -122,6 +134,56 @@ const style = {
   },
   template_button: {
     height: 31
+  },
+  paper: {
+    maxHeight: 200,
+    overflowY: 'auto',
+    position: 'absolute',
+    transform: 'translate3d(-180px, 3px, 0px)'
+  },
+  menu_list: {
+    paddingTop: 0,
+    fontSize: 14
+  },
+  mr15: {
+    marginRight: 15
+  },
+  menu: {
+    top: 38,
+    padding: 0
+  },
+  can_transfer: {
+    color: 'black'
+  },
+  not_transfer: {
+    color: 'lightgray'
+  },
+  diagnosis_problem_list: {
+    maxHeight: 75,
+    overflowY: 'auto'
+  },
+  select_diagnosis_problem: {
+    backgroundColor: 'lightgray',
+    cursor: 'pointer',
+    paddingLeft: 8,
+    height: 25,
+    borderBottom: '1px solid rgba(0,0,0,0.2)',
+    width: 'calc(100% - 8px)'
+  },
+  diagnosis_problem: {
+    cursor: 'pointer',
+    paddingLeft: 8,
+    height: 25,
+    borderBottom: '1px solid rgba(0,0,0,0.2)',
+    width: 'calc(100% - 8px)'
+  },
+  diagnosis_problem_name: {
+    height: 25,
+    float: 'left',
+    width: 'calc(100% - 110px)',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis'
   }
 };
 
@@ -132,8 +194,16 @@ class Note extends Component {
       medicalRecordList: this.props.medicalRecordList,
       medicalRecord: {},
       templateList: this.props.templateList,
-      selectTemplate: [],
-      clinicalNotes: ''
+      clinicalNotesOrigin: '',
+      clinicalNotes: '',
+      chronicProblemListOrigin: [],
+      chronicProblemList: [],
+      attendingProblemListOrigin: [],
+      attendingProblemList: [],
+      searchValue: '',
+      open: false,
+      selectDiagnosis: {},
+      ifTransfer: 0 //0表示attending Problem 和chronicProblem不能互相copy，1.attending->chronic, 2.chronic->attending
     };
   }
   componentDidMount() {
@@ -147,16 +217,23 @@ class Note extends Component {
       });
       this.setState({ templateList });
     }
+    if(JSON.stringify(this.props.encounter) !== '{}'){
+      let params = { encounterId: this.props.encounter.encounterId};
+      this.props.dispatch({type: 'GET_CLINIC_NOTE', params});
+      this.props.dispatch({type: 'GET_ATTENDING_PROBLEM', params});
+    }
   }
   UNSAFE_componentWillReceiveProps(nextProps) {
     // medicalRecordList记录
     if (nextProps.medicalRecordList !== this.props.medicalRecordList) {
-      this.setState(
-        {
-          medicalRecord: nextProps.medicalRecordList[0],
-          medicalRecordList: nextProps.medicalRecordList
-        }
-      );
+      let medicalRecord = {};
+      if(nextProps.medicalRecordList.length > 0){
+        medicalRecord = nextProps.medicalRecordList[0];
+      }
+      this.setState({
+        medicalRecord: medicalRecord,
+        medicalRecordList: nextProps.medicalRecordList
+      });
     }
     // template
     if (nextProps.templateList !== this.props.templateList) {
@@ -166,27 +243,58 @@ class Note extends Component {
           item.checked = false;
         });
       }
-      this.setState({ templateList }, ()=>console.log(this.state.templateList));
+      this.setState({ templateList }, () =>
+        console.log(this.state.templateList)
+      );
     }
+    // chronicProblem
+    if (nextProps.chronicProblemList !== this.props.chronicProblemList) {
+      let chronicProblemList = _.cloneDeep(nextProps.chronicProblemList);
+      this.setState({
+        chronicProblemList,
+        chronicProblemListOrigin: chronicProblemList
+      });
+    }
+    // // encounter
+    // if (nextProps.chronicProblemList !== this.props.chronicProblemList) {
+    //   if(JSON.stringify(nextProps.encounter) !== '{}'){
+    //     let params = { encounterId: nextProps.encounter.encounterId};
+    //     this.props.dispatch({type: 'GET_CLINIC_NOTE', params});
+    //     this.props.dispatch({type: 'GET_ATTENDING_PROBLEM', params});
+    //   }
+    // }
+    // // clinicalNotes
+    // if (nextProps.clinicalNotes !== this.props.clinicalNotes) {
+    //   let clinicalNotes = _.cloneDeep(nextProps.clinicalNotes);
+    //   this.setState({
+    //     clinicalNotes,
+    //     clinicalNotesOrigin: clinicalNotes
+    //   });
+    // }
+    // // attendingProblem
+    // if (nextProps.attendingProblemList !== this.props.attendingProblemList) {
+    //   let attendingProblemList = _.cloneDeep(nextProps.attendingProblemList);
+    //   this.setState({
+    //     attendingProblemList,
+    //     attendingProblemListOrigin: attendingProblemList
+    //   });
+    // }
   }
   changeCheck = (e, checked, item) => {
-    console.log(checked);
     let templateList = _.cloneDeep(this.state.templateList);
-    let clinicalNotes = _.cloneDeep(this.state.clinicalNotes);
+    let clinicalNotes = '';
     let template = _.find(templateList, eve => {
       return eve.clinicalNoteTemplateId === item.clinicalNoteTemplateId;
     });
-    if (checked) {
-      if (clinicalNotes === '') {
-        clinicalNotes = clinicalNotes + item.templateContent;
-      } else {
-        clinicalNotes = clinicalNotes + '\n' + item.templateContent;
-      }
-    } else {
-      JSON.stringify(clinicalNotes).replace(item.templateContent, '');
-    }
     template.checked = checked;
-    this.setState({ templateList, clinicalNotes }, ()=> console.log(this.state.templateList));
+    _.forEach(templateList, item => {
+      if (item.checked) {
+        clinicalNotes += item.templateContent + '\n';
+      }
+    });
+    this.setState({ templateList, clinicalNotes }, () => {
+      console.log(this.state.templateList);
+    });
   };
   changeMedicalRecord = medicalRecord => {
     this.setState({ medicalRecord });
@@ -199,22 +307,129 @@ class Note extends Component {
     console.log(JSON.stringify(this.state.clinicalNotes));
   };
   clear = () => {
-    let templateList = _.cloneDeep(this.props.templateList);
+    let clinicalNotes = _.cloneDeep(this.state.clinicalNotesOrigin);
+    let attendingProblemList = _.cloneDeep(this.state.attendingProblemListOrigin);
+    let chronicProblemList = _.cloneDeep(this.state.chronicProblemListOrigin);
+    let templateList = _.cloneDeep(this.state.templateList);
     _.forEach(templateList, item => {
       item.checked = false;
     });
-    this.setState({ templateList, clinicalNotes: '' }, () => console.log(this.state.templateList));
+    this.setState({templateList, clinicalNotes, attendingProblemList, chronicProblemList, searchValue: ''});
   };
   copy = () => {
     let notes = this.state.medicalRecord.noteContent;
     let clinicalNotes = _.cloneDeep(this.state.clinicalNotes);
-    if (clinicalNotes === '') {
-      clinicalNotes = clinicalNotes + notes;
-    } else {
-      clinicalNotes = clinicalNotes + '\n' + notes;
-    }
+    clinicalNotes = clinicalNotes + notes;
     this.setState({ clinicalNotes });
   };
+  /* Problems */
+  changeSearchValue = e => {
+    this.setState({ searchValue: e.target.value });
+    if (e.target.value !== '') {
+      const params = {
+        keyword: e.target.value
+      };
+      this.props.dispatch({ type: 'SEARCH_DIAGNOSIS_PROBLEMS', params });
+      this.setState({ open: true });
+    }
+  };
+  handleClose = item => {
+    let attendingProblemList = _.cloneDeep(this.state.attendingProblemList);
+    if (JSON.stringify(item) !== '{}') {
+      if (
+        !_.find(
+          attendingProblemList,
+          eve => eve.diagnosisId === item.diagnosisId
+        )
+      ) {
+        attendingProblemList.push(item);
+      }
+    }
+    this.setState({ open: false, attendingProblemList });
+  };
+  // index 0表示在attendingProblems里， 1表示在chronic Problems
+  clickDiagnosis = (selectDiagnosis, index) => {
+    let ifTransfer = 0;
+    if (index === 0) {
+      let chronicProblemList = _.cloneDeep(this.state.chronicProblemList);
+      if (
+        _.find(chronicProblemList, item => {
+          return item.diagnosisId === selectDiagnosis.diagnosisId;
+        })
+      ) {
+        ifTransfer = 0;
+      } else {
+        ifTransfer = 1;
+      }
+    } else {
+      let attendingProblemList = _.cloneDeep(this.state.attendingProblemList);
+      if (
+        _.find(attendingProblemList, item => {
+          return item.diagnosisId === selectDiagnosis.diagnosisId;
+        })
+      ) {
+        ifTransfer = 0;
+      } else {
+        ifTransfer = 2;
+      }
+    }
+    this.setState({ selectDiagnosis, ifTransfer });
+  };
+  removeDiagnosis = (diagnosis, index) => {
+    if (index === 0) {
+      let attendingProblemList = _.cloneDeep(this.state.attendingProblemList);
+      _.remove(attendingProblemList, item => {
+        return item.diagnosisId === diagnosis.diagnosisId;
+      });
+      this.setState({ attendingProblemList });
+    } else {
+      let chronicProblemList = _.cloneDeep(this.state.chronicProblemList);
+      _.remove(chronicProblemList, item => {
+        return item.diagnosisId === diagnosis.diagnosisId;
+      });
+      this.setState({ chronicProblemList });
+    }
+  };
+  transfer = index => {
+    let selectDiagnosis = _.cloneDeep(this.state.selectDiagnosis);
+    let attendingProblemList = _.cloneDeep(this.state.attendingProblemList);
+    let chronicProblemList = _.cloneDeep(this.state.chronicProblemList);
+    if (index === 0) {
+      chronicProblemList.push({
+        diagnosisId: selectDiagnosis.diagnosisId,
+        diagnosisDescription: selectDiagnosis.diagnosisDescription,
+        status: 'Active'
+      });
+    } else {
+      attendingProblemList.push({
+        diagnosisId: selectDiagnosis.diagnosisId,
+        diagnosisDescription: selectDiagnosis.diagnosisDescription
+      });
+    }
+    this.setState({
+      ifTransfer: 0,
+      selectDiagnosis: {},
+      attendingProblemList,
+      chronicProblemList
+    });
+  };
+  handleEnterKey = e => {
+    if (e.keyCode === 13) {
+      if (this.state.searchValue !== '') {
+        const params = {
+          keyword: this.state.searchValue
+        };
+        this.props.dispatch({ type: 'SEARCH_DIAGNOSIS_PROBLEMS', params });
+        this.setState({ open: true });
+      }
+    }
+  };
+  changeChronicPromblemStatus = (e, chronicProblem) => {
+    let chronicProblemList = _.cloneDeep(this.state.chronicProblemList);
+    let problem = _.find(chronicProblemList, item => {return item.diagnosisId === chronicProblem.diagnosisId;});
+    problem.status = e.target.value;
+    this.setState({chronicProblemList});
+  }
 
   render() {
     const { classes } = this.props;
@@ -302,44 +517,134 @@ class Note extends Component {
                 <Typography>Attending Problem(s)</Typography>
                 <Typography component="div" className={classes.transfer_box}>
                   <InputBase
+                      value={this.state.searchValue}
+                      onChange={this.changeSearchValue}
                       placeholder="Input keyword to search"
                       className={classes.diagnosis_search}
+                      inputRef={node => {
+                      this.anchorel = node;
+                    }}
+                      onKeyUp={this.handleEnterKey}
+                    // onBlur={() => this.handleClose({})}
                   />
-                  <Typography
-                      component="div"
-                      className={classes.diagnosis_item}
-                  >
-                    Diabetes Mellitus
-                    <Close
-                        fontSize="small"
-                        className={classes.diagnosis_close}
-                    />
-                  </Typography>
+                  <Popper open={this.state.open} anchorEl={this.anchorel}>
+                    <Paper className={classes.paper}>
+                      {this.props.diagnosisProblemList.map((item, index) => (
+                        <MenuItem
+                            key={index}
+                            onClick={() => this.handleClose(item)}
+                            className={classes.menu_list}
+                        >
+                          <Typography
+                              component={'div'}
+                              className={classes.mr15}
+                          >
+                            {item.diagnosisDescription}
+                          </Typography>
+                        </MenuItem>
+                      ))}
+                      <Divider />
+                      <MenuItem
+                          onClick={() => this.handleClose({})}
+                          className={classes.menu_list}
+                      >
+                        Not Found
+                      </MenuItem>
+                    </Paper>
+                  </Popper>
+                  <FormGroup row className={classes.diagnosis_problem_list}>
+                    {this.state.attendingProblemList.map((item, index) => (
+                      <Typography
+                          className={
+                          this.state.selectDiagnosis.diagnosisId ===
+                          item.diagnosisId
+                            ? classes.select_diagnosis_problem
+                            : classes.diagnosis_problem
+                        }
+                          key={index}
+                          component="div"
+                      >
+                        <Typography
+                            className={classes.diagnosis_problem_name}
+                            onClick={() => this.clickDiagnosis(item, 0)}
+                        >
+                          {item.diagnosisDescription}
+                        </Typography>
+                        <Close
+                            fontSize="small"
+                            className={classes.diagnosis_close}
+                            onClick={() => this.removeDiagnosis(item, 0)}
+                        />
+                      </Typography>
+                    ))}
+                  </FormGroup>
                 </Typography>
               </Grid>
               <Grid item xs={1}>
                 <Typography component="div" className={classes.transfer_part2}>
                   <Typography component="div">
-                    <ArrowRight />
+                    <ArrowRight
+                        className={
+                        this.state.ifTransfer === 1
+                          ? classes.can_transfer
+                          : classes.not_transfer
+                      }
+                        onClick={
+                        this.state.ifTransfer === 1
+                          ? () => this.transfer(0)
+                          : null
+                      }
+                    />
                   </Typography>
                   <Typography component="div">
-                    <ArrowLeft />
+                    <ArrowLeft
+                        className={
+                        this.state.ifTransfer === 2
+                          ? classes.can_transfer
+                          : classes.not_transfer
+                      }
+                        onClick={
+                        this.state.ifTransfer === 2
+                          ? () => this.transfer(1)
+                          : null
+                      }
+                    />
                   </Typography>
                 </Typography>
               </Grid>
               <Grid item xs={5}>
                 <Typography>Chronic Problem(s)</Typography>
                 <Typography component="div" className={classes.transfer_box}>
-                  <Typography
-                      component="div"
-                      className={classes.diagnosis_item}
-                  >
-                    Diabetes Mellitus
-                    <Close
-                        fontSize="small"
-                        className={classes.diagnosis_close}
-                    />
-                  </Typography>
+                <FormGroup row className={classes.diagnosis_problem_list} style={{maxHeight: 105}}>
+                  {this.state.chronicProblemList.map((item, index) => (
+                    <Typography
+                        className={
+                        this.state.selectDiagnosis.diagnosisId ===
+                        item.diagnosisId
+                          ? classes.select_diagnosis_problem
+                          : classes.diagnosis_problem
+                      }
+                        key={index}
+                        component="div"
+                    >
+                      <Typography
+                          className={classes.diagnosis_problem_name}
+                          onClick={() => this.clickDiagnosis(item, 1)}
+                      >
+                        {item.diagnosisDescription}
+                      </Typography>
+                      <select value={item.status} onChange={(...arg) => this.changeChronicPromblemStatus(...arg, item)}>
+                        <option value="Active">Active</option>
+                        <option value="Resolved">Resolved</option>
+                      </select>
+                      <Close
+                          fontSize="small"
+                          className={classes.diagnosis_close}
+                          onClick={() => this.removeDiagnosis(item, 1)}
+                      />
+                    </Typography>
+                  ))}
+                  </FormGroup>
                 </Typography>
               </Grid>
             </Grid>
@@ -381,7 +686,7 @@ class Note extends Component {
                           <Checkbox
                               label={item.templateName}
                               value={item.templateName}
-                              defaultChecked={item.checked}
+                              checked={item.checked || false}
                               color={'primary'}
                               onChange={(...arg) =>
                               this.changeCheck(...arg, item)
@@ -405,7 +710,7 @@ class Note extends Component {
                     onClick={this.clear}
                 >
                   {' '}
-                  Clear{' '}
+                  Cancel{' '}
                 </Button>
                 <Button
                     style={{ marginTop: 8, marginRight: 10 }}
@@ -426,4 +731,4 @@ class Note extends Component {
     );
   }
 }
-export default withStyles(style)(Note);
+export default connect(mapStateToProps)(withStyles(style)(Note));

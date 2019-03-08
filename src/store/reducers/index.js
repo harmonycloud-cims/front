@@ -197,7 +197,12 @@ const updateAppointment = (state = appointmentState, action = {}) => {
 };
 const consultationState = {
   medicalRecordList: [],
-  templateList: []
+  templateList: [],
+  chronicProblemList: [],
+  diagnosisProblemList: [],
+  encounter: {},
+  clinicNote: '',
+  attendingProblemList: []
 };
 const updateConsultation = (state = consultationState, action = {}) => {
   switch (action.type) {
@@ -205,6 +210,16 @@ const updateConsultation = (state = consultationState, action = {}) => {
       return { ...state, medicalRecordList: action.medicalRecordList };
     case 'UPDATE_TEMPLATELIST':
       return { ...state, templateList: action.templateList };
+    case 'UPDATE_CHRONICPROBLEMLIST':
+      return { ...state, chronicProblemList: action.chronicProblemList };
+    case 'UPDATE_DIAGNOSIS_PROBLEM':
+      return { ...state, diagnosisProblemList: action.diagnosisProblemList };
+    case 'UPDATE_ENCOUNTERID':
+      return { ...state, encounter: action.encounter };
+    case 'UPDATE_CLINIC_NOTE':
+      return { ...state, clinicNote: action.clinicNote };
+    case 'UPDATE_ATTENDING_PROBLEM':
+      return { ...state, attendingProblemList: action.attendingProblemList };
     default:
       return state;
   }

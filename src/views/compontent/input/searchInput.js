@@ -80,12 +80,12 @@ class SearchInput extends Component {
     this.setState({ open: false });
   };
   handleEnterKey = e => {
-    if (this.flag && e.keyCode === 13) {
+    if (e.keyCode === 13) {
       this.search();
     }
-    if (e.keyCode === 40) {
-      this.setState({ whichOpen: false });
-    }
+    // if (e.keyCode === 40) {
+    //   this.setState({ whichOpen: false });
+    // }
   };
   cancel = e => {
     console.log(e.keyCode);
@@ -151,7 +151,7 @@ class SearchInput extends Component {
               Not Found
             </MenuItem>
           </Paper>
-        </Popper>{' '}
+        </Popper>
         {/*  :
                     <Menu open={this.state.open} anchorEl={this.anchorel} className={classes.menu}>
                         {

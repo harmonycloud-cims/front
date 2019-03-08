@@ -384,6 +384,92 @@ function* getTemplateList() {
     }
   }
 }
+function* getChronicProblemList() {
+  while (true) {
+    let { params } = yield take('GET_CHRONICPROBLEM');
+    try {
+      let { data } = yield call(axios.get, '/diagnosis/chronicProblemList', {
+        params: params
+      }); //阻塞，请求后台数据
+      if (data.success) {
+        yield put({ type: 'UPDATE_CHRONICPROBLEMLIST', chronicProblemList: data.data });
+      } else {
+        console.log(data.errorMessage);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+}
+function* getDiagnosisProblemList() {
+  while (true) {
+    let { params } = yield take('SEARCH_DIAGNOSIS_PROBLEMS');
+    try {
+      let { data } = yield call(axios.get, '/diagnosis/diagnosisProblem', {
+        params: params
+      }); //阻塞，请求后台数据
+      if (data.success) {
+        yield put({ type: 'UPDATE_DIAGNOSIS_PROBLEM', diagnosisProblemList: data.data });
+      } else {
+        console.log(data.errorMessage);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+}
+function* getEncounterId() {
+  while (true) {
+    let { params } = yield take('GET_ENCOUNTERID');
+    try {
+      let { data } = yield call(axios.get, '/encounter/getEncounter', {
+        params: params
+      }); //阻塞，请求后台数据
+      if (data.success) {
+        yield put({ type: 'UPDATE_ENCOUNTERID', encounter: data.data });
+      } else {
+        console.log(data.errorMessage);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+}
+function* getClinicNote() {
+  while (true) {
+    let { params } = yield take('GET_CLINIC_NOTE');
+    try {
+      let { data } = yield call(axios.get, '/clinicalnote/getClinicalNote', {
+        params: params
+      }); //阻塞，请求后台数据
+      if (data.success) {
+        yield put({ type: 'UPDATE_CLINIC_NOTE', clinicNote: data.data });
+      } else {
+        console.log(data.errorMessage);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+}
+function* getAttendingProblem() {
+  while (true) {
+    let { params } = yield take('GET_ATTENDING_PROBLEM');
+    try {
+      let { data } = yield call(axios.get, '/diagnosis/attendingproblemList', {
+        params: params
+      }); //阻塞，请求后台数据
+      if (data.success) {
+        yield put({ type: 'UPDATE_ATTENDING_PROBLEM', attendingProblemList: data.data });
+      } else {
+        console.log(data.errorMessage);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+}
+
 
 export default function* rootSaga() {
   yield fork(getClinicList);
@@ -415,4 +501,9 @@ export default function* rootSaga() {
 
   yield fork(getMedicalRecordList);
   yield fork(getTemplateList);
+  yield fork(getChronicProblemList);
+  yield fork(getDiagnosisProblemList);
+  yield fork(getEncounterId);
+  yield fork(getClinicNote);
+  yield fork(getAttendingProblem);
 }
