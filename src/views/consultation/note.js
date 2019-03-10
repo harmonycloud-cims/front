@@ -142,17 +142,23 @@ const style = {
     height: 31
   },
   paper: {
+    maxHeight: 250,
+    transform: 'translate3d(-0px, 3px, 0px)',
+    width: 380
+  },
+  menu_all_list: {
     maxHeight: 200,
-    overflowY: 'auto',
-    position: 'absolute',
-    transform: 'translate3d(-180px, 3px, 0px)'
+    overflowY: 'auto'
   },
   menu_list: {
     paddingTop: 0,
     fontSize: 14
   },
   mr15: {
-    marginRight: 15
+    marginRight: 15,
+    overflowX: 'hidden',
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis'
   },
   menu: {
     top: 38,
@@ -215,7 +221,6 @@ class Note extends Component {
     };
   }
   componentDidMount() {
-    console.log(12312);
     if (this.props.medicalRecordList.length > 0) {
       this.setState({ medicalRecord: this.props.medicalRecordList[0] });
     }
@@ -252,7 +257,6 @@ class Note extends Component {
     // }
   }
   UNSAFE_componentWillReceiveProps(nextProps) {
-    console.log(987697);
     // medicalRecordList记录
     if (nextProps.medicalRecordList !== this.props.medicalRecordList) {
       let medicalRecord = {};
@@ -422,6 +426,17 @@ class Note extends Component {
       this.setState({ open: true });
     }
   };
+  handleEnterKey = e => {
+    if (e.keyCode === 13) {
+      if (this.state.searchValue !== '') {
+        const params = {
+          keyword: this.state.searchValue
+        };
+        this.props.dispatch({ type: 'SEARCH_DIAGNOSIS_PROBLEMS', params });
+        this.setState({ open: true });
+      }
+    }
+  };
   handleClose = item => {
     let attendingProblemList = _.cloneDeep(this.state.attendingProblemList);
     if (JSON.stringify(item) !== '{}') {
@@ -501,17 +516,6 @@ class Note extends Component {
       attendingProblemList,
       chronicProblemList
     });
-  };
-  handleEnterKey = e => {
-    if (e.keyCode === 13) {
-      if (this.state.searchValue !== '') {
-        const params = {
-          keyword: this.state.searchValue
-        };
-        this.props.dispatch({ type: 'SEARCH_DIAGNOSIS_PROBLEMS', params });
-        this.setState({ open: true });
-      }
-    }
   };
   changeChronicPromblemStatus = (e, chronicProblem) => {
     let chronicProblemList = _.cloneDeep(this.state.chronicProblemList);
@@ -622,11 +626,13 @@ class Note extends Component {
                   />
                   <Popper open={this.state.open} anchorEl={this.anchorel}>
                     <Paper className={classes.paper}>
+                    <Typography component="div" className={classes.menu_all_list}>
                       {this.props.diagnosisProblemList.map((item, index) => (
                         <MenuItem
                             key={index}
                             onClick={() => this.handleClose(item)}
                             className={classes.menu_list}
+                            title={item.diagnosisDescription}
                         >
                           <Typography
                               component={'div'}
@@ -636,6 +642,7 @@ class Note extends Component {
                           </Typography>
                         </MenuItem>
                       ))}
+                      </Typography>
                       <Divider />
                       <MenuItem
                           onClick={() => this.handleClose({})}

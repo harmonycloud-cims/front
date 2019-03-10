@@ -147,7 +147,8 @@ class Appointment extends Component {
       date: moment()
         .add(1, 'days')
         .format('DD MMM YYYY'),
-      time: '09:00'
+      time: '09:00',
+      bookSuccess: false
     };
   }
   componentDidMount() {
@@ -166,6 +167,11 @@ class Appointment extends Component {
       this.setState({
         showRoomList: nextProps.roomList,
         room: nextProps.roomList[0]
+      });
+    }
+    if(this.state.bookSuccess && (!nextProps.bookAppointmentDialog) && (nextProps.bookAppointmentDialog !== this.props.bookAppointmentDialog)) {
+      this.setState({ isSelected: false }, () => {
+        this.initData(this.props);
       });
     }
   }
@@ -300,16 +306,16 @@ class Appointment extends Component {
       patientName: `${this.state.patient.englishSurname}, ${
         this.state.patient.englishGivenName
       }`,
+      patientSex: this.state.patient.sex,
       roomId: this.state.room.roomId,
       roomName: this.state.room.roomName
     };
-    this.props.dispatch({ type: 'BOOK_APPOINTMENT', params });
-    this.setState({ isSelected: false }, () => {
-      this.initData(this.props);
-    });
+    this.setState({bookSuccess: true}, ()=> 
+    this.props.dispatch({ type: 'BOOK_APPOINTMENT', params }));
   };
   closeDialog = () => {
-    this.props.dispatch({ type: 'BOOK_COMPARE_CLOSE' });
+    this.setState({bookSuccess: false}, () => 
+    this.props.dispatch({ type: 'BOOK_COMPARE_CLOSE' }));
   };
 
   render() {

@@ -23,7 +23,7 @@ class Patient extends Component {
     render() {
         const { classes } = this.props;
         return (
-            <Grid container style={{backgroundColor: this.props.patient.sex === 'female' ? 'rgba(255,0,0,0.1)' : '#CFECFA'}} className={classes.root} >
+            <Grid container style={{backgroundColor: this.props.patient.sex === 'female' ? 'rgba(255,0,0,0.2)' : '#CFECFA'}} className={classes.root} >
                 <Grid item xs={9}>
                     <Typography component={'div'}>
                         {this.props.patient.englishSurname}, {this.props.patient.englishGivenName} {this.props.patient.chineseName !== '' ? (this.props.patient.chineseName): null}

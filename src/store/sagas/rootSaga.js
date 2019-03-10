@@ -1,6 +1,6 @@
-import { take, call, put, fork } from 'redux-saga/effects';
+import { take, call, put, fork, cancelled } from 'redux-saga/effects';
 import axios from '../../services/axiosInstance';
-
+const cancelSource = axios.CancelToken.source();
 /* user */
 function* getEncounterType() {
   while (true) {
@@ -169,6 +169,7 @@ function* logout() {
 function* seachPatient() {
   while (true) {
     let { params } = yield take('SEARCH_PATIENT');
+    console.log(params);
     try {
       let { data } = yield call(axios.post, '/patient/searchPatient', params); //阻塞，请求后台数据
       if (data.success) {
@@ -404,10 +405,11 @@ function* getChronicProblemList() {
 function* getDiagnosisProblemList() {
   while (true) {
     let { params } = yield take('SEARCH_DIAGNOSIS_PROBLEMS');
+    console.log(params);
     try {
       let { data } = yield call(axios.get, '/diagnosis/diagnosisProblem', {
         params: params
-      }); //阻塞，请求后台数据
+      },{ cancelToken: cancelSource.token }); //阻塞，请求后台数据
       if (data.success) {
         yield put({ type: 'UPDATE_DIAGNOSIS_PROBLEM', diagnosisProblemList: data.data });
       } else {
@@ -415,6 +417,10 @@ function* getDiagnosisProblemList() {
       }
     } catch (error) {
       console.log(error);
+    } finally {
+      if (yield cancelled()) {
+        yield call(cancelSource, cancelSource.cancel);
+      }
     }
   }
 }

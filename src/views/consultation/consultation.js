@@ -12,6 +12,8 @@ import {
   TableCell,
   TableHead,
   TableBody,
+  TableFooter,
+  TablePagination,
   Button,
   InputBase,
   IconButton,
@@ -72,6 +74,10 @@ const style = {
   },
   iconButton: {
     padding: 10
+  },
+  table_pagination: {
+    position: 'absolute',
+    right: 0
   }
 };
 // const data = [
@@ -106,7 +112,9 @@ class Consulatation extends Component {
       value: '',
       ifSelected: false,
       tabValue: 0,
-      patientId: null
+      patientId: null,
+      rowsPerPage: 10,
+      page: 0
     };
   }
 
@@ -196,6 +204,14 @@ class Consulatation extends Component {
   // tab change
   changeTabValue = (event, value) => {
     this.setState({ tabValue: value });
+  };
+
+  /* table pagination */
+  handleChangePage = (event, page) => {
+    this.setState({ page });
+  };
+  handleChangeRowsPerPage = event => {
+    this.setState({ page: 0, rowsPerPage: event.target.value });
   };
 
   render() {
@@ -367,52 +383,79 @@ class Consulatation extends Component {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {this.state.attendanceList.map((item, index) => (
-                    <TableRow key={index}>
-                      <TableCell
-                          style={{ paddingLeft: '15px' }}
-                          padding={'none'}
+                  {this.state.attendanceList
+                    .slice(
+                      this.state.page * this.state.rowsPerPage,
+                      this.state.rowsPerPage * (this.state.page + 1)
+                    )
+                    .map((item, index) => (
+                      <TableRow
+                          key={index}
+                          style={{
+                          backgroundColor:
+                            item.patientSex === 'female'
+                              ? 'rgba(255,0,0,0.2)'
+                              : '#CFECFA'
+                        }}
                       >
-                        {item.patientDoc}
-                      </TableCell>
-                      <TableCell padding={'dense'}>
-                        {item.patientName}
-                      </TableCell>
-                      <TableCell padding={'dense'}>
-                        {moment(item.appointmentDate).format(
-                          'DD MMM YYYY HH:mm'
-                        )}
-                      </TableCell>
-                      <TableCell padding={'dense'}>
-                        {item.attendanceTime
-                          ? moment(item.attendanceTime).format(
-                              'DD MMM YYYY HH:mm'
-                            )
-                          : null}
-                      </TableCell>
-                      <TableCell padding={'dense'}>
-                        {item.encounterTypeName}
-                      </TableCell>
-                      <TableCell padding={'dense'}>{item.roomName}</TableCell>
-                      <TableCell padding={'dense'}>
-                        {item.attendanceStatus}
-                      </TableCell>
-                      <TableCell padding={'dense'}>
-                        {item.attendanceStatus === 'Attend' ? (
-                          <Button
-                              variant={'outlined'}
-                              color={'primary'}
-                              size={'small'}
-                              onClick={() => this.select(item)}
-                          >
-                            {' '}
-                            Select{' '}
-                          </Button>
-                        ) : null}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                        <TableCell
+                            style={{ paddingLeft: '15px' }}
+                            padding={'none'}
+                        >
+                          {item.patientDoc}
+                        </TableCell>
+                        <TableCell padding={'dense'}>
+                          {item.patientName}
+                        </TableCell>
+                        <TableCell padding={'dense'}>
+                          {moment(item.appointmentDate).format(
+                            'DD MMM YYYY HH:mm'
+                          )}
+                        </TableCell>
+                        <TableCell padding={'dense'}>
+                          {item.attendanceTime
+                            ? moment(item.attendanceTime).format(
+                                'DD MMM YYYY HH:mm'
+                              )
+                            : null}
+                        </TableCell>
+                        <TableCell padding={'dense'}>
+                          {item.encounterTypeName}
+                        </TableCell>
+                        <TableCell padding={'dense'}>{item.roomName}</TableCell>
+                        <TableCell padding={'dense'}>
+                          {item.attendanceStatus}
+                        </TableCell>
+                        <TableCell padding={'dense'}>
+                          {item.attendanceStatus === 'Attend' ? (
+                            <Button
+                                variant={'outlined'}
+                                color={'primary'}
+                                size={'small'}
+                                onClick={() => this.select(item)}
+                            >
+                              {' '}
+                              Select{' '}
+                            </Button>
+                          ) : null}
+                        </TableCell>
+                      </TableRow>
+                    ))}
                 </TableBody>
+                <TableFooter>
+                  <TableRow>
+                    <TablePagination
+                        className={classes.table_pagination}
+                        rowsPerPageOptions={[5, 10, 25]}
+                        colSpan={3}
+                        count={this.state.attendanceList.length}
+                        rowsPerPage={this.state.rowsPerPage}
+                        page={this.state.page}
+                        onChangePage={this.handleChangePage}
+                        onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                    />
+                  </TableRow>
+                </TableFooter>
               </Table>
             </Grid>
           </Grid>

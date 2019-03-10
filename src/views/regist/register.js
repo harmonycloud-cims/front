@@ -179,8 +179,10 @@ class Register extends Component {
   search = value => {
     if (value) {
       // 去除空格,大写搜索
+
       value = value.replace(' ', '');
       const params = { searchData: value };
+      console.log(params);
       this.props.dispatch({ type: 'SEARCH_PATIENT', params });
     }
   };

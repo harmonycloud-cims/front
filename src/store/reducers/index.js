@@ -208,8 +208,18 @@ const consultationState = {
 };
 const updateConsultation = (state = consultationState, action = {}) => {
   switch (action.type) {
-    case 'UPDATE_MEDICAL_RECORD':
-      return { ...state, medicalRecordList: action.medicalRecordList };
+    case 'UPDATE_MEDICAL_RECORD': {
+      let medicalRecordList = action.medicalRecordList;
+      medicalRecordList.sort(function(a, b) {
+        if (a.createDate > b.createDate) {
+          return -1;
+        } else if (a.createDate < b.createDate) {
+          return 1;
+        }
+        return 0;
+      });
+      return { ...state, medicalRecordList };
+    }
     case 'UPDATE_TEMPLATELIST':
       return { ...state, templateList: action.templateList };
     case 'UPDATE_CHRONICPROBLEMLIST':
@@ -225,7 +235,7 @@ const updateConsultation = (state = consultationState, action = {}) => {
     case 'OPEN_CONSULTATION_LOADING':
       return { ...state, closeDialog: action.data };
     case 'CONSULTATION_LOADING_SUCCESS':
-      return { ...state, consulationErrorMessage: '保存成功' };
+      return { ...state, consulationErrorMessage: 'Save successful' };
     case 'CLOSE_CONSULTATION_LOADING':
       return { ...state, closeDialog: false, consulationErrorMessage: '' };
     case 'CONSULTATION_LOADING_ERROR':
