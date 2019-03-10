@@ -418,13 +418,13 @@ class Note extends Component {
   /* Problems */
   changeSearchValue = e => {
     this.setState({ searchValue: e.target.value });
-    if (e.target.value !== '') {
-      const params = {
-        keyword: e.target.value
-      };
-      this.props.dispatch({ type: 'SEARCH_DIAGNOSIS_PROBLEMS', params });
-      this.setState({ open: true });
-    }
+    // if (e.target.value !== '') {
+    //   const params = {
+    //     keyword: e.target.value
+    //   };
+    //   this.props.dispatch({ type: 'SEARCH_DIAGNOSIS_PROBLEMS', params });
+    //   this.setState({ open: true });
+    // }
   };
   handleEnterKey = e => {
     if (e.keyCode === 13) {
