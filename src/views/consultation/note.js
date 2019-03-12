@@ -60,7 +60,9 @@ const style = {
   },
   left_warp: {
     padding: 20,
-    backgroundColor: 'lightgray'
+    backgroundColor: 'lightgray',
+    height: 'calc(100vh - 200px)',
+    minHeight: 600
   },
   right_warp: {
     paddingLeft: 15,
@@ -135,7 +137,8 @@ const style = {
   },
   clinical_note_box: {
     border: '1px solid rgba(0,0,0,0.2)',
-    height: 220,
+    height: 'calc(100vh - 600px)',
+    minHeight: 220,
     width: 'calc(100% - 40px)',
     padding: 15,
     marginLeft: 10,
@@ -301,8 +304,10 @@ class Note extends Component {
     if (nextProps.clinicNote !== this.props.clinicNote) {
       let clinicalNotes = '';
       let isUpdate = false;
-      if (nextProps.clinicNote && nextProps.clinicNote.noteContent) {
-        clinicalNotes = _.cloneDeep(nextProps.clinicNote.noteContent);
+      if (nextProps.clinicNote) {
+        if(nextProps.clinicNote.noteContent) {
+          clinicalNotes = _.cloneDeep(nextProps.clinicNote.noteContent);
+        }
         isUpdate = true;
       }
       this.setState({
@@ -561,9 +566,10 @@ class Note extends Component {
     this.setState({ chronicProblemList });
   };
   closeDialog = () => {
+    this.setState({ openDiag: false });
     this.props.dispatch({ type: 'CLOSE_CONSULTATION_LOADING' });
-    this.setState({ isUpdate: false, openDiag: false });
-    this.props.close();
+    // this.props.dispatch({ type: 'CLEAR_CONSULTATION_LOADING' });
+    // this.props.close();
   };
   render() {
     const { classes } = this.props;
@@ -616,7 +622,7 @@ class Note extends Component {
           <Typography
               component="div"
               className={classes.table}
-              style={{ padding: 15, height: 220, color: '#4052B2' }}
+              style={{ padding: 15, minHeight: 220, height: 'calc(100vh - 600px)', color: '#3f51b5' }}
           >
             {this.state.medicalRecord.noteContent}
           </Typography>

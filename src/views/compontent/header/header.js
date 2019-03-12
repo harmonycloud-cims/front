@@ -126,7 +126,7 @@ class CommonHeader extends Component {
               className="com_header_right_warp_item"
               title={'Logout'}
           >
-            <span className="menu_font" style={{ color: '#4052B2' }}>
+            <span className="menu_font" style={{ color: '#3f51b5' }}>
               Logout
             </span>
             <ArrowForwardIos

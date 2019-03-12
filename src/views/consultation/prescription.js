@@ -6,21 +6,31 @@ import {
   Button,
   FormGroup,
   FormControl,
-  Table,
+  Tab,
   Paper,
   InputBase,
   MenuItem,
   Popper,
   Divider,
   CircularProgress,
-  IconButton
+  IconButton,
+  Tabs,
+  Radio
 } from '@material-ui/core';
-import { Search } from '@material-ui/icons';
+import {
+  Search,
+  RadioButtonUnchecked,
+  RadioButtonChecked,
+  Add
+  // Remove
+} from '@material-ui/icons';
 import { withStyles } from '@material-ui/core/styles';
 
 function mapStateToProps(state) {
   return {
-    searchDrugList: state.updatePrescription.searchDrugList
+    clinic: state.updateUser.clinic,
+    searchDrugList: state.updatePrescription.searchDrugList,
+    departmentFavouriteList: state.updatePrescription.departmentFavouriteList
   };
 }
 const style = {
@@ -31,7 +41,8 @@ const style = {
     borderRadius: '15px',
     border: '1px solid rgba(0,0,0,0.2)',
     height: 25,
-    width: 400
+    width: 400,
+    margin: '5px 10px 0 10px'
   },
   input: {
     marginLeft: 8,
@@ -41,27 +52,42 @@ const style = {
   iconButton: {
     padding: 10
   },
-  table_header: {
-    fontSize: 14,
-    fontWeight: 600,
-    color: 'rgba(0, 0, 0, 0.7)',
-    padding: '0, 0, 0, 10'
-  },
   left_warp: {
     padding: 20,
-    backgroundColor: 'lightgray'
+    backgroundColor: 'lightgray',
+    height: 'calc(100vh - 270px)',
+    minHeight: 530
+  },
+  left_warp_tab: {
+    padding: 10,
+    overflowY: 'auto'
+  },
+  left_warp_favourite_icon: {
+    width: '0.8em',
+    height: '0.8em'
+  },
+  left_warp_favourite_ingredient: {
+    paddingLeft: 20
   },
   right_warp: {
-    paddingLeft: 15,
-    paddingTop: 10
+    padding: 20
+  },
+  right_warp_search: {
+    marginBottom: 20
+  },
+  search_title: {
+    fontSize: 16,
+    fontWeight: 600,
+    marginTop: 10,
+    color: 'rgba(0, 0, 0, 0.6)'
   },
   title: {
     fontSize: 16,
     fontWeight: 600
   },
   table: {
-    height: 'calc(100vh - 345px)',
-    minHeight: 200,
+    height: 'calc(100vh - 375px)',
+    minHeight: 430,
     backgroundColor: '#fff',
     border: '1px solid rgba(0,0,0,0.5)',
     marginBottom: 20,
@@ -88,18 +114,254 @@ const style = {
     paddingTop: 5,
     paddingLeft: 20,
     paddingBottom: 5
+  },
+  prescription_table: {
+    border: '1px solid rgba(0,0,0,0.2)',
+    height: 'calc(100vh - 457px)',
+    minHeight: 347,
+    marginBottom: 20,
+    overflowY: 'auto'
   }
 };
-
+const data = [
+  {
+    drugFavouriteGroupId: 1,
+    groupName: 'Decease 1',
+    drugFavouriteGroupDrugDtoList: [
+      {
+        drugFavGrpDrugId: 1,
+        drugId: 1,
+        ingredient: 'paracetamol',
+        tradeName: 'Dhamol',
+        regimenLine: '  8 week(s)'
+      }
+    ]
+  },
+  {
+    drugFavouriteGroupId: 2,
+    groupName: 'Decease 2',
+    drugFavouriteGroupDrugDtoList: [
+      {
+        drugFavGrpDrugId: 2,
+        drugId: 2,
+        ingredient: 'chloramphenicol',
+        tradeName: 'chloramphenicol (Martindale)',
+        regimenLine: ' as directed  '
+      }
+    ]
+  },
+  {
+    drugFavouriteGroupId: 3,
+    groupName: 'Decease 3',
+    drugFavouriteGroupDrugDtoList: [
+      {
+        drugFavGrpDrugId: 3,
+        drugId: 3,
+        ingredient: 'Bacillus Calmette Guerin (live attenuated) vaccine',
+        tradeName: 'BCG Vaccine SSI',
+        regimenLine: ' as directed 4 week(s)'
+      }
+    ]
+  },
+  {
+    drugFavouriteGroupId: 4,
+    groupName: 'Decease 4',
+    drugFavouriteGroupDrugDtoList: [
+      {
+        drugFavGrpDrugId: 5,
+        drugId: 5,
+        ingredient: 'diflucortolone valerate + isoconazole nitrate',
+        tradeName: 'Travocort',
+        regimenLine: ' at night  '
+      }
+    ]
+  },
+  {
+    drugFavouriteGroupId: 5,
+    groupName: 'Decease 5',
+    drugFavouriteGroupDrugDtoList: [
+      {
+        drugFavGrpDrugId: 4,
+        drugId: 4,
+        ingredient: 'ampicillin (as sodium)',
+        tradeName: 'ampicillin (as sodium) (Shijiazhuang)',
+        regimenLine: ' as directed 6 week(s)'
+      }
+    ]
+  },
+  {
+    drugFavouriteGroupId: 6,
+    groupName: 'Decease 6',
+    drugFavouriteGroupDrugDtoList: [
+      {
+        drugFavGrpDrugId: 6,
+        drugId: 1,
+        ingredient: 'paracetamol',
+        tradeName: 'Dhamol',
+        regimenLine: ' at night 1 week(s)'
+      }
+    ]
+  },
+  {
+    drugFavouriteGroupId: 7,
+    groupName: 'Decease 7',
+    drugFavouriteGroupDrugDtoList: [
+      {
+        drugFavGrpDrugId: 7,
+        drugId: 1,
+        ingredient: 'paracetamol',
+        tradeName: 'Dhamol',
+        regimenLine: ' at night 2 week(s)'
+      }
+    ]
+  },
+  {
+    drugFavouriteGroupId: 8,
+    groupName: 'Decease 8',
+    drugFavouriteGroupDrugDtoList: [
+      {
+        drugFavGrpDrugId: 8,
+        drugId: 1,
+        ingredient: 'paracetamol',
+        tradeName: 'Dhamol',
+        regimenLine: ' at night 3 day(s)'
+      }
+    ]
+  },
+  {
+    drugFavouriteGroupId: 9,
+    groupName: 'Decease 9',
+    drugFavouriteGroupDrugDtoList: [
+      {
+        drugFavGrpDrugId: 9,
+        drugId: 1,
+        ingredient: 'paracetamol',
+        tradeName: 'Dhamol',
+        regimenLine: ' at night 4 day(s)'
+      }
+    ]
+  },
+  {
+    drugFavouriteGroupId: 10,
+    groupName: 'Decease 10',
+    drugFavouriteGroupDrugDtoList: [
+      {
+        drugFavGrpDrugId: 10,
+        drugId: 1,
+        ingredient: 'paracetamol',
+        tradeName: 'Dhamol',
+        regimenLine: ' at night 5 day(s)'
+      }
+    ]
+  },
+  {
+    drugFavouriteGroupId: 11,
+    groupName: 'Decease 11',
+    drugFavouriteGroupDrugDtoList: [
+      {
+        drugFavGrpDrugId: 11,
+        drugId: 1,
+        ingredient: 'paracetamol',
+        tradeName: 'Dhamol',
+        regimenLine: ' at night 7 day(s)'
+      }
+    ]
+  },
+  {
+    drugFavouriteGroupId: 12,
+    groupName: 'Decease 12',
+    drugFavouriteGroupDrugDtoList: [
+      {
+        drugFavGrpDrugId: 12,
+        drugId: 1,
+        ingredient: 'paracetamol',
+        tradeName: 'Dhamol',
+        regimenLine: ' at once  '
+      }
+    ]
+  },
+  {
+    drugFavouriteGroupId: 13,
+    groupName: 'Decease 13',
+    drugFavouriteGroupDrugDtoList: [
+      {
+        drugFavGrpDrugId: 13,
+        drugId: 1,
+        ingredient: 'paracetamol',
+        tradeName: 'Dhamol',
+        regimenLine: ' at once 1 dose(s)'
+      }
+    ]
+  },
+  {
+    drugFavouriteGroupId: 14,
+    groupName: 'Decease 14',
+    drugFavouriteGroupDrugDtoList: [
+      {
+        drugFavGrpDrugId: 14,
+        drugId: 1,
+        ingredient: 'paracetamol',
+        tradeName: 'Dhamol',
+        regimenLine: ' daily  '
+      }
+    ]
+  },
+  {
+    drugFavouriteGroupId: 15,
+    groupName: 'Decease 15',
+    drugFavouriteGroupDrugDtoList: [
+      {
+        drugFavGrpDrugId: 15,
+        drugId: 1,
+        ingredient: 'paracetamol',
+        tradeName: 'Dhamol',
+        regimenLine: ' daily 1 week(s)'
+      }
+    ]
+  },
+  {
+    drugFavouriteGroupId: 16,
+    groupName: 'Decease 16',
+    drugFavouriteGroupDrugDtoList: [
+      {
+        drugFavGrpDrugId: 16,
+        drugId: 1,
+        ingredient: 'paracetamol',
+        tradeName: 'Dhamol',
+        regimenLine: ' daily 14 day(s)'
+      }
+    ]
+  }
+];
 class Prescription extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      tabValue: 0,
       open: false,
-      value: ''
+      value: '',
+      grade: 'adult'
     };
   }
-  componentDidMount() {}
+  // componentDidMount() {
+  //   this.initData();
+  // }
+  // initData = () => {
+  //   const params = {
+  //     clinicId: this.props.clinic.clinicId
+  //   };
+  //   this.props.dispatch({ type: 'GET_DEPARTMENTAL_FAVOURITE', params });
+  // };
+  copy = () => {
+    console.log('copy');
+  };
+  save = () => {
+    this.setState({ openDiag: true });
+  };
+  clear = () => {
+    this.setState({ isUpdate: false });
+    this.props.close();
+  };
   render() {
     const { classes } = this.props;
     return (
@@ -118,7 +380,49 @@ class Prescription extends Component {
         </Grid>
         <Grid item xs={3} className={classes.left_warp}>
           <Typography component="div" className={classes.table}>
-            <Table />
+            <Tabs
+                value={this.state.tabValue}
+                onChange={(event, value) => this.setState({ tabValue: value })}
+                indicatorColor={'primary'}
+                textColor={'primary'}
+            >
+              <Tab label="Departmental Favourite" style={{ width: 80 }} />
+              <Tab label="Drug Histiry" style={{ width: 80 }} />
+            </Tabs>
+            {this.state.tabValue === 0 && (
+              <Typography component="div" className={classes.left_warp_tab}>
+                {/* {this.props.departmentFavouriteList.length > 0
+                  ? this.props.departmentFavouriteList.map((item, index) => ( */}
+                {data.length > 0
+                  ? data.map((item, index) => (
+                      <Typography component="div" key={index}>
+                        <FormGroup row>
+                          <Add
+                              color="primary"
+                              size="small"
+                              className={classes.left_warp_favourite_icon}
+                          />
+                          <Typography>{item.groupName}</Typography>
+                        </FormGroup>
+                        {item.drugFavouriteGroupDrugDtoList.map(eve => (
+                          <Typography
+                              key={eve.drugId}
+                              component="div"
+                              className={classes.left_warp_favourite_ingredient}
+                          >
+                            {eve.tradeName}
+                          </Typography>
+                        ))}
+                      </Typography>
+                    ))
+                  : null}
+              </Typography>
+            )}
+            {this.state.tabValue === 1 && (
+              <Typography component="div" className={classes.left_warp_tab}>
+                world
+              </Typography>
+            )}
           </Typography>
           <Button
               className={classes.button}
@@ -133,8 +437,10 @@ class Prescription extends Component {
         </Grid>
         <Grid item xs={9}>
           <Typography component="div" className={classes.right_warp}>
-            <Typography component="div"></Typography>
-            <Typography component="div" className={classes.title}>
+            <FormGroup row className={classes.right_warp_search}>
+              <Typography className={classes.search_title}>
+                Drug Name/Set
+              </Typography>
               <Paper className={classes.root} elevation={1}>
                 <InputBase
                     className={classes.input}
@@ -190,7 +496,60 @@ class Prescription extends Component {
                   </Paper>
                 </Popper>
               </Paper>
+              <FormGroup>
+                <FormGroup row>
+                  <Radio
+                      style={{ padding: 0 }}
+                      checked={this.state.grade === 'adult'}
+                      onChange={() => this.setState({ grade: 'adult' })}
+                      color="default"
+                      icon={<RadioButtonUnchecked fontSize="small" />}
+                      checkedIcon={<RadioButtonChecked fontSize="small" />}
+                      label="asd"
+                  />
+                  <Typography>Adult</Typography>
+                </FormGroup>
+                <FormGroup row>
+                  <Radio
+                      style={{ padding: 0 }}
+                      checked={this.state.grade === 'paediatric'}
+                      onChange={() => this.setState({ grade: 'paediatric' })}
+                      color="default"
+                      icon={<RadioButtonUnchecked fontSize="small" />}
+                      checkedIcon={<RadioButtonChecked fontSize="small" />}
+                  />
+                  <Typography>Paediatric</Typography>
+                </FormGroup>
+              </FormGroup>
+            </FormGroup>
+            <Typography component="div" className={classes.title}>
+              Prescription
             </Typography>
+            <Typography
+                component="div"
+                className={classes.prescription_table}
+            />
+            <Button
+                className={classes.button}
+                variant="outlined"
+                color="primary"
+                size="small"
+                onClick={this.clear}
+            >
+              {' '}
+              Cancel{' '}
+            </Button>
+            <Button
+                style={{ marginRight: 10 }}
+                className={classes.button}
+                variant="outlined"
+                color="primary"
+                size="small"
+                onClick={this.save}
+            >
+              {' '}
+              Save{' '}
+            </Button>
           </Typography>
         </Grid>
       </Grid>

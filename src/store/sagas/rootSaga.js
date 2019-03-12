@@ -522,6 +522,28 @@ function* getAttendingProblem() {
   }
 }
 
+// prescription
+function* getDepartmentFavourite() {
+  while (true) {
+    let { params } = yield take('GET_DEPARTMENTAL_FAVOURITE');
+    try {
+      let { data } = yield call(axios.get, '/drug/depFavList', {
+        params: params
+      }); //阻塞，请求后台数据
+      if (data.success) {
+        yield put({
+          type: 'UPDATE_DEPARTMENTAL_FAVOURITE',
+          departmentFavouriteList: data.data
+        });
+      } else {
+        console.log(data.errorMessage);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+}
+
 export default function* rootSaga() {
   yield fork(getClinicList);
   yield fork(changeClinic);
@@ -559,4 +581,6 @@ export default function* rootSaga() {
   yield fork(getAttendingProblem);
   yield fork(saveConsultation);
   yield fork(updateConsultation);
+
+  yield fork(getDepartmentFavourite);
 }

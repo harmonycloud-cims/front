@@ -39,7 +39,7 @@ const style = {
     height: 40,
     textAlign: 'center',
     paddingTop: 20,
-    color: '#4052B2'
+    color: '#3f51b5'
   },
   table_body_cell_body_holiday: {
     backgroundColor: '#FEDEED',

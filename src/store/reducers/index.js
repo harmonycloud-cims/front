@@ -238,11 +238,13 @@ const updateConsultation = (state = consultationState, action = {}) => {
     case 'UPDATE_ATTENDING_PROBLEM':
       return { ...state, attendingProblemList: action.attendingProblemList };
     case 'OPEN_CONSULTATION_LOADING':
-      return { ...state, closeDialog: action.data };
+      return { ...state, consulationErrorMessage: '', closeDialog: action.data };
     case 'CONSULTATION_LOADING_SUCCESS':
       return { ...state, consulationErrorMessage: 'Save successful' };
     case 'CLOSE_CONSULTATION_LOADING':
-      return { ...state, closeDialog: false, consulationErrorMessage: '' };
+      return { ...state, closeDialog: false };
+    // case 'CLEAR_CONSULTATION_LOADING':
+    //   return { ...state, consulationErrorMessage: '' };
     case 'CONSULTATION_LOADING_ERROR':
       return { ...state, consulationErrorMessage: action.data };
     default:
@@ -250,12 +252,15 @@ const updateConsultation = (state = consultationState, action = {}) => {
   }
 };
 const prescriptionState = {
+  departmentFavouriteList: [],
   searchDrugList: []
 };
 const updatePrescription = (state = prescriptionState, action = {}) => {
   switch (action.type) {
     case 'UPDATE_DRUG_LIST':
       return { ...state, searchDrugList: action.data };
+    case 'UPDATE_DEPARTMENTAL_FAVOURITE':
+      return { ...state, departmentFavouriteList: action.data };
     default:
       return state;
   }

@@ -1,6 +1,6 @@
 $headerHeight: 50px;
 $color: rgba(0, 0, 0, 0.8);
-$buttonColor: #4052b2;
+$buttonColor: #3f51b5;
 :global {
   /* 字体大小 */
   .s_fs_12 {
@@ -169,7 +169,7 @@ $buttonColor: #4052b2;
     width: calc(100% - 310px);
   }
   .com_header_right_warp {
-    display: inline-block;
+    // display: inline-block;
     height: $headerHeight;
     line-height: $headerHeight;
     float: right;
