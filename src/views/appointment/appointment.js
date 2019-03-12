@@ -169,7 +169,11 @@ class Appointment extends Component {
         room: nextProps.roomList[0]
       });
     }
-    if(this.state.bookSuccess && (!nextProps.bookAppointmentDialog) && (nextProps.bookAppointmentDialog !== this.props.bookAppointmentDialog)) {
+    if (
+      this.state.bookSuccess &&
+      !nextProps.bookAppointmentDialog &&
+      nextProps.bookAppointmentDialog !== this.props.bookAppointmentDialog
+    ) {
       this.setState({ isSelected: false }, () => {
         this.initData(this.props);
       });
@@ -310,12 +314,14 @@ class Appointment extends Component {
       roomId: this.state.room.roomId,
       roomName: this.state.room.roomName
     };
-    this.setState({bookSuccess: true}, ()=> 
-    this.props.dispatch({ type: 'BOOK_APPOINTMENT', params }));
+    this.setState({ bookSuccess: true }, () =>
+      this.props.dispatch({ type: 'BOOK_APPOINTMENT', params })
+    );
   };
   closeDialog = () => {
-    this.setState({bookSuccess: false}, () => 
-    this.props.dispatch({ type: 'BOOK_COMPARE_CLOSE' }));
+    this.setState({ bookSuccess: false }, () =>
+      this.props.dispatch({ type: 'BOOK_COMPARE_CLOSE' })
+    );
   };
 
   render() {

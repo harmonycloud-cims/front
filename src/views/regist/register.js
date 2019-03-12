@@ -179,10 +179,8 @@ class Register extends Component {
   search = value => {
     if (value) {
       // 去除空格,大写搜索
-
       value = value.replace(' ', '');
       const params = { searchData: value };
-      console.log(params);
       this.props.dispatch({ type: 'SEARCH_PATIENT', params });
     }
   };
@@ -361,6 +359,14 @@ class Register extends Component {
                 />
               )}
             </div>
+            {/* <InlineDatePicker
+                {...CONST.PROPS.VALID_DATE_RANGE}
+                clearable
+                value={this.state.patient.dateOfBirth}
+                onChange={(...arg) =>
+                  this.changeInformation(...arg, 'dateOfBirth')
+                }
+            /> */}
             <div className={styles.form50}>
               <div>Sex</div>
               <RadioGroup

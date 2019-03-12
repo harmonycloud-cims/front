@@ -6,9 +6,7 @@ import {
   Popper,
   MenuItem,
   Typography,
-  Divider,
-  Menu,
-  MenuList
+  Divider
 } from '@material-ui/core';
 import { Search } from '@material-ui/icons';
 import { withStyles } from '@material-ui/core/styles';

@@ -20,9 +20,11 @@ import {
   Divider,
   Dialog,
   DialogActions,
-  DialogContent
+  DialogContent,
+  IconButton,
+  CircularProgress
 } from '@material-ui/core';
-import { Close, ArrowLeft, ArrowRight, Remove } from '@material-ui/icons';
+import { Close, ArrowLeft, ArrowRight, Remove, Search } from '@material-ui/icons';
 import { withStyles } from '@material-ui/core/styles';
 import _ from 'lodash';
 import moment from 'moment';
@@ -38,10 +40,18 @@ function mapStateToProps(state) {
     clinicNote: state.updateConsultation.clinicNote,
     attendingProblemList: state.updateConsultation.attendingProblemList,
     closeDialog: state.updateConsultation.closeDialog,
+    openSearchProgress: state.updateConsultation.openSearchProgress,
     consulationErrorMessage: state.updateConsultation.consulationErrorMessage
   };
 }
 const style = {
+  root: {
+    padding: '2px 4px',
+    display: 'flex',
+    alignItems: 'center',
+    height: 25,
+    borderRadius: 0
+  },
   table_header: {
     fontSize: 14,
     fontWeight: 600,
@@ -110,7 +120,6 @@ const style = {
   },
   diagnosis_search: {
     paddingLeft: 8,
-    borderBottom: '1px solid rgba(0,0,0,0.2)',
     width: 'calc(100% - 8px)'
   },
   diagnosis_close: {
@@ -143,7 +152,7 @@ const style = {
   },
   paper: {
     maxHeight: 250,
-    transform: 'translate3d(-0px, 3px, 0px)',
+    transform: 'translate3d(18px, 0px, 0px)',
     width: 380
   },
   menu_all_list: {
@@ -231,10 +240,9 @@ class Note extends Component {
       });
       this.setState({ templateList });
     }
-    console.log(this.props.clinicNote);
-    if(this.props.clinicNote) {
+    if (this.props.clinicNote) {
       let clinicalNotes = '';
-      if(this.props.clinicNote.noteContent){
+      if (this.props.clinicNote.noteContent) {
         clinicalNotes = _.cloneDeep(this.props.clinicNote.noteContent);
       }
       this.setState({
@@ -243,24 +251,19 @@ class Note extends Component {
         isUpdate: true
       });
     }
-    if(this.props.attendingProblemList){
+    if (this.props.attendingProblemList) {
       let attendingProblemList = _.cloneDeep(this.props.attendingProblemList);
       this.setState({
         attendingProblemList,
         attendingProblemListOrigin: attendingProblemList
       });
     }
-    // if(JSON.stringify(this.props.encounter) !== '{}'){
-    //   let params = { encounterId: this.props.encounter.encounterId};
-    //   this.props.dispatch({type: 'GET_CLINIC_NOTE', params});
-    //   this.props.dispatch({type: 'GET_ATTENDING_PROBLEM', params});
-    // }
   }
   UNSAFE_componentWillReceiveProps(nextProps) {
     // medicalRecordList记录
     if (nextProps.medicalRecordList !== this.props.medicalRecordList) {
       let medicalRecord = {};
-      if(nextProps.medicalRecordList.length > 0){
+      if (nextProps.medicalRecordList.length > 0) {
         medicalRecord = nextProps.medicalRecordList[0];
       }
       this.setState({
@@ -288,18 +291,17 @@ class Note extends Component {
     }
     // encounter
     if (nextProps.encounter !== this.props.encounter) {
-      if(nextProps.encounter && JSON.stringify(nextProps.encounter) !== '{}'){
-        let params = { encounterId: nextProps.encounter.encounterId};
-        this.props.dispatch({type: 'GET_CLINIC_NOTE', params});
-        this.props.dispatch({type: 'GET_ATTENDING_PROBLEM', params});
+      if (nextProps.encounter && JSON.stringify(nextProps.encounter) !== '{}') {
+        let params = { encounterId: nextProps.encounter.encounterId };
+        this.props.dispatch({ type: 'GET_CLINIC_NOTE', params });
+        this.props.dispatch({ type: 'GET_ATTENDING_PROBLEM', params });
       }
     }
     // clinicalNotes
     if (nextProps.clinicNote !== this.props.clinicNote) {
-      console.log(nextProps.clinicNote, 'next');
       let clinicalNotes = '';
       let isUpdate = false;
-      if(nextProps.clinicNote && nextProps.clinicNote.noteContent){
+      if (nextProps.clinicNote && nextProps.clinicNote.noteContent) {
         clinicalNotes = _.cloneDeep(nextProps.clinicNote.noteContent);
         isUpdate = true;
       }
@@ -351,54 +353,80 @@ class Note extends Component {
     //   item.encounterId = encounterId;
     //   item.patientId = patientId;
     // });
+    console.log(this.state.attendingProblemList);
     const attendingDiagnosisList = [];
     const chronicDiagnosisList = [];
-    _.forEach(this.state.attendingProblemList, item => {
-      attendingDiagnosisList.push({
-        diagnosisId: item.diagnosisId,
-        encounterId,
-        patientId
-      });
-    });
-    _.forEach(this.state.chronicProblemList, item => {
-      chronicDiagnosisList.push({
-        status: item.status,
-        diagnosisId: item.diagnosisId,
-        encounterId,
-        patientId
-      });
-    });
     const clinicalNote = {
       encounterId,
       noteContent: this.state.clinicalNotes,
       patientId,
       recordType: 'Dr Note'
     };
-    const params = {
-      attendingDiagnosisList,
-      chronicDiagnosisList,
-      clinicalNote
-    };
-    const params1 = {
-      newAttendingDiagnosisList: attendingDiagnosisList,
-      newChronicDiagnosisList:chronicDiagnosisList,
-      newClinicalNote: clinicalNote,
-      oldAttendingDiagnosisList: this.props.attendingProblemList,
-      oldChronicDiagnosisList: this.props.chronicProblemList,
-      oldClinicalNote: this.props.clinicNote
-    };
-    console.log(this.state.isUpdate, params1);
-    if(this.state.isUpdate) {
-      // this.props.dispatch({type: 'UPDATE_CONSULTATION', params: params1});
+    if (this.state.isUpdate) {
+      _.forEach(this.state.attendingProblemList, item => {
+        let attendingProblem = {
+          diagnosisId: item.diagnosisId,
+          encounterId,
+          patientId
+        };
+        _.forEach(this.props.attendingProblemList, eve => {
+          if(item.diagnosisId === eve.diagnosisId){
+            attendingProblem.id = eve.attendingDiagnosisId;
+          }
+        });
+        attendingDiagnosisList.push(attendingProblem);
+      });
+      _.forEach(this.state.chronicProblemList, item => {
+        let chronicProblem = {
+          status: item.status,
+          diagnosisId: item.diagnosisId,
+          encounterId,
+          patientId
+        };
+        _.forEach(this.props.chronicProblemList, eve => {
+          if(item.diagnosisId === eve.diagnosisId){
+            chronicProblem.id = eve.chronicDiagnosisId;
+          }
+        });
+        chronicDiagnosisList.push(chronicProblem);
+      });
+      const params = {
+        newAttendingDiagnosisList: attendingDiagnosisList,
+        newChronicDiagnosisList: chronicDiagnosisList,
+        newClinicalNote: clinicalNote,
+        oldAttendingDiagnosisList: this.props.attendingProblemList,
+        oldChronicDiagnosisList: this.props.chronicProblemList,
+        oldClinicalNote: this.props.clinicNote
+      };
+      this.props.dispatch({ type: 'UPDATE_CONSULTATION', params: params });
+      this.setState({ openDiag: true });
     } else {
-      this.props.dispatch({type: 'SAVE_CONSULTATION', params});
-      this.setState({openDiag: true});
+      _.forEach(this.state.attendingProblemList, item => {
+        attendingDiagnosisList.push({
+          diagnosisId: item.diagnosisId,
+          encounterId,
+          patientId
+        });
+      });
+      _.forEach(this.state.chronicProblemList, item => {
+        chronicDiagnosisList.push({
+          status: item.status,
+          diagnosisId: item.diagnosisId,
+          encounterId,
+          patientId
+        });
+      });
+      const params = {
+        attendingDiagnosisList,
+        chronicDiagnosisList,
+        clinicalNote
+      };
+      this.props.dispatch({ type: 'SAVE_CONSULTATION', params });
+      this.setState({ openDiag: true });
     }
-    // console.log(this.state.clinicalNotes);
-    // console.log(this.props.encounter, this.props.patientId, JSON.stringify(this.state.clinicalNotes), this.state.attendingProblemList, this.state.chronicProblemList);
   };
   clear = () => {
-    this.setState({isUpdate: false});
+    this.setState({ isUpdate: false });
     this.props.close();
     // let clinicalNotes = _.cloneDeep(this.state.clinicalNotesOrigin);
     // let attendingProblemList = _.cloneDeep(this.state.attendingProblemListOrigin);
@@ -418,23 +446,30 @@ class Note extends Component {
   /* Problems */
   changeSearchValue = e => {
     this.setState({ searchValue: e.target.value });
-    // if (e.target.value !== '') {
-    //   const params = {
-    //     keyword: e.target.value
-    //   };
-    //   this.props.dispatch({ type: 'SEARCH_DIAGNOSIS_PROBLEMS', params });
-    //   this.setState({ open: true });
-    // }
-  };
-  handleEnterKey = e => {
-    if (e.keyCode === 13) {
-      if (this.state.searchValue !== '') {
+    if (e.target.value !== '') {
+      if (e.target.value.length > 3) {
         const params = {
-          keyword: this.state.searchValue
+          keyword: e.target.value
         };
         this.props.dispatch({ type: 'SEARCH_DIAGNOSIS_PROBLEMS', params });
         this.setState({ open: true });
       }
+    } else {
+      this.setState({open: false});
+    }
+  };
+  searchDiagnosisProblem = () => {
+    if (this.state.searchValue !== '') {
+      const params = {
+        keyword: this.state.searchValue
+      };
+      this.props.dispatch({ type: 'SEARCH_DIAGNOSIS_PROBLEMS', params });
+      this.setState({ open: true });
+    }
+  }
+  handleEnterKey = e => {
+    if (e.keyCode === 13) {
+      this.searchDiagnosisProblem();
     }
   };
   handleClose = item => {
@@ -449,7 +484,7 @@ class Note extends Component {
         attendingProblemList.push(item);
       }
     }
-    this.setState({ open: false, attendingProblemList });
+    this.setState({ open: false, attendingProblemList, searchValue: '' });
   };
   // index 0表示在attendingProblems里， 1表示在chronic Problems
   clickDiagnosis = (selectDiagnosis, index) => {
@@ -519,15 +554,17 @@ class Note extends Component {
   };
   changeChronicPromblemStatus = (e, chronicProblem) => {
     let chronicProblemList = _.cloneDeep(this.state.chronicProblemList);
-    let problem = _.find(chronicProblemList, item => {return item.diagnosisId === chronicProblem.diagnosisId;});
+    let problem = _.find(chronicProblemList, item => {
+      return item.diagnosisId === chronicProblem.diagnosisId;
+    });
     problem.status = e.target.value;
-    this.setState({chronicProblemList});
-  }
+    this.setState({ chronicProblemList });
+  };
   closeDialog = () => {
-    this.props.dispatch({type: 'CLOSE_CONSULTATION_ERROR'});
-    this.setState({isUpdate: false, openDiag: false});
+    this.props.dispatch({ type: 'CLOSE_CONSULTATION_LOADING' });
+    this.setState({ isUpdate: false, openDiag: false });
     this.props.close();
-  }
+  };
   render() {
     const { classes } = this.props;
     return (
@@ -613,6 +650,7 @@ class Note extends Component {
               <Grid item xs={5}>
                 <Typography>Attending Problem(s)</Typography>
                 <Typography component="div" className={classes.transfer_box}>
+                <Paper className={classes.root} elevation={1}>
                   <InputBase
                       value={this.state.searchValue}
                       onChange={this.changeSearchValue}
@@ -624,24 +662,37 @@ class Note extends Component {
                       onKeyUp={this.handleEnterKey}
                     // onBlur={() => this.handleClose({})}
                   />
+                  <IconButton
+                      onClick={this.searchDiagnosisProblem}
+                      className={classes.iconButton}
+                      aria-label="Search"
+                      color={'primary'}
+                  >
+                    {
+                      this.props.openSearchProgress ? <CircularProgress size={20}/> : <Search />
+                    }
+                  </IconButton>
                   <Popper open={this.state.open} anchorEl={this.anchorel}>
                     <Paper className={classes.paper}>
-                    <Typography component="div" className={classes.menu_all_list}>
-                      {this.props.diagnosisProblemList.map((item, index) => (
-                        <MenuItem
-                            key={index}
-                            onClick={() => this.handleClose(item)}
-                            className={classes.menu_list}
-                            title={item.diagnosisDescription}
-                        >
-                          <Typography
-                              component={'div'}
-                              className={classes.mr15}
+                      <Typography
+                          component="div"
+                          className={classes.menu_all_list}
+                      >
+                        {this.props.diagnosisProblemList.map((item, index) => (
+                          <MenuItem
+                              key={index}
+                              onClick={() => this.handleClose(item)}
+                              className={classes.menu_list}
+                              title={item.diagnosisDescription}
                           >
-                            {item.diagnosisDescription}
-                          </Typography>
-                        </MenuItem>
-                      ))}
+                            <Typography
+                                component={'div'}
+                                className={classes.mr15}
+                            >
+                              {item.diagnosisDescription}
+                            </Typography>
+                          </MenuItem>
+                        ))}
                       </Typography>
                       <Divider />
                       <MenuItem
@@ -652,6 +703,7 @@ class Note extends Component {
                       </MenuItem>
                     </Paper>
                   </Popper>
+                  </Paper>
                   <FormGroup row className={classes.diagnosis_problem_list}>
                     {this.state.attendingProblemList.map((item, index) => (
                       <Typography
@@ -715,35 +767,44 @@ class Note extends Component {
               <Grid item xs={5}>
                 <Typography>Chronic Problem(s)</Typography>
                 <Typography component="div" className={classes.transfer_box}>
-                <FormGroup row className={classes.diagnosis_problem_list} style={{maxHeight: 105}}>
-                  {this.state.chronicProblemList.map((item, index) => (
-                    <Typography
-                        className={
-                        this.state.selectDiagnosis.diagnosisId ===
-                        item.diagnosisId
-                          ? classes.select_diagnosis_problem
-                          : classes.diagnosis_problem
-                      }
-                        key={index}
-                        component="div"
-                    >
+                  <FormGroup
+                      row
+                      className={classes.diagnosis_problem_list}
+                      style={{ maxHeight: 105 }}
+                  >
+                    {this.state.chronicProblemList.map((item, index) => (
                       <Typography
-                          className={classes.diagnosis_problem_name}
-                          onClick={() => this.clickDiagnosis(item, 1)}
+                          className={
+                          this.state.selectDiagnosis.diagnosisId ===
+                          item.diagnosisId
+                            ? classes.select_diagnosis_problem
+                            : classes.diagnosis_problem
+                        }
+                          key={index}
+                          component="div"
                       >
-                        {item.diagnosisDescription}
+                        <Typography
+                            className={classes.diagnosis_problem_name}
+                            onClick={() => this.clickDiagnosis(item, 1)}
+                        >
+                          {item.diagnosisDescription}
+                        </Typography>
+                        <select
+                            value={item.status}
+                            onChange={(...arg) =>
+                            this.changeChronicPromblemStatus(...arg, item)
+                          }
+                        >
+                          <option value="Active">Active</option>
+                          <option value="Resolved">Resolved</option>
+                        </select>
+                        <Close
+                            fontSize="small"
+                            className={classes.diagnosis_close}
+                            onClick={() => this.removeDiagnosis(item, 1)}
+                        />
                       </Typography>
-                      <select value={item.status} onChange={(...arg) => this.changeChronicPromblemStatus(...arg, item)}>
-                        <option value="Active">Active</option>
-                        <option value="Resolved">Resolved</option>
-                      </select>
-                      <Close
-                          fontSize="small"
-                          className={classes.diagnosis_close}
-                          onClick={() => this.removeDiagnosis(item, 1)}
-                      />
-                    </Typography>
-                  ))}
+                    ))}
                   </FormGroup>
                 </Typography>
               </Grid>

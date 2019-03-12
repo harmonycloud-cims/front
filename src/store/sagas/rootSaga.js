@@ -1,6 +1,5 @@
-import { take, call, put, fork, cancelled } from 'redux-saga/effects';
+import { take, call, put, fork, takeLatest } from 'redux-saga/effects';
 import axios from '../../services/axiosInstance';
-const cancelSource = axios.CancelToken.source();
 /* user */
 function* getEncounterType() {
   while (true) {
@@ -165,22 +164,25 @@ function* logout() {
   }
 }
 
+function* fetchPatient(action) {
+  try {
+    let { data } = yield call(
+      axios.post,
+      '/patient/searchPatient',
+      action.params
+    ); //阻塞，请求后台数据
+    if (data.success) {
+      yield put({ type: 'PATIENTLIST', data: data.data });
+    } else {
+      yield put({ type: 'PATIENTLIST', data: [] });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
 /* patient */
 function* seachPatient() {
-  while (true) {
-    let { params } = yield take('SEARCH_PATIENT');
-    console.log(params);
-    try {
-      let { data } = yield call(axios.post, '/patient/searchPatient', params); //阻塞，请求后台数据
-      if (data.success) {
-        yield put({ type: 'PATIENTLIST', data: data.data });
-      } else {
-        yield put({ type: 'PATIENTLIST', data: [] });
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  yield takeLatest('SEARCH_PATIENT', fetchPatient);
 }
 function* getPatient() {
   while (true) {
@@ -393,7 +395,10 @@ function* getChronicProblemList() {
         params: params
       }); //阻塞，请求后台数据
       if (data.success) {
-        yield put({ type: 'UPDATE_CHRONICPROBLEMLIST', chronicProblemList: data.data });
+        yield put({
+          type: 'UPDATE_CHRONICPROBLEMLIST',
+          chronicProblemList: data.data
+        });
       } else {
         console.log(data.errorMessage);
       }
@@ -402,27 +407,27 @@ function* getChronicProblemList() {
     }
   }
 }
-function* getDiagnosisProblemList() {
-  while (true) {
-    let { params } = yield take('SEARCH_DIAGNOSIS_PROBLEMS');
-    console.log(params);
-    try {
-      let { data } = yield call(axios.get, '/diagnosis/diagnosisProblem', {
-        params: params
-      },{ cancelToken: cancelSource.token }); //阻塞，请求后台数据
-      if (data.success) {
-        yield put({ type: 'UPDATE_DIAGNOSIS_PROBLEM', diagnosisProblemList: data.data });
-      } else {
-        console.log(data.errorMessage);
-      }
-    } catch (error) {
-      console.log(error);
-    } finally {
-      if (yield cancelled()) {
-        yield call(cancelSource, cancelSource.cancel);
-      }
+function* fectchDiagnogsisProblem(action) {
+  try {
+    yield put({ type: 'OPEN_SEARCH' });
+    let { data } = yield call(axios.get, '/diagnosis/diagnosisProblem', {
+      params: action.params
+    }); //阻塞，请求后台数据
+    if (data.success) {
+      yield put({
+        type: 'UPDATE_DIAGNOSIS_PROBLEM',
+        diagnosisProblemList: data.data
+      });
+      yield put({ type: 'CLOSE_SEARCH' });
+    } else {
+      console.log(data.errorMessage);
     }
+  } catch (error) {
+    console.log(error);
   }
+}
+function* getDiagnosisProblemList() {
+  yield takeLatest('SEARCH_DIAGNOSIS_PROBLEMS', fectchDiagnogsisProblem);
 }
 function* getEncounterId() {
   while (true) {
@@ -461,32 +466,38 @@ function* getClinicNote() {
 function* saveConsultation() {
   while (true) {
     let { params } = yield take('SAVE_CONSULTATION');
-    yield put({type: 'OPEN_CONSULTATION_LOADING', data: true});
+    yield put({ type: 'OPEN_CONSULTATION_LOADING', data: true });
     try {
       let { data } = yield call(axios.post, '/bff/insert', params); //阻塞，请求后台数据
       if (data.success) {
-        yield put({type: 'CONSULTATION_LOADING_SUCCESS'});
+        yield put({ type: 'CONSULTATION_LOADING_SUCCESS' });
       } else {
-        yield put({type: 'CONSULTATION_LOADING_ERROR', data: data.errorMessage});
+        yield put({
+          type: 'CONSULTATION_LOADING_ERROR',
+          data: data.errorMessage
+        });
       }
     } catch (error) {
-      yield put({type: 'CONSULTATION_LOADING_ERROR', data: error});
+      yield put({ type: 'CONSULTATION_LOADING_ERROR', data: error });
     }
   }
 }
 function* updateConsultation() {
   while (true) {
     let { params } = yield take('UPDATE_CONSULTATION');
-    yield put({type: 'OPEN_CONSULTATION_LOADING', data: true});
+    yield put({ type: 'OPEN_CONSULTATION_LOADING', data: true });
     try {
       let { data } = yield call(axios.post, '/bff/update', params); //阻塞，请求后台数据
       if (data.success) {
-        yield put({type: 'CONSULTATION_LOADING_SUCCESS'});
+        yield put({ type: 'CONSULTATION_LOADING_SUCCESS' });
       } else {
-        yield put({type: 'CONSULTATION_LOADING_ERROR', data: data.errorMessage});
+        yield put({
+          type: 'CONSULTATION_LOADING_ERROR',
+          data: data.errorMessage
+        });
       }
     } catch (error) {
-      yield put({type: 'CONSULTATION_LOADING_ERROR', data: error});
+      yield put({ type: 'CONSULTATION_LOADING_ERROR', data: error });
     }
   }
 }
@@ -498,7 +509,10 @@ function* getAttendingProblem() {
         params: params
       }); //阻塞，请求后台数据
       if (data.success) {
-        yield put({ type: 'UPDATE_ATTENDING_PROBLEM', attendingProblemList: data.data });
+        yield put({
+          type: 'UPDATE_ATTENDING_PROBLEM',
+          attendingProblemList: data.data
+        });
       } else {
         console.log(data.errorMessage);
       }
@@ -507,7 +521,6 @@ function* getAttendingProblem() {
     }
   }
 }
-
 
 export default function* rootSaga() {
   yield fork(getClinicList);

@@ -14,7 +14,8 @@ const storageConfig = {
     'updateLogin',
     'updatePatient',
     'updateAppointment',
-    'updateConsultation'
+    'updateConsultation',
+    'updatePrescription'
   ] // reducer 里不持久化的数据
 };
 

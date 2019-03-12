@@ -25,6 +25,8 @@ import { withStyles } from '@material-ui/core/styles';
 import moment from 'moment';
 import Patient from '../compontent/patient';
 import Note from './note';
+import Prescription from './prescription';
+
 function mapStateToProps(state) {
   return {
     patientList: state.updatePatient.patientList,
@@ -110,8 +112,8 @@ class Consulatation extends Component {
       // date: '13 Mar 2019',
       attendanceList: this.props.attendanceList,
       value: '',
-      ifSelected: false,
-      tabValue: 0,
+      ifSelected: true,
+      tabValue: 1,
       patientId: null,
       rowsPerPage: 10,
       page: 0
@@ -236,6 +238,11 @@ class Consulatation extends Component {
             {this.state.tabValue === 0 && (
               <Note
                   patientId={this.state.patientId}
+                  close={this.closePatient}
+              />
+            )}
+            {this.state.tabValue === 1 && (
+              <Prescription
                   close={this.closePatient}
               />
             )}

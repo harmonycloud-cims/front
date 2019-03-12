@@ -204,7 +204,8 @@ const consultationState = {
   clinicNote: '',
   attendingProblemList: [],
   closeDialog: false,
-  consulationErrorMessage: ''
+  consulationErrorMessage: '',
+  openSearchProgress: false
 };
 const updateConsultation = (state = consultationState, action = {}) => {
   switch (action.type) {
@@ -224,6 +225,10 @@ const updateConsultation = (state = consultationState, action = {}) => {
       return { ...state, templateList: action.templateList };
     case 'UPDATE_CHRONICPROBLEMLIST':
       return { ...state, chronicProblemList: action.chronicProblemList };
+    case 'OPEN_SEARCH':
+      return { ...state, openSearchProgress: true };
+    case 'CLOSE_SEARCH':
+      return { ...state, openSearchProgress: false };
     case 'UPDATE_DIAGNOSIS_PROBLEM':
       return { ...state, diagnosisProblemList: action.diagnosisProblemList };
     case 'UPDATE_ENCOUNTERID':
@@ -244,13 +249,26 @@ const updateConsultation = (state = consultationState, action = {}) => {
       return state;
   }
 };
+const prescriptionState = {
+  searchDrugList: []
+};
+const updatePrescription = (state = prescriptionState, action = {}) => {
+  switch (action.type) {
+    case 'UPDATE_DRUG_LIST':
+      return { ...state, searchDrugList: action.data };
+    default:
+      return state;
+  }
+};
+
 const rootReducer = combineReducers({
   config: (state = {}) => state,
   updateUser,
   updateLogin,
   updatePatient,
   updateAppointment,
-  updateConsultation
+  updateConsultation,
+  updatePrescription
 });
 
 export default rootReducer;
