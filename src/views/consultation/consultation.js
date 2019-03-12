@@ -112,8 +112,8 @@ class Consulatation extends Component {
       // date: '13 Mar 2019',
       attendanceList: this.props.attendanceList,
       value: '',
-      ifSelected: true,
-      tabValue: 1,
+      ifSelected: false,
+      tabValue: 0,
       patientId: null,
       rowsPerPage: 10,
       page: 0
