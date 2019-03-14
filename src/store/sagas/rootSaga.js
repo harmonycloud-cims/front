@@ -142,6 +142,8 @@ function* doLogin() {
       let { data } = yield call(axios.post, '/user/login', params); //阻塞，请求后台数据
       if (data.success) {
         window.sessionStorage.setItem('token', data.data.token);
+        window.sessionStorage.setItem('user', params.loginname);
+        window.sessionStorage.setItem('clinic', params.clinicName);
         yield put({ type: 'UPDATE_LOGIN_USER', data }); //发起一个action，类似于dispatch
       } else {
         yield put({ type: 'LOGIN_ERROR', error: data.errorMessage });
@@ -166,6 +168,7 @@ function* logout() {
 
 function* fetchPatient(action) {
   try {
+    yield put({ type: 'OPEN_SEARCH' });
     let { data } = yield call(
       axios.post,
       '/patient/searchPatient',
@@ -173,6 +176,7 @@ function* fetchPatient(action) {
     ); //阻塞，请求后台数据
     if (data.success) {
       yield put({ type: 'PATIENTLIST', data: data.data });
+      yield put({ type: 'CLOSE_SEARCH' });
     } else {
       yield put({ type: 'PATIENTLIST', data: [] });
     }
@@ -204,11 +208,11 @@ function* getPatient() {
 function* updatePatient() {
   while (true) {
     let { params } = yield take('UPDATE_PATIENT');
-    yield put({ type: 'PATIENT_LOADING', data: true });
+    yield put({ type: 'PATIENT_LOADING', data: '' });
     try {
       let { data } = yield call(axios.post, '/patient/update', params); //阻塞，请求后台数据
       if (data.success) {
-        yield put({ type: 'PATIENT_LOADING', data: false });
+        yield put({ type: 'PATIENT_LOADING', data: data.data.msg });
       } else {
         yield put({ type: 'PATIENT_LOADING_ERROR', data: data.errorMessage });
       }
@@ -220,11 +224,11 @@ function* updatePatient() {
 function* savePatient() {
   while (true) {
     let { params } = yield take('REGISTER_PATIENT');
-    yield put({ type: 'PATIENT_LOADING', data: true });
+    yield put({ type: 'PATIENT_LOADING', data: '' });
     try {
       let { data } = yield call(axios.post, '/patient/register', params); //阻塞，请求后台数据
       if (data.success) {
-        yield put({ type: 'PATIENT_LOADING', data: false });
+        yield put({ type: 'PATIENT_LOADING', data: data.data.msg });
       } else {
         yield put({ type: 'PATIENT_LOADING_ERROR', data: data.errorMessage });
       }
@@ -543,6 +547,26 @@ function* getDepartmentFavourite() {
     }
   }
 }
+function* searchDrugList() {
+  while (true) {
+    let { params } = yield take('SEARCH_DRUG_LIST');
+    try {
+      let { data } = yield call(axios.get, '/drug/drugList', {
+        params: params
+      }); //阻塞，请求后台数据
+      if (data.success) {
+        yield put({
+          type: 'UPDATE_DRUG_LIST',
+          searchDrugList: data.data
+        });
+      } else {
+        console.log(data.errorMessage);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+}
 
 export default function* rootSaga() {
   yield fork(getClinicList);
@@ -583,4 +607,5 @@ export default function* rootSaga() {
   yield fork(updateConsultation);
 
   yield fork(getDepartmentFavourite);
+  yield fork(searchDrugList);
 }

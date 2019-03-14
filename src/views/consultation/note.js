@@ -348,16 +348,6 @@ class Note extends Component {
   save = () => {
     const patientId = this.props.patientId;
     const encounterId = this.props.encounter.encounterId;
-    // const attendingDiagnosisList = _.cloneDeep(this.state.attendingProblemList);
-    // const chronicDiagnosisList = _.cloneDeep(this.state.chronicProblemList);
-    // _.forEach(attendingDiagnosisList, item => {
-    //   item.encounterId = encounterId;
-    //   item.patientId = patientId;
-    // });
-    // _.forEach(chronicDiagnosisList, item => {
-    //   item.encounterId = encounterId;
-    //   item.patientId = patientId;
-    // });
     console.log(this.state.attendingProblemList);
     const attendingDiagnosisList = [];
     const chronicDiagnosisList = [];
@@ -566,16 +556,16 @@ class Note extends Component {
     this.setState({ chronicProblemList });
   };
   closeDialog = () => {
-    this.setState({ openDiag: false });
+    this.setState({ openDiag: false, isUpdate: true });
     this.props.dispatch({ type: 'CLOSE_CONSULTATION_LOADING' });
     // this.props.dispatch({ type: 'CLEAR_CONSULTATION_LOADING' });
-    // this.props.close();
+    this.props.close();
   };
   render() {
     const { classes } = this.props;
     return (
       <Grid container>
-        <Grid item xs={3} className={classes.left_warp}>
+        <Grid item xs={4} lg={3} className={classes.left_warp}>
           <Typography component="div" className={classes.title}>
             Medical Record
           </Typography>
@@ -637,7 +627,7 @@ class Note extends Component {
             Copy{' '}
           </Button>
         </Grid>
-        <Grid item xs={9}>
+        <Grid item xs={8} lg={9}>
           <FormGroup row className={classes.alert}>
             <FormControl className={classes.alert_left}>Alert</FormControl>
             <FormControl className={classes.alert_right}>

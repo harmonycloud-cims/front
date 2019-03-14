@@ -45,7 +45,6 @@ const updateUser = (state = initState, action = {}) => {
     case 'UPDATE_ROOM': {
       let roomList = action.roomList;
       _.forEach(roomList, item => (item.checked = true));
-      // console.log('roomlist', roomList);
       return { ...state, roomList };
     }
     case 'UPDATE_ALL_ROOM':
@@ -94,11 +93,11 @@ const updatePatient = (state = patientState, action = {}) => {
     case 'PATIENT_BY_ID':
       return { ...state, patientById: action.patientById };
     case 'PATIENT_LOADING':
-      return { ...state, patientLoading: action.data };
+      return { ...state, patientErrorMessage: action.data, patientLoading: true };
     case 'PATIENT_LOADING_ERROR':
       return { ...state, patientErrorMessage: action.data };
     case 'PATIENT_LOADING_ERROR_CLOSE':
-      return { ...state, patientLoading: false, patientErrorMessage: '' };
+      return { ...state, patientLoading: false };
     default:
       return state;
   }
@@ -258,9 +257,19 @@ const prescriptionState = {
 const updatePrescription = (state = prescriptionState, action = {}) => {
   switch (action.type) {
     case 'UPDATE_DRUG_LIST':
-      return { ...state, searchDrugList: action.data };
-    case 'UPDATE_DEPARTMENTAL_FAVOURITE':
-      return { ...state, departmentFavouriteList: action.data };
+      return { ...state, searchDrugList: action.searchDrugList };
+    case 'UPDATE_DEPARTMENTAL_FAVOURITE': {
+      let departmentFavouriteList = action.departmentFavouriteList;
+      if(departmentFavouriteList.length > 0) {
+        _.forEach(departmentFavouriteList, item => {
+          item.isCollapse = false;
+          _.forEach(item.drugFavouriteGroupDrugDtoList, eve => {
+            eve.checked = false;
+          });
+        });
+      }
+      return { ...state, departmentFavouriteList };
+    }
     default:
       return state;
   }

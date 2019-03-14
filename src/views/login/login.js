@@ -41,6 +41,7 @@ class Login extends Component {
   doLogin = e => {
     e.preventDefault();
     const params = {
+      clinicName: this.props.clinic.clinicName,
       clinicId: this.state.clinicId,
       loginname: this.state.loginname,
       password: this.state.password

@@ -15,6 +15,8 @@ axios.interceptors.request.use(
       config.headers.Authorization = `Bearer ${window.sessionStorage.getItem(
         'token'
       )}`;
+      config.headers.user = window.sessionStorage.getItem('user');
+      config.headers.clinic = window.sessionStorage.getItem('clinic');
     }
     return config;
   },

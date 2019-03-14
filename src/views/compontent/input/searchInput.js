@@ -6,12 +6,18 @@ import {
   Popper,
   MenuItem,
   Typography,
-  Divider
+  CircularProgress
 } from '@material-ui/core';
 import { Search } from '@material-ui/icons';
 import { withStyles } from '@material-ui/core/styles';
 import _ from 'lodash';
+import { connect } from 'react-redux';
 
+function mapStateToProps(state) {
+  return {
+    openSearchProgress: state.updateConsultation.openSearchProgress
+  };
+}
 const style = {
   root: {
     padding: '2px 4px',
@@ -32,20 +38,24 @@ const style = {
   },
   paper: {
     maxHeight: 200,
-    overflowY: 'auto',
     position: 'absolute',
     transform: 'translate3d(-180px, 3px, 0px)'
+  },
+  menu: {
+    maxHeight: 150,
+    overflowY: 'auto'
   },
   menu_list: {
     paddingTop: 0,
     fontSize: 14
   },
+  menu_list_select: {
+    paddingTop: 0,
+    fontSize: 14,
+    backgroundColor: 'rgba(0,0,0,0.1)'
+  },
   mr15: {
     marginRight: 15
-  },
-  menu: {
-    top: 38,
-    padding: 0
   }
 };
 class SearchInput extends Component {
@@ -54,13 +64,20 @@ class SearchInput extends Component {
     this.state = {
       open: false,
       value: '',
-      whichOpen: true
+      count: -1
     };
   }
+  UNSAFE_componentWillReceiveProps(nextProps) {
+    if (nextProps.patientList !== this.props.patientList) {
+      this.setState({ count: -1 });
+    }
+  }
+  // enter search
   search = () => {
     this.props.change(_.toUpper(this.state.value));
     this.setState({ open: true });
   };
+  // change search value
   handleToggle = e => {
     this.changeValue(e.target.value);
   };
@@ -73,34 +90,47 @@ class SearchInput extends Component {
     this.props.change(_.toUpper(value));
     this.setState({ value: value });
   };
+  // whichone choose
   handleClose = item => {
     this.props.selectPatient(item);
-    this.setState({ open: false });
+    this.setState({ open: false, value: '' });
   };
-  handleEnterKey = e => {
-    if (e.keyCode === 13) {
-      this.search();
+  // keyboard event
+  keyDown = e => {
+    let temp = _.cloneDeep(this.state.count);
+    let len = this.props.patientList.length; //patient count
+    if (e.keyCode === 40) {
+      if (temp > -2 && temp < len - 1) {
+        temp = temp + 1;
+      } else if (temp === len - 1) {
+        temp = -2;
+      } else {
+        temp = 0;
+      }
     }
-    // if (e.keyCode === 40) {
-    //   this.setState({ whichOpen: false });
-    // }
-  };
-  cancel = e => {
-    console.log(e.keyCode);
-    if (e.keyCode === 13) {
-      this.flag = false;
-      this.setState({ whichOpen: true, open: false });
-    } else if (
-      !(
-        e.keyCode === 37 ||
-        e.keyCode === 38 ||
-        e.keyCode === 39 ||
-        e.keyCode === 40
-      )
-    ) {
-      this.setState({ whichOpen: true });
-      this.changeValue(this.state.value + String.fromCharCode(e.keyCode));
+    if (e.keyCode === 38) {
+      if (temp > 0 && temp < len) {
+        temp = temp - 1;
+      } else if (temp === -1) {
+        temp = -2;
+      } else if (temp === 0) {
+        temp = -2;
+      } else {
+        temp = len - 1;
+      }
     }
+    if (e.keyCode === 13) {
+      if (temp === -2) {
+        this.handleClose({});
+        temp = -1;
+      } else if (temp === -1) {
+        temp = -1;
+      } else {
+        this.handleClose(this.props.patientList[temp]);
+        temp = -1;
+      }
+    }
+    this.setState({ count: temp });
   };
   render() {
     const { classes } = this.props;
@@ -114,7 +144,7 @@ class SearchInput extends Component {
             onChange={this.handleToggle}
             placeholder="Search by ID/ Name/ Phone"
             value={this.state.value}
-            onKeyUp={this.handleEnterKey}
+            onKeyDown={this.keyDown}
         />
         <IconButton
             onClick={this.search}
@@ -122,49 +152,50 @@ class SearchInput extends Component {
             aria-label="Search"
             color={'primary'}
         >
-          <Search />
+          {this.props.openSearchProgress ? (
+            <CircularProgress size={20} />
+          ) : (
+            <Search />
+          )}
         </IconButton>
-        {/*  this.state.whichOpen ? */}
         <Popper open={this.state.open} anchorEl={this.anchorel}>
           <Paper className={classes.paper}>
-            {this.props.patientList.map((item, index) => (
-              <MenuItem
-                  key={index}
-                  onClick={() => this.handleClose(item)}
-                  className={classes.menu_list}
-              >
-                <Typography component={'div'} className={classes.mr15}>
-                  {item.patient.englishSurname}, {item.patient.englishGivenName}
-                </Typography>
-                <Typography component={'div'}>
-                  {item.patient.mobilePhoneAreaCode}-{item.patient.mobilePhone}
-                </Typography>
-              </MenuItem>
-            ))}
-            <Divider />
+            <Typography id="testul" className={classes.menu}>
+              {this.props.patientList.map((item, index) => (
+                <MenuItem
+                    key={index}
+                    onClick={() => this.handleClose(item)}
+                    className={
+                    this.state.count === index
+                      ? classes.menu_list_select
+                      : classes.menu_list
+                  }
+                >
+                  <Typography component={'span'} className={classes.mr15}>
+                    {item.patient.englishSurname},{' '}
+                    {item.patient.englishGivenName}
+                  </Typography>
+                  <Typography component={'span'}>
+                    {item.patient.mobilePhoneAreaCode}-
+                    {item.patient.mobilePhone}
+                  </Typography>
+                </MenuItem>
+              ))}
+            </Typography>
             <MenuItem
                 onClick={() => this.handleClose({})}
-                className={classes.menu_list}
+                className={
+                this.state.count === -2
+                  ? classes.menu_list_select
+                  : classes.menu_list
+              }
             >
               Not Found
             </MenuItem>
           </Paper>
         </Popper>
-        {/*  :
-                    <Menu open={this.state.open} anchorEl={this.anchorel} className={classes.menu}>
-                        {
-                            this.props.patientList.map((item, index) =>
-                                <MenuItem key={index} onClick={() => this.handleClose(item)} className={classes.menu_list} onKeyUp={this.cancel}>
-                                    <Typography component={'div'} className={classes.mr15}>{item.patient.englishSurname}, {item.patient.englishGivenName}</Typography>
-                                    <Typography component={'div'} >{item.patient.mobilePhoneAreaCode}-{item.patient.mobilePhone}</Typography>
-                                </MenuItem>)
-                        }
-                        <Divider/>
-                        <MenuItem onClick={() => this.handleClose({})} className={classes.menu_list} onKeyUp={this.cancel}>Not Found</MenuItem>
-                    </Menu>
-                }  */}
       </Paper>
     );
   }
 }
-export default withStyles(style)(SearchInput);
+export default connect(mapStateToProps)(withStyles(style)(SearchInput));

@@ -15,16 +15,19 @@ import {
   CircularProgress,
   IconButton,
   Tabs,
-  Radio
+  Radio,
+  Checkbox
 } from '@material-ui/core';
 import {
   Search,
   RadioButtonUnchecked,
   RadioButtonChecked,
-  Add
-  // Remove
+  Add,
+  Remove,
+  RemoveCircle
 } from '@material-ui/icons';
 import { withStyles } from '@material-ui/core/styles';
+import _ from 'lodash';
 
 function mapStateToProps(state) {
   return {
@@ -41,7 +44,7 @@ const style = {
     borderRadius: '15px',
     border: '1px solid rgba(0,0,0,0.2)',
     height: 25,
-    width: 400,
+    width: 380,
     margin: '5px 10px 0 10px'
   },
   input: {
@@ -59,7 +62,7 @@ const style = {
     minHeight: 530
   },
   left_warp_tab: {
-    padding: 10,
+    padding: '10px 10px 0 10px',
     overflowY: 'auto'
   },
   left_warp_favourite_icon: {
@@ -67,7 +70,24 @@ const style = {
     height: '0.8em'
   },
   left_warp_favourite_ingredient: {
-    paddingLeft: 20
+    color: '#3f51b5',
+    paddingLeft: 15
+  },
+  department_favourite_item: {
+    marginBottom: 5
+  },
+  department_favourite_group: {
+    cursor: 'pointer'
+  },
+  department_favourite_check: {
+    display: 'inline',
+    padding: '0 5px 0 0',
+    color: 'rgba(0, 0, 0, 0.2)'
+  },
+  department_favourite_item_detail: {
+    width: 'calc(100% - 40px)',
+    wordBreak: 'break-all',
+    fontSize: 13
   },
   right_warp: {
     padding: 20
@@ -121,218 +141,19 @@ const style = {
     minHeight: 347,
     marginBottom: 20,
     overflowY: 'auto'
+  },
+  medicine_item: {
+    padding: '10px 20px',
+    borderBottom: '1px solid rgba(0, 0, 0, 0.2)',
+    color: '#3f51b5'
+  },
+  medicine_icon: {
+    width: 15,
+    height: 15,
+    verticalAlign: 'middle',
+    padding: '2px 5px 0 0'
   }
 };
-const data = [
-  {
-    drugFavouriteGroupId: 1,
-    groupName: 'Decease 1',
-    drugFavouriteGroupDrugDtoList: [
-      {
-        drugFavGrpDrugId: 1,
-        drugId: 1,
-        ingredient: 'paracetamol',
-        tradeName: 'Dhamol',
-        regimenLine: '  8 week(s)'
-      }
-    ]
-  },
-  {
-    drugFavouriteGroupId: 2,
-    groupName: 'Decease 2',
-    drugFavouriteGroupDrugDtoList: [
-      {
-        drugFavGrpDrugId: 2,
-        drugId: 2,
-        ingredient: 'chloramphenicol',
-        tradeName: 'chloramphenicol (Martindale)',
-        regimenLine: ' as directed  '
-      }
-    ]
-  },
-  {
-    drugFavouriteGroupId: 3,
-    groupName: 'Decease 3',
-    drugFavouriteGroupDrugDtoList: [
-      {
-        drugFavGrpDrugId: 3,
-        drugId: 3,
-        ingredient: 'Bacillus Calmette Guerin (live attenuated) vaccine',
-        tradeName: 'BCG Vaccine SSI',
-        regimenLine: ' as directed 4 week(s)'
-      }
-    ]
-  },
-  {
-    drugFavouriteGroupId: 4,
-    groupName: 'Decease 4',
-    drugFavouriteGroupDrugDtoList: [
-      {
-        drugFavGrpDrugId: 5,
-        drugId: 5,
-        ingredient: 'diflucortolone valerate + isoconazole nitrate',
-        tradeName: 'Travocort',
-        regimenLine: ' at night  '
-      }
-    ]
-  },
-  {
-    drugFavouriteGroupId: 5,
-    groupName: 'Decease 5',
-    drugFavouriteGroupDrugDtoList: [
-      {
-        drugFavGrpDrugId: 4,
-        drugId: 4,
-        ingredient: 'ampicillin (as sodium)',
-        tradeName: 'ampicillin (as sodium) (Shijiazhuang)',
-        regimenLine: ' as directed 6 week(s)'
-      }
-    ]
-  },
-  {
-    drugFavouriteGroupId: 6,
-    groupName: 'Decease 6',
-    drugFavouriteGroupDrugDtoList: [
-      {
-        drugFavGrpDrugId: 6,
-        drugId: 1,
-        ingredient: 'paracetamol',
-        tradeName: 'Dhamol',
-        regimenLine: ' at night 1 week(s)'
-      }
-    ]
-  },
-  {
-    drugFavouriteGroupId: 7,
-    groupName: 'Decease 7',
-    drugFavouriteGroupDrugDtoList: [
-      {
-        drugFavGrpDrugId: 7,
-        drugId: 1,
-        ingredient: 'paracetamol',
-        tradeName: 'Dhamol',
-        regimenLine: ' at night 2 week(s)'
-      }
-    ]
-  },
-  {
-    drugFavouriteGroupId: 8,
-    groupName: 'Decease 8',
-    drugFavouriteGroupDrugDtoList: [
-      {
-        drugFavGrpDrugId: 8,
-        drugId: 1,
-        ingredient: 'paracetamol',
-        tradeName: 'Dhamol',
-        regimenLine: ' at night 3 day(s)'
-      }
-    ]
-  },
-  {
-    drugFavouriteGroupId: 9,
-    groupName: 'Decease 9',
-    drugFavouriteGroupDrugDtoList: [
-      {
-        drugFavGrpDrugId: 9,
-        drugId: 1,
-        ingredient: 'paracetamol',
-        tradeName: 'Dhamol',
-        regimenLine: ' at night 4 day(s)'
-      }
-    ]
-  },
-  {
-    drugFavouriteGroupId: 10,
-    groupName: 'Decease 10',
-    drugFavouriteGroupDrugDtoList: [
-      {
-        drugFavGrpDrugId: 10,
-        drugId: 1,
-        ingredient: 'paracetamol',
-        tradeName: 'Dhamol',
-        regimenLine: ' at night 5 day(s)'
-      }
-    ]
-  },
-  {
-    drugFavouriteGroupId: 11,
-    groupName: 'Decease 11',
-    drugFavouriteGroupDrugDtoList: [
-      {
-        drugFavGrpDrugId: 11,
-        drugId: 1,
-        ingredient: 'paracetamol',
-        tradeName: 'Dhamol',
-        regimenLine: ' at night 7 day(s)'
-      }
-    ]
-  },
-  {
-    drugFavouriteGroupId: 12,
-    groupName: 'Decease 12',
-    drugFavouriteGroupDrugDtoList: [
-      {
-        drugFavGrpDrugId: 12,
-        drugId: 1,
-        ingredient: 'paracetamol',
-        tradeName: 'Dhamol',
-        regimenLine: ' at once  '
-      }
-    ]
-  },
-  {
-    drugFavouriteGroupId: 13,
-    groupName: 'Decease 13',
-    drugFavouriteGroupDrugDtoList: [
-      {
-        drugFavGrpDrugId: 13,
-        drugId: 1,
-        ingredient: 'paracetamol',
-        tradeName: 'Dhamol',
-        regimenLine: ' at once 1 dose(s)'
-      }
-    ]
-  },
-  {
-    drugFavouriteGroupId: 14,
-    groupName: 'Decease 14',
-    drugFavouriteGroupDrugDtoList: [
-      {
-        drugFavGrpDrugId: 14,
-        drugId: 1,
-        ingredient: 'paracetamol',
-        tradeName: 'Dhamol',
-        regimenLine: ' daily  '
-      }
-    ]
-  },
-  {
-    drugFavouriteGroupId: 15,
-    groupName: 'Decease 15',
-    drugFavouriteGroupDrugDtoList: [
-      {
-        drugFavGrpDrugId: 15,
-        drugId: 1,
-        ingredient: 'paracetamol',
-        tradeName: 'Dhamol',
-        regimenLine: ' daily 1 week(s)'
-      }
-    ]
-  },
-  {
-    drugFavouriteGroupId: 16,
-    groupName: 'Decease 16',
-    drugFavouriteGroupDrugDtoList: [
-      {
-        drugFavGrpDrugId: 16,
-        drugId: 1,
-        ingredient: 'paracetamol',
-        tradeName: 'Dhamol',
-        regimenLine: ' daily 14 day(s)'
-      }
-    ]
-  }
-];
 class Prescription extends Component {
   constructor(props) {
     super(props);
@@ -340,21 +161,51 @@ class Prescription extends Component {
       tabValue: 0,
       open: false,
       value: '',
-      grade: 'adult'
+      grade: 'adult',
+      showDepartmentFavouriteList: this.props.departmentFavouriteList,
+      medicineList: []
     };
   }
-  // componentDidMount() {
-  //   this.initData();
-  // }
-  // initData = () => {
-  //   const params = {
-  //     clinicId: this.props.clinic.clinicId
-  //   };
-  //   this.props.dispatch({ type: 'GET_DEPARTMENTAL_FAVOURITE', params });
-  // };
-  copy = () => {
-    console.log('copy');
+  componentDidMount() {
+    this.initData();
+    this.searchDrugList();
+  }
+  UNSAFE_componentWillReceiveProps(nextProps) {
+    if (
+      nextProps.departmentFavouriteList !== this.props.departmentFavouriteList
+    ) {
+      this.setState({
+        showDepartmentFavouriteList: nextProps.departmentFavouriteList
+      });
+    }
+  }
+  initData = () => {
+    const params = {
+      clinicId: this.props.clinic.clinicId
+    };
+    this.props.dispatch({ type: 'GET_DEPARTMENTAL_FAVOURITE', params });
   };
+  searchDrugList = () => {
+    const params = {
+      keyword: 'chloramphenicol'
+    };
+    this.props.dispatch({ type: 'SEARCH_DRUG_LIST', params });
+  };
+
+  collapseIngredient = id => {
+    let departmentFavouriteList = _.cloneDeep(
+      this.state.showDepartmentFavouriteList
+    );
+    let departmentFavourite = _.find(departmentFavouriteList, item => {
+      return item.drugFavouriteGroupId === id;
+    });
+    departmentFavourite.isCollapse = !departmentFavourite.isCollapse;
+    _.forEach(departmentFavourite.drugFavouriteGroupDrugDtoList, item => {
+      item.checked = !item.checked;
+    });
+    this.setState({ showDepartmentFavouriteList: departmentFavouriteList });
+  };
+
   save = () => {
     this.setState({ openDiag: true });
   };
@@ -362,6 +213,68 @@ class Prescription extends Component {
     this.setState({ isUpdate: false });
     this.props.close();
   };
+  // 'drag and drop' add medicine
+  drag = (e, id) => {
+    e.dataTransfer.setData('drugFavouriteGroupId', id);
+  };
+  allowDrag = e => {
+    console.log('all');
+    e.preventDefault();
+  };
+  drop = e => {
+    console.log('drop');
+    e.preventDefault();
+    let departmentFavouriteList = _.cloneDeep(
+      this.state.showDepartmentFavouriteList
+    );
+    let medicineList = _.cloneDeep(this.state.medicineList);
+    let id = e.dataTransfer.getData('drugFavouriteGroupId');
+    let departmentFavourite = _.find(departmentFavouriteList, item => {
+      return item.drugFavouriteGroupId === parseInt(id, 10);
+    });
+    departmentFavourite.isCollapse = true;
+    _.forEach(departmentFavourite.drugFavouriteGroupDrugDtoList, item => {
+      item.checked = true;
+      if (
+        !_.find(medicineList, eve => {
+          return item.drugId === eve.drugId;
+        })
+      ) {
+        medicineList.push(item);
+      }
+    });
+    this.setState({
+      showDepartmentFavouriteList: departmentFavouriteList,
+      medicineList
+    });
+  };
+  // click ‘copy’ to add medicine
+  clickCheckbox = (groupId, drugId) => {
+    let departmentFavouriteList = _.cloneDeep(
+      this.state.showDepartmentFavouriteList
+    );
+    let departmentFavourite = _.find(departmentFavouriteList, item => {
+      return item.drugFavouriteGroupId === groupId;
+    });
+    if (departmentFavourite.drugFavouriteGroupDrugDtoList) {
+      let drug = _.find(
+        departmentFavourite.drugFavouriteGroupDrugDtoList,
+        item => {
+          return item.drugId === drugId;
+        }
+      );
+      if (drug) {
+        drug.checked = !drug.checked;
+      }
+    }
+    this.setState({ showDepartmentFavouriteList: departmentFavouriteList });
+  };
+  copy = () => {
+    console.log('copy');
+  };
+  removeMedicine = () => {
+    console.log('1234');
+  }
   render() {
     const { classes } = this.props;
     return (
@@ -378,7 +291,7 @@ class Prescription extends Component {
             </FormControl>
           </FormGroup>
         </Grid>
-        <Grid item xs={3} className={classes.left_warp}>
+        <Grid item xs={4} lg={3} className={classes.left_warp}>
           <Typography component="div" className={classes.table}>
             <Tabs
                 value={this.state.tabValue}
@@ -386,33 +299,87 @@ class Prescription extends Component {
                 indicatorColor={'primary'}
                 textColor={'primary'}
             >
-              <Tab label="Departmental Favourite" style={{ width: 80 }} />
-              <Tab label="Drug Histiry" style={{ width: 80 }} />
+              <Tab
+                  label="Departmental Favourite"
+                  style={{ minWidth: 140, width: 140 }}
+              />
+              <Tab label="Drug Histiry" style={{ minWidth: 140, width: 140 }} />
             </Tabs>
             {this.state.tabValue === 0 && (
               <Typography component="div" className={classes.left_warp_tab}>
-                {/* {this.props.departmentFavouriteList.length > 0
-                  ? this.props.departmentFavouriteList.map((item, index) => ( */}
-                {data.length > 0
-                  ? data.map((item, index) => (
-                      <Typography component="div" key={index}>
-                        <FormGroup row>
-                          <Add
-                              color="primary"
-                              size="small"
-                              className={classes.left_warp_favourite_icon}
-                          />
-                          <Typography>{item.groupName}</Typography>
-                        </FormGroup>
-                        {item.drugFavouriteGroupDrugDtoList.map(eve => (
+                {this.state.showDepartmentFavouriteList.length > 0
+                  ? this.state.showDepartmentFavouriteList.map(item => (
+                      <Typography
+                          component="div"
+                          key={item.drugFavouriteGroupId}
+                          className={classes.department_favourite_item}
+                          draggable="true"
+                          onDragStart={(...arg) =>
+                          this.drag(...arg, item.drugFavouriteGroupId)
+                        }
+                      >
+                        <FormGroup
+                            row
+                            className={classes.department_favourite_group}
+                            onClick={() =>
+                            this.collapseIngredient(item.drugFavouriteGroupId)
+                          }
+                        >
+                          {item.isCollapse ? (
+                            <Remove
+                                color="primary"
+                                size="small"
+                                className={classes.left_warp_favourite_icon}
+                            />
+                          ) : (
+                            <Add
+                                color="primary"
+                                size="small"
+                                className={classes.left_warp_favourite_icon}
+                            />
+                          )}
                           <Typography
-                              key={eve.drugId}
-                              component="div"
-                              className={classes.left_warp_favourite_ingredient}
+                              style={{
+                              color: item.isCollapse ? '#3f51b5' : 'black'
+                            }}
                           >
-                            {eve.tradeName}
+                            {item.groupName}
                           </Typography>
-                        ))}
+                        </FormGroup>
+                        {item.isCollapse
+                          ? item.drugFavouriteGroupDrugDtoList.map(eve => (
+                              <FormGroup
+                                  key={eve.drugId}
+                                  row
+                                  className={
+                                  classes.left_warp_favourite_ingredient
+                                }
+                              >
+                                <Checkbox
+                                    className={classes.department_favourite_check}
+                                    checked={eve.checked || false}
+                                    color="default"
+                                    value={`${eve.drugId}${eve.tradeName}`}
+                                    onClick={() =>
+                                    this.clickCheckbox(
+                                      item.drugFavouriteGroupId,
+                                      eve.drugId
+                                    )
+                                  }
+                                />
+                                <Typography
+                                    component="div"
+                                    color="primary"
+                                    className={
+                                    classes.department_favourite_item_detail
+                                  }
+                                >
+                                  {eve.tradeName}({eve.ingredient}) inj -<br />
+                                  {eve.regimenLine}
+                                </Typography>
+                              </FormGroup>
+                            ))
+                          : null}
                       </Typography>
                     ))
                   : null}
@@ -435,7 +402,7 @@ class Prescription extends Component {
             Copy{' '}
           </Button>
         </Grid>
-        <Grid item xs={9}>
+        <Grid item xs={8} lg={9}>
           <Typography component="div" className={classes.right_warp}>
             <FormGroup row className={classes.right_warp_search}>
               <Typography className={classes.search_title}>
@@ -528,7 +495,30 @@ class Prescription extends Component {
             <Typography
                 component="div"
                 className={classes.prescription_table}
-            />
+                onDragOver={this.allowDrag}
+                onDrop={(...arg) => this.drop(...arg)}
+            >
+              {this.state.medicineList.map(item => (
+                <FormGroup
+                    key={item.drugId}
+                    row
+                    className={classes.medicine_item}
+                >
+                  <RemoveCircle className={classes.medicine_icon} onClick={() => this.removeMedicine}/>
+                  <Typography
+                      component="div"
+                      color="primary"
+                      className={classes.department_favourite_item_detail}
+                  >
+                  <FormGroup row>
+                    <Typography component="span" style={{fontWeight: 600}}>{item.tradeName} </Typography>
+                    <Typography component="span" style={{color: 'rgba(0,0,0,0.6)'}}>({item.ingredient}) inj -</Typography>
+                  </FormGroup>
+                  <Typography component="div" style={{color: 'rgba(0,0,0,0.6)'}}>{item.regimenLine}</Typography>
+                  </Typography>
+                </FormGroup>
+              ))}
+            </Typography>
             <Button
                 className={classes.button}
                 variant="outlined"

@@ -51,7 +51,7 @@ class CommonHeader extends Component {
     this.props.dispatch({ type: 'REFRESH_TOKEN' });
     let timer = setInterval(() => {
       this.props.dispatch({ type: 'REFRESH_TOKEN' });
-    }, 14 * 60000);
+    }, 13 * 60000);
     this.setState({ timer });
   }
   UNSAFE_componentWillReceiveProps(nextProps) {

@@ -187,6 +187,7 @@ class Consulatation extends Component {
   };
   closePatient = () => {
     this.setState({ patient: {}, ifSelected: false, patientId: null });
+    this.initData();
   };
   // 快捷搜索
   handleToggle = e => {

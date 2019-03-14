@@ -30,6 +30,7 @@ import {
   districtList
 } from '../../services/staticData';
 import moment from 'moment';
+import { InlineDatePicker } from 'material-ui-pickers';
 
 const style = {
   grid: {
@@ -99,17 +100,6 @@ class Register extends Component {
       name === 'documentNumber'
     ) {
       patient[name] = _.toUpper(e.target.value);
-    } else if (name === 'dateOfBirth') {
-      if (
-        window.navigator.userAgent.indexOf('Safari') > -1 &&
-        window.navigator.userAgent.indexOf('Chrome') < 0
-      ) {
-        patient[name] = e.target.value;
-      } else {
-        patient[name] = moment(e.target.value, 'YYYY-MM-DD').format(
-          'DD MMM YYYY'
-        );
-      }
     } else {
       patient[name] = e.target.value;
     }
@@ -223,7 +213,11 @@ class Register extends Component {
       this.props.dispatch({ type: 'CLOSE_PATIENT_LOADING' })
     );
   };
-
+  date = e => {
+    let { patient } = this.state;
+    patient['dateOfBirth'] = moment(e._d).format('DD MMM YYYY');
+    this.setState({ patient });
+  };
   render() {
     const { classes } = this.props;
     const basicInputs = [
@@ -335,38 +329,39 @@ class Register extends Component {
               <div>
                 Date of Birth<span style={{ color: 'red' }}>*</span>
               </div>
-              <InputBase
-                  type={'date'}
-                  className={classes.form_input}
-                  value={
-                  window.navigator.userAgent.indexOf('Safari') > -1 &&
-                  window.navigator.userAgent.indexOf('Chrome') < 0
-                    ? this.state.patient.dateOfBirth
-                    : moment(
-                        this.state.patient.dateOfBirth,
-                        'DD MMM YYYY'
-                      ).format('YYYY-MM-DD')
-                }
-                  onChange={(...arg) =>
-                  this.changeInformation(...arg, 'dateOfBirth')
-                }
+              <InlineDatePicker
+                  className={'select_input'}
+                  style={{ marginLeft: 10 }}
+                  mask={value =>
+                    value
+                      ? [
+                          /\d/,
+                          /\d/,
+                          ' ',
+                          /[A-Z]/,
+                          /[a-z]/,
+                          /[a-z]/,
+                          ' ',
+                          /\d/,
+                          /\d/,
+                          /\d/,
+                          /\d/
+                        ]
+                      : []
+                  }
+                  disableOpenOnEnter
+                  format={'DD MMM YYYY'}
+                  placeholder={'DD MMM YYYY'}
+                  keyboard
+                  invalidDateMessage={'輸入的日期無效'}
+                  maxDate={new Date()}
+                  value={moment(this.state.patient.dateOfBirth, 'DD MMM YYYY')}
+                  onChange={this.date}
+                  // onInputChange={(...arg) =>
+                  //   this.changeInformation(...arg, 'dateOfBirth')
+                  // }
               />
-              {window.navigator.userAgent.indexOf('Safari') > -1 &&
-              window.navigator.userAgent.indexOf('Chrome') < 0 ? null : (
-                <InputBase
-                    value={this.state.patient.dateOfBirth}
-                    className={classes.cover}
-                />
-              )}
             </div>
-            {/* <InlineDatePicker
-                {...CONST.PROPS.VALID_DATE_RANGE}
-                clearable
-                value={this.state.patient.dateOfBirth}
-                onChange={(...arg) =>
-                  this.changeInformation(...arg, 'dateOfBirth')
-                }
-            /> */}
             <div className={styles.form50}>
               <div>Sex</div>
               <RadioGroup
