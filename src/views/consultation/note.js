@@ -154,13 +154,18 @@ const style = {
     height: 31
   },
   paper: {
-    maxHeight: 250,
+    maxHeight: 200,
     transform: 'translate3d(18px, 0px, 0px)',
     width: 380
   },
   menu_all_list: {
-    maxHeight: 200,
+    maxHeight: 150,
     overflowY: 'auto'
+  },
+  menu_list_select: {
+    paddingTop: 0,
+    fontSize: 14,
+    backgroundColor: 'rgba(0,0,0,0.1)'
   },
   menu_list: {
     paddingTop: 0,
@@ -229,38 +234,12 @@ class Note extends Component {
       selectDiagnosis: {},
       ifTransfer: 0, //0表示attending Problem 和chronicProblem不能互相copy，1.attending->chronic, 2.chronic->attending
       isUpdate: false,
-      openDiag: false
+      openDiag: false,
+      count: -1
     };
   }
   componentDidMount() {
-    if (this.props.medicalRecordList.length > 0) {
-      this.setState({ medicalRecord: this.props.medicalRecordList[0] });
-    }
-    let templateList = _.cloneDeep(this.props.templateList);
-    if (templateList.length > 0) {
-      _.forEach(templateList, item => {
-        item.checked = false;
-      });
-      this.setState({ templateList });
-    }
-    if (this.props.clinicNote) {
-      let clinicalNotes = '';
-      if (this.props.clinicNote.noteContent) {
-        clinicalNotes = _.cloneDeep(this.props.clinicNote.noteContent);
-      }
-      this.setState({
-        clinicalNotes,
-        clinicalNotesOrigin: clinicalNotes,
-        isUpdate: true
-      });
-    }
-    if (this.props.attendingProblemList) {
-      let attendingProblemList = _.cloneDeep(this.props.attendingProblemList);
-      this.setState({
-        attendingProblemList,
-        attendingProblemListOrigin: attendingProblemList
-      });
-    }
+    this.initData();
   }
   UNSAFE_componentWillReceiveProps(nextProps) {
     // medicalRecordList记录
@@ -325,6 +304,18 @@ class Note extends Component {
       });
     }
   }
+  initData = () => {
+    const { appointmentSelect } = this.props;
+    const patientId = appointmentSelect.patientId;
+    const params = { patientId };
+    const params1 = { clinicId: appointmentSelect.clinicId };
+    const params2 = { appointmentId: appointmentSelect.appointmentId };
+    this.props.dispatch({ type: 'GET_PATINET_BY_ID', params });
+    this.props.dispatch({ type: 'GET_MEDICAL_RECORD', params });
+    this.props.dispatch({ type: 'GET_TEMPLATE', params: params1 });
+    this.props.dispatch({ type: 'GET_CHRONICPROBLEM', params });
+    this.props.dispatch({ type: 'GET_ENCOUNTERID', params: params2 });
+  }
   changeCheck = (e, checked, item) => {
     let templateList = _.cloneDeep(this.state.templateList);
     let clinicalNotes = '';
@@ -346,9 +337,8 @@ class Note extends Component {
     this.setState({ clinicalNotes: e.target.value });
   };
   save = () => {
-    const patientId = this.props.patientId;
+    const patientId = this.props.appointmentSelect.patientId;
     const encounterId = this.props.encounter.encounterId;
-    console.log(this.state.attendingProblemList);
     const attendingDiagnosisList = [];
     const chronicDiagnosisList = [];
     const clinicalNote = {
@@ -440,7 +430,7 @@ class Note extends Component {
   };
   /* Problems */
   changeSearchValue = e => {
-    this.setState({ searchValue: e.target.value });
+    this.setState({ searchValue: e.target.value, count: -1 });
     if (e.target.value !== '') {
       if (e.target.value.length > 3) {
         const params = {
@@ -462,9 +452,55 @@ class Note extends Component {
       this.setState({ open: true });
     }
   }
-  handleEnterKey = e => {
-    if (e.keyCode === 13) {
-      this.searchDiagnosisProblem();
+  keyDown = e => {
+    if(this.state.open) {
+      let temp = _.cloneDeep(this.state.count);
+      let len = this.props.diagnosisProblemList.length; //patient count
+      if (e.keyCode === 40) {
+        if (temp > -2 && temp < len - 1) {
+          temp = temp + 1;
+        } else if (temp === len - 1) {
+          temp = -2;
+        } else {
+          temp = 0;
+        }
+      }
+      if (e.keyCode === 38) {
+        if (temp > 0 && temp < len) {
+          temp = temp - 1;
+        } else if (temp === -1) {
+          temp = -2;
+        } else if (temp === 0) {
+          temp = -2;
+        } else {
+          temp = len - 1;
+        }
+      }
+      if (e.keyCode === 13) {
+        if(this.state.count === -1) {
+          this.searchDiagnosisProblem();
+        } else {
+          if (temp === -2) {
+            this.handleClose({});
+            temp = -1;
+          } else if (temp === -1) {
+            temp = -1;
+          } else {
+            this.handleClose(this.props.diagnosisProblemList[temp]);
+            temp = -1;
+          }
+        }
+      }
+      if(temp > 3) {
+        document.getElementById('myInput').scrollTop = (temp-3)*35;
+      } else if (temp > 0 && temp <= 3){
+        document.getElementById('myInput').scrollTop = 0;
+      }
+      this.setState({ count: temp });
+    } else {
+      if (e.keyCode === 13) {
+        this.searchDiagnosisProblem();
+      }
     }
   };
   handleClose = item => {
@@ -556,10 +592,10 @@ class Note extends Component {
     this.setState({ chronicProblemList });
   };
   closeDialog = () => {
-    this.setState({ openDiag: false, isUpdate: true });
+    this.setState({ openDiag: false, isUpdate: true }, () => this.initData());
     this.props.dispatch({ type: 'CLOSE_CONSULTATION_LOADING' });
     // this.props.dispatch({ type: 'CLEAR_CONSULTATION_LOADING' });
-    this.props.close();
+    // this.props.close();
   };
   render() {
     const { classes } = this.props;
@@ -655,8 +691,7 @@ class Note extends Component {
                       inputRef={node => {
                       this.anchorel = node;
                     }}
-                      onKeyUp={this.handleEnterKey}
-                    // onBlur={() => this.handleClose({})}
+                      onKeyDown={this.keyDown}
                   />
                   <IconButton
                       onClick={this.searchDiagnosisProblem}
@@ -673,12 +708,14 @@ class Note extends Component {
                       <Typography
                           component="div"
                           className={classes.menu_all_list}
+                          ref="myInput"
+                          id="myInput"
                       >
                         {this.props.diagnosisProblemList.map((item, index) => (
                           <MenuItem
                               key={index}
                               onClick={() => this.handleClose(item)}
-                              className={classes.menu_list}
+                              className={this.state.count === index ? classes.menu_list_select : classes.menu_list}
                               title={item.diagnosisDescription}
                           >
                             <Typography
@@ -693,7 +730,11 @@ class Note extends Component {
                       <Divider />
                       <MenuItem
                           onClick={() => this.handleClose({})}
-                          className={classes.menu_list}
+                          className={
+                            this.state.count === -2
+                              ? classes.menu_list_select
+                              : classes.menu_list
+                          }
                       >
                         Not Found
                       </MenuItem>

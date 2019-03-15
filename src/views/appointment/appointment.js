@@ -28,6 +28,7 @@ import { ChevronRight, ChevronLeft, Warning } from '@material-ui/icons';
 import Patient from '../compontent/patient';
 import moment from 'moment';
 import { caluDate } from '../../services/utils';
+import { InlineDatePicker } from 'material-ui-pickers';
 
 function mapStateToProps(state) {
   return {
@@ -251,19 +252,7 @@ class Appointment extends Component {
     this.setState({ room });
   };
   changeDateTime = (e, name) => {
-    if (name === 'date') {
-      if (
-        window.navigator.userAgent.indexOf('Safari') > -1 &&
-        window.navigator.userAgent.indexOf('Chrome') < 0
-      ) {
-        this.setState({ date: e.target.value });
-      } else {
-        let value = moment(e.target.value, 'YYYY-MM-DD').format('DD MMM YYYY');
-        this.setState({ date: value });
-      }
-    } else {
-      this.setState({ [name]: e.target.value });
-    }
+    this.setState({ [name]: e.target.value });
   };
 
   /* 搜索patient */
@@ -323,7 +312,9 @@ class Appointment extends Component {
       this.props.dispatch({ type: 'BOOK_COMPARE_CLOSE' })
     );
   };
-
+  changeDate = e => {
+    this.setState({ date: moment(e._d).format('DD MMM YYYY') });
+  };
   render() {
     const { classes } = this.props;
     return (
@@ -476,33 +467,37 @@ class Appointment extends Component {
                       </Grid>
                       <Grid item xs={6}>
                         <Typography component={'div'}>Date/Time</Typography>
-                        <InputBase
-                            style={{ width: 130 }}
-                            type={'date'}
+                        <InlineDatePicker
                             className={'phone_select_input'}
-                            value={
-                            window.navigator.userAgent.indexOf('Safari') > -1 &&
-                            window.navigator.userAgent.indexOf('Chrome') < 0
-                              ? this.state.date
-                              : moment(this.state.date, 'DD MMM YYYY').format(
-                                  'YYYY-MM-DD'
-                                )
+                            style={{ marginLeft: 10, width: 180 }}
+                            mask={value =>
+                            value
+                              ? [
+                                  /\d/,
+                                  /\d/,
+                                  ' ',
+                                  /[A-Z]/,
+                                  /[a-z]/,
+                                  /[a-z]/,
+                                  ' ',
+                                  /\d/,
+                                  /\d/,
+                                  /\d/,
+                                  /\d/
+                                ]
+                              : []
                           }
-                            min={moment(new Date().getTime()).format(
-                            'YYYY-MM-DD'
-                          )}
-                            onChange={(...arg) =>
-                            this.changeDateTime(...arg, 'date')
-                          }
+                            disableOpenOnEnter
+                            format={'DD MMM YYYY'}
+                            placeholder={'DD MMM YYYY'}
+                            variant={'outlined'}
+                            keyboard
+                            invalidDateMessage={'輸入的日期無效'}
+                            minDateMessage={'請選擇正確的日期'}
+                            minDate={new Date()}
+                            value={moment(this.state.date, 'DD MMM YYYY')}
+                            onChange={this.changeDate}
                         />
-                        {window.navigator.userAgent.indexOf('Safari') > -1 &&
-                        window.navigator.userAgent.indexOf('Chrome') <
-                          0 ? null : (
-                          <InputBase
-                              value={this.state.date}
-                              className={classes.cover}
-                          />
-                        )}
                         <InputBase
                             style={{ width: 120 }}
                             type={'time'}

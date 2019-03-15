@@ -26,6 +26,7 @@ import moment from 'moment';
 import Patient from '../compontent/patient';
 import Note from './note';
 import Prescription from './prescription';
+import { InlineDatePicker } from 'material-ui-pickers';
 
 function mapStateToProps(state) {
   return {
@@ -58,16 +59,6 @@ const style = {
     fontWeight: 600,
     color: 'rgba(0, 0, 0, 0.7)',
     padding: '0, 0, 0, 10'
-  },
-  cover: {
-    top: 54,
-    position: 'absolute',
-    backgroundColor: '#fff',
-    width: 100,
-    fontSize: 14,
-    left: 38,
-    height: 20,
-    padding: '2px 0 0 0'
   },
   input: {
     marginLeft: 8,
@@ -114,7 +105,7 @@ class Consulatation extends Component {
       value: '',
       ifSelected: false,
       tabValue: 0,
-      patientId: null,
+      appointmentSelect: {},
       rowsPerPage: 10,
       page: 0
     };
@@ -152,15 +143,9 @@ class Consulatation extends Component {
 
   /* select页面 */
   changeDate = e => {
-    if (
-      window.navigator.userAgent.indexOf('Safari') > -1 &&
-      window.navigator.userAgent.indexOf('Chrome') < 0
-    ) {
-      this.setState({ date: e.target.value }, () => this.initData());
-    } else {
-      let value = moment(e.target.value, 'YYYY-MM-DD').format('DD MMM YYYY');
-      this.setState({ date: value }, () => this.initData());
-    }
+    this.setState({ date: moment(e._d).format('DD MMM YYYY') }, () =>
+      this.initData()
+    );
   };
   changeAttendanceStatus = (e, checked) => {
     if (checked) {
@@ -169,24 +154,16 @@ class Consulatation extends Component {
       );
     }
   };
+  // change room
   changeInformation = (e, name) => {
     this.setState({ [name]: e.target.value }, () => this.initData());
   };
   // select patient
   select = item => {
-    const patientId = item.patientId;
-    const params = { patientId };
-    const params1 = { clinicId: item.clinicId };
-    const params2 = { appointmentId: item.appointmentId };
-    this.props.dispatch({ type: 'GET_PATINET_BY_ID', params });
-    this.props.dispatch({ type: 'GET_MEDICAL_RECORD', params });
-    this.props.dispatch({ type: 'GET_TEMPLATE', params: params1 });
-    this.props.dispatch({ type: 'GET_CHRONICPROBLEM', params });
-    this.props.dispatch({ type: 'GET_ENCOUNTERID', params: params2 });
-    this.setState({ ifSelected: true, tabValue: 0, patientId });
+    this.setState({ ifSelected: true, tabValue: 0, appointmentSelect: item });
   };
   closePatient = () => {
-    this.setState({ patient: {}, ifSelected: false, patientId: null });
+    this.setState({ patient: {}, ifSelected: false, appointmentSelect: {} });
     this.initData();
   };
   // 快捷搜索
@@ -238,14 +215,12 @@ class Consulatation extends Component {
             </Tabs>
             {this.state.tabValue === 0 && (
               <Note
-                  patientId={this.state.patientId}
+                  appointmentSelect={this.state.appointmentSelect}
                   close={this.closePatient}
               />
             )}
             {this.state.tabValue === 1 && (
-              <Prescription
-                  close={this.closePatient}
-              />
+              <Prescription close={this.closePatient} />
             )}
           </div>
         ) : (
@@ -253,26 +228,35 @@ class Consulatation extends Component {
             <Grid item xs={3}>
               <div className={'f_mt10'}>
                 <div>Date</div>
-                <InputBase
-                    type={'date'}
+                <InlineDatePicker
                     className={'select_input'}
-                    value={
-                    window.navigator.userAgent.indexOf('Safari') > -1 &&
-                    window.navigator.userAgent.indexOf('Chrome') < 0
-                      ? this.state.date
-                      : moment(this.state.date, 'DD MMM YYYY').format(
-                          'YYYY-MM-DD'
-                        )
+                    style={{ marginLeft: 10 }}
+                    mask={value =>
+                    value
+                      ? [
+                          /\d/,
+                          /\d/,
+                          ' ',
+                          /[A-Z]/,
+                          /[a-z]/,
+                          /[a-z]/,
+                          ' ',
+                          /\d/,
+                          /\d/,
+                          /\d/,
+                          /\d/
+                        ]
+                      : []
                   }
-                    onChange={(...arg) => this.changeDate(...arg)}
+                    disableOpenOnEnter
+                    format={'DD MMM YYYY'}
+                    placeholder={'DD MMM YYYY'}
+                    variant={'outlined'}
+                    keyboard
+                    invalidDateMessage={'輸入的日期無效'}
+                    value={moment(this.state.date, 'DD MMM YYYY')}
+                    onChange={this.changeDate}
                 />
-                {window.navigator.userAgent.indexOf('Safari') > -1 &&
-                window.navigator.userAgent.indexOf('Chrome') < 0 ? null : (
-                  <InputBase
-                      value={this.state.date}
-                      className={classes.cover}
-                  />
-                )}
               </div>
               <div className={'f_mt10'}>
                 <div>Attend Status</div>

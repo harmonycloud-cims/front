@@ -109,7 +109,8 @@ const appointmentState = {
   bookCompareResultError: '',
   bookAppointmentDialog: false,
   selectCalendar: false,
-  attendanceList: []
+  attendanceList: [],
+  attendLoading: false
 };
 const updateAppointment = (state = appointmentState, action = {}) => {
   switch (action.type) {
@@ -166,6 +167,10 @@ const updateAppointment = (state = appointmentState, action = {}) => {
       return { ...state, bookAppointmentDialog: false };
     case 'SELECT_CALENDAR':
       return { ...state, selectCalendar: action.data };
+    case 'OPEN_ATTENDING_DIALOG':
+      return { ...state, attendLoading: true };
+    case 'CLOSE_ATTENDING_DIALOG':
+      return { ...state, attendLoading: false };
     case 'UPDATE_ATTENDANCELIST': {
       let notAttend = action.attendanceList;
       let attend = _.remove(notAttend, item => {

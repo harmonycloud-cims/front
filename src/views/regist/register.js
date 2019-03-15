@@ -60,16 +60,6 @@ const style = {
   },
   add_icon: {
     verticalAlign: 'bottom'
-  },
-  cover: {
-    top: 30,
-    position: 'absolute',
-    backgroundColor: '#fff',
-    width: 150,
-    fontSize: 14,
-    left: 18,
-    height: 20,
-    padding: '4px 0 0 0'
   }
 };
 function mapStateToProps(state) {
@@ -354,12 +344,11 @@ class Register extends Component {
                   placeholder={'DD MMM YYYY'}
                   keyboard
                   invalidDateMessage={'輸入的日期無效'}
+                  maxDateMessage={'請選擇正確的日期'}
                   maxDate={new Date()}
+                  variant={'outlined'}
                   value={moment(this.state.patient.dateOfBirth, 'DD MMM YYYY')}
                   onChange={this.date}
-                  // onInputChange={(...arg) =>
-                  //   this.changeInformation(...arg, 'dateOfBirth')
-                  // }
               />
             </div>
             <div className={styles.form50}>

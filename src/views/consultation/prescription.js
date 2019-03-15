@@ -191,7 +191,7 @@ class Prescription extends Component {
     };
     this.props.dispatch({ type: 'SEARCH_DRUG_LIST', params });
   };
-
+  // show all the group && checked
   collapseIngredient = id => {
     let departmentFavouriteList = _.cloneDeep(
       this.state.showDepartmentFavouriteList
@@ -217,17 +217,16 @@ class Prescription extends Component {
   drag = (e, id) => {
     e.dataTransfer.setData('drugFavouriteGroupId', id);
   };
+  // drop necessary condition
   allowDrag = e => {
-    console.log('all');
     e.preventDefault();
   };
   drop = e => {
-    console.log('drop');
     e.preventDefault();
     let departmentFavouriteList = _.cloneDeep(
       this.state.showDepartmentFavouriteList
     );
-    let medicineList = _.cloneDeep(this.state.medicineList);
+    let oldMedicineList = _.cloneDeep(this.state.medicineList);
     let id = e.dataTransfer.getData('drugFavouriteGroupId');
     let departmentFavourite = _.find(departmentFavouriteList, item => {
       return item.drugFavouriteGroupId === parseInt(id, 10);
@@ -235,14 +234,8 @@ class Prescription extends Component {
     departmentFavourite.isCollapse = true;
     _.forEach(departmentFavourite.drugFavouriteGroupDrugDtoList, item => {
       item.checked = true;
-      if (
-        !_.find(medicineList, eve => {
-          return item.drugId === eve.drugId;
-        })
-      ) {
-        medicineList.push(item);
-      }
     });
+    let medicineList = oldMedicineList.concat(departmentFavourite.drugFavouriteGroupDrugDtoList);
     this.setState({
       showDepartmentFavouriteList: departmentFavouriteList,
       medicineList
@@ -270,10 +263,23 @@ class Prescription extends Component {
     this.setState({ showDepartmentFavouriteList: departmentFavouriteList });
   };
   copy = () => {
-    console.log('copy');
+    let departmentFavouriteList = _.cloneDeep(
+      this.state.showDepartmentFavouriteList
+    );
+    let oldMedicineList = _.cloneDeep(this.state.medicineList);
+    let checkedList = [];
+    departmentFavouriteList.length > 0 && _.forEach(departmentFavouriteList, item => {
+      _.forEach(item.drugFavouriteGroupDrugDtoList, eve => {
+        eve.checked && checkedList.push(eve);
+      });
+    });
+    let medicineList = oldMedicineList.concat(checkedList);
+    this.setState({medicineList});
   };
-  removeMedicine = () => {
-    console.log('1234');
+  removeMedicine = (index) => {
+    let oldMedicineList = _.cloneDeep(this.state.medicineList);
+    oldMedicineList.splice(index, 1);
+    this.setState({medicineList: oldMedicineList});
   }
   render() {
     const { classes } = this.props;
@@ -498,13 +504,13 @@ class Prescription extends Component {
                 onDragOver={this.allowDrag}
                 onDrop={(...arg) => this.drop(...arg)}
             >
-              {this.state.medicineList.map(item => (
+              {this.state.medicineList.map((item,index) => (
                 <FormGroup
-                    key={item.drugId}
+                    key={index}
                     row
                     className={classes.medicine_item}
                 >
-                  <RemoveCircle className={classes.medicine_icon} onClick={() => this.removeMedicine}/>
+                  <RemoveCircle className={classes.medicine_icon} onClick={() => this.removeMedicine(index)}/>
                   <Typography
                       component="div"
                       color="primary"

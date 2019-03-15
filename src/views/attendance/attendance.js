@@ -15,12 +15,15 @@ import {
   Button,
   InputBase,
   IconButton,
-  Paper
+  Paper,
+  Dialog
 } from '@material-ui/core';
 import { Search } from '@material-ui/icons';
 import _ from 'lodash';
 import { withStyles } from '@material-ui/core/styles/index';
 import moment from 'moment';
+import { InlineDatePicker } from 'material-ui-pickers';
+import timg from '../../images/timg.gif';
 
 function mapStateToProps(state) {
   return {
@@ -28,7 +31,8 @@ function mapStateToProps(state) {
     clinicList: state.updateUser.clinicList,
     encounterList: state.updateUser.encounterList,
     allRoomList: state.updateUser.allRoomList,
-    attendanceList: state.updateAppointment.attendanceList
+    attendanceList: state.updateAppointment.attendanceList,
+    attendLoading: state.updateAppointment.attendLoading
   };
 }
 const style = {
@@ -41,16 +45,6 @@ const style = {
     fontWeight: 600,
     color: 'rgba(0, 0, 0, 0.7)',
     padding: '0, 0, 0, 10'
-  },
-  cover: {
-    top: 54,
-    position: 'absolute',
-    backgroundColor: '#fff',
-    width: 100,
-    fontSize: 14,
-    left: 38,
-    height: 20,
-    padding: '2px 0 0 0'
   },
   root: {
     padding: '2px 4px',
@@ -119,15 +113,9 @@ class Attendance extends Component {
   };
 
   changeDate = e => {
-    if (
-      window.navigator.userAgent.indexOf('Safari') > -1 &&
-      window.navigator.userAgent.indexOf('Chrome') < 0
-    ) {
-      this.setState({ date: e.target.value }, () => this.initData());
-    } else {
-      let value = moment(e.target.value, 'YYYY-MM-DD').format('DD MMM YYYY');
-      this.setState({ date: value }, () => this.initData());
-    }
+    this.setState({ date: moment(e._d).format('DD MMM YYYY') }, () =>
+      this.initData()
+    );
   };
   changeAttendanceStatus = (e, checked) => {
     if (checked) {
@@ -182,23 +170,35 @@ class Attendance extends Component {
           <Grid item xs={3}>
             <div className={'f_mt10'}>
               <div>Date</div>
-              <InputBase
-                  type={'date'}
+              <InlineDatePicker
                   className={'select_input'}
-                  value={
-                  window.navigator.userAgent.indexOf('Safari') > -1 &&
-                  window.navigator.userAgent.indexOf('Chrome') < 0
-                    ? this.state.date
-                    : moment(this.state.date, 'DD MMM YYYY').format(
-                        'YYYY-MM-DD'
-                      )
+                  style={{ marginLeft: 10 }}
+                  mask={value =>
+                  value
+                    ? [
+                        /\d/,
+                        /\d/,
+                        ' ',
+                        /[A-Z]/,
+                        /[a-z]/,
+                        /[a-z]/,
+                        ' ',
+                        /\d/,
+                        /\d/,
+                        /\d/,
+                        /\d/
+                      ]
+                    : []
                 }
-                  onChange={(...arg) => this.changeDate(...arg)}
+                  disableOpenOnEnter
+                  format={'DD MMM YYYY'}
+                  placeholder={'DD MMM YYYY'}
+                  variant={'outlined'}
+                  keyboard
+                  invalidDateMessage={'輸入的日期無效'}
+                  value={moment(this.state.date, 'DD MMM YYYY')}
+                  onChange={this.changeDate}
               />
-              {window.navigator.userAgent.indexOf('Safari') > -1 &&
-              window.navigator.userAgent.indexOf('Chrome') < 0 ? null : (
-                <InputBase value={this.state.date} className={classes.cover} />
-              )}
             </div>
             <div className={'f_mt10'}>
               <div>Attend Status</div>
@@ -355,21 +355,24 @@ class Attendance extends Component {
               </TableBody>
               <TableFooter>
                 <TableRow>
-                <TablePagination
-                    className={classes.table_pagination}
-                    rowsPerPageOptions={[5, 10, 25]}
-                    colSpan={3}
-                    count={this.state.attendanceList.length}
-                    rowsPerPage={this.state.rowsPerPage}
-                    page={this.state.page}
-                    onChangePage={this.handleChangePage}
-                    onChangeRowsPerPage={this.handleChangeRowsPerPage}
-                />
+                  <TablePagination
+                      className={classes.table_pagination}
+                      rowsPerPageOptions={[5, 10, 25]}
+                      colSpan={3}
+                      count={this.state.attendanceList.length}
+                      rowsPerPage={this.state.rowsPerPage}
+                      page={this.state.page}
+                      onChangePage={this.handleChangePage}
+                      onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                  />
                 </TableRow>
               </TableFooter>
             </Table>
           </Grid>
         </Grid>
+        <Dialog open={this.props.attendLoading}>
+          <img src={timg} alt={''} />
+        </Dialog>
       </div>
     );
   }

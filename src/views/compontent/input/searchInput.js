@@ -97,40 +97,47 @@ class SearchInput extends Component {
   };
   // keyboard event
   keyDown = e => {
-    let temp = _.cloneDeep(this.state.count);
-    let len = this.props.patientList.length; //patient count
-    if (e.keyCode === 40) {
-      if (temp > -2 && temp < len - 1) {
-        temp = temp + 1;
-      } else if (temp === len - 1) {
-        temp = -2;
-      } else {
-        temp = 0;
+    if(this.state.open){
+      let temp = _.cloneDeep(this.state.count);
+      let len = this.props.patientList.length; //patient count
+      if (e.keyCode === 40) {
+        if (temp > -2 && temp < len - 1) {
+          temp = temp + 1;
+        } else if (temp === len - 1) {
+          temp = -2;
+        } else {
+          temp = 0;
+        }
       }
-    }
-    if (e.keyCode === 38) {
-      if (temp > 0 && temp < len) {
-        temp = temp - 1;
-      } else if (temp === -1) {
-        temp = -2;
-      } else if (temp === 0) {
-        temp = -2;
-      } else {
-        temp = len - 1;
+      if (e.keyCode === 38) {
+        if (temp > 0 && temp < len) {
+          temp = temp - 1;
+        } else if (temp === -1) {
+          temp = -2;
+        } else if (temp === 0) {
+          temp = -2;
+        } else {
+          temp = len - 1;
+        }
       }
-    }
-    if (e.keyCode === 13) {
-      if (temp === -2) {
-        this.handleClose({});
-        temp = -1;
-      } else if (temp === -1) {
-        temp = -1;
-      } else {
-        this.handleClose(this.props.patientList[temp]);
-        temp = -1;
+      if (e.keyCode === 13) {
+        if (temp === -2) {
+          this.handleClose({});
+          temp = -1;
+        } else if (temp === -1) {
+          temp = -1;
+        } else {
+          this.handleClose(this.props.patientList[temp]);
+          temp = -1;
+        }
       }
+      if(temp > 3) {
+        document.getElementById('myInput').scrollTop = (temp-3)*35;
+      } else if (temp > 0 && temp <= 3){
+        document.getElementById('myInput').scrollTop = 0;
+      }
+      this.setState({ count: temp });
     }
-    this.setState({ count: temp });
   };
   render() {
     const { classes } = this.props;
@@ -160,7 +167,7 @@ class SearchInput extends Component {
         </IconButton>
         <Popper open={this.state.open} anchorEl={this.anchorel}>
           <Paper className={classes.paper}>
-            <Typography id="testul" className={classes.menu}>
+            <Typography ref="myInput" id="myInput" className={classes.menu}>
               {this.props.patientList.map((item, index) => (
                 <MenuItem
                     key={index}

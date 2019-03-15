@@ -340,12 +340,14 @@ function* getAttendance() {
 function* attend() {
   while (true) {
     let { params, params1 } = yield take('ATTEND');
+    yield put({type: 'OPEN_ATTENDING_DIALOG'});
     try {
       let { data } = yield call(axios.get, '/appointment/attend', {
         params: params
       }); //阻塞，请求后台数据
       if (data.success) {
         yield put({ type: 'GET_ATTENDANCELIST', params: params1 });
+        yield put({ type: 'CLOSE_ATTENDING_DIALOG' });
       }
     } catch (error) {
       console.log(error);
