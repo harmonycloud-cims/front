@@ -549,17 +549,17 @@ function* getDepartmentFavourite() {
     }
   }
 }
-function* searchDrugList() {
+function* getDrugHistory() {
   while (true) {
-    let { params } = yield take('SEARCH_DRUG_LIST');
+    let { params } = yield take('GET_DRUG_HISTORY');
     try {
-      let { data } = yield call(axios.get, '/drug/drugList', {
+      let { data } = yield call(axios.get, '/order/drugHistory', {
         params: params
       }); //阻塞，请求后台数据
       if (data.success) {
         yield put({
-          type: 'UPDATE_DRUG_LIST',
-          searchDrugList: data.data
+          type: 'UPDATE_DRUG_HISTORY',
+          drugHistoryList: data.data
         });
       } else {
         console.log(data.errorMessage);
@@ -568,6 +568,66 @@ function* searchDrugList() {
       console.log(error);
     }
   }
+}
+function* saveOrder() {
+  while (true) {
+    let { params } = yield take('SAVE_ORDER');
+    yield put({ type: 'OPEN_CONSULTATION_LOADING', data: true });
+    try {
+      let { data } = yield call(axios.post, '/order/saveOrder', params); //阻塞，请求后台数据
+      if (data.success) {
+        yield put({ type: 'CONSULTATION_LOADING_SUCCESS' });
+      } else {
+        yield put({
+          type: 'CONSULTATION_LOADING_ERROR',
+          data: data.errorMessage
+        });
+      }
+    } catch (error) {
+      yield put({ type: 'CONSULTATION_LOADING_ERROR', data: error });
+    }
+  }
+}
+function* updateOrder() {
+  while (true) {
+    let { params } = yield take('UPDATE_ORDER');
+    yield put({ type: 'OPEN_CONSULTATION_LOADING', data: true });
+    try {
+      let { data } = yield call(axios.post, '/order/updateOrder', params); //阻塞，请求后台数据
+      if (data.success) {
+        yield put({ type: 'CONSULTATION_LOADING_SUCCESS' });
+      } else {
+        yield put({
+          type: 'CONSULTATION_LOADING_ERROR',
+          data: data.errorMessage
+        });
+      }
+    } catch (error) {
+      yield put({ type: 'CONSULTATION_LOADING_ERROR', data: error });
+    }
+  }
+}
+function* fectchDrugList(action) {
+  try {
+    yield put({ type: 'OPEN_SEARCH' });
+    let { data } = yield call(axios.get, '/drug/drugList', {
+      params: action.params
+    }); //阻塞，请求后台数据
+    if (data.success) {
+      yield put({
+        type: 'UPDATE_DRUG_LIST',
+        searchDrugList: data.data
+      });
+      yield put({ type: 'CLOSE_SEARCH' });
+    } else {
+      console.log(data.errorMessage);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+function* searchDrugList() {
+  yield takeLatest('SEARCH_DRUG_LIST', fectchDrugList);
 }
 
 export default function* rootSaga() {
@@ -609,5 +669,8 @@ export default function* rootSaga() {
   yield fork(updateConsultation);
 
   yield fork(getDepartmentFavourite);
+  yield fork(getDrugHistory);
   yield fork(searchDrugList);
+  yield fork(saveOrder);
+  yield fork(updateOrder);
 }

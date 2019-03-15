@@ -100,7 +100,6 @@ class Consulatation extends Component {
       roomId: '0',
       attendanceStatus: 'All',
       date: moment(new Date().getTime()).format('DD MMM YYYY'),
-      // date: '13 Mar 2019',
       attendanceList: this.props.attendanceList,
       value: '',
       ifSelected: false,
@@ -220,7 +219,7 @@ class Consulatation extends Component {
               />
             )}
             {this.state.tabValue === 1 && (
-              <Prescription close={this.closePatient} />
+              <Prescription close={this.closePatient} appointmentSelect={this.state.appointmentSelect} />
             )}
           </div>
         ) : (
@@ -384,11 +383,13 @@ class Consulatation extends Component {
                       <TableRow
                           key={index}
                           style={{
-                          backgroundColor:
-                            item.patientSex === 'female'
-                              ? 'rgba(255,0,0,0.2)'
-                              : '#CFECFA'
-                        }}
+                            backgroundColor:
+                              item.patientSex === 'female'
+                                ? 'rgba(255,0,0,0.2)'
+                                : item.patientSex === 'male'
+                                ? '#CFECFA'
+                                : 'rgba(255,155,55, 0.4)'
+                          }}
                       >
                         <TableCell
                             style={{ paddingLeft: '15px' }}

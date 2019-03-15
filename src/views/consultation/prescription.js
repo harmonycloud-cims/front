@@ -16,7 +16,10 @@ import {
   IconButton,
   Tabs,
   Radio,
-  Checkbox
+  Checkbox,
+  Dialog,
+  DialogActions,
+  DialogContent
 } from '@material-ui/core';
 import {
   Search,
@@ -28,12 +31,18 @@ import {
 } from '@material-ui/icons';
 import { withStyles } from '@material-ui/core/styles';
 import _ from 'lodash';
+import timg from '../../images/timg.gif';
 
 function mapStateToProps(state) {
   return {
     clinic: state.updateUser.clinic,
+    encounter: state.updateConsultation.encounter,
     searchDrugList: state.updatePrescription.searchDrugList,
-    departmentFavouriteList: state.updatePrescription.departmentFavouriteList
+    drugHistoryList: state.updatePrescription.drugHistoryList,
+    departmentFavouriteList: state.updatePrescription.departmentFavouriteList,
+    closeDialog: state.updateConsultation.closeDialog,
+    openSearchProgress: state.updateConsultation.openSearchProgress,
+    consulationErrorMessage: state.updateConsultation.consulationErrorMessage
   };
 }
 const style = {
@@ -101,6 +110,32 @@ const style = {
     marginTop: 10,
     color: 'rgba(0, 0, 0, 0.6)'
   },
+  paper: {
+    maxHeight: 240,
+    transform: 'translate3d(18px, 0px, 0px)',
+    width: 380
+  },
+  menu_all_list: {
+    maxHeight: 200,
+    overflowY: 'auto'
+  },
+  menu_list_select: {
+    paddingTop: 0,
+    fontSize: 14,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    height: 40
+  },
+  menu_list: {
+    paddingTop: 0,
+    fontSize: 14,
+    height: 40
+  },
+  mr15: {
+    marginRight: 15,
+    overflowX: 'hidden',
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis'
+  },
   title: {
     fontSize: 16,
     fontWeight: 600
@@ -152,6 +187,19 @@ const style = {
     height: 15,
     verticalAlign: 'middle',
     padding: '2px 5px 0 0'
+  },
+  drug_history_tab: {
+    overflowY: 'auto'
+  },
+  drug_history_item: {
+    padding: 10,
+    borderBottom: '1px solid rgba(0,0,0,0.2)'
+  },
+  drug_history_time: {
+    padding: '0 0 5px 10px'
+  },
+  drug_hisotry_record: {
+    paddingLeft: 5
   }
 };
 class Prescription extends Component {
@@ -159,16 +207,18 @@ class Prescription extends Component {
     super(props);
     this.state = {
       tabValue: 0,
-      open: false,
-      value: '',
+      open: false, //search result
+      searchValue: '',
       grade: 'adult',
       showDepartmentFavouriteList: this.props.departmentFavouriteList,
-      medicineList: []
+      medicineList: [],
+      count: -1,
+      isUpdate: false,
+      openDiag: false
     };
   }
   componentDidMount() {
     this.initData();
-    this.searchDrugList();
   }
   UNSAFE_componentWillReceiveProps(nextProps) {
     if (
@@ -178,18 +228,22 @@ class Prescription extends Component {
         showDepartmentFavouriteList: nextProps.departmentFavouriteList
       });
     }
+    if (nextProps.drugHistoryList !== this.props.drugHistoryList) {
+      this.setState({
+        drugHistoryList: nextProps.drugHistoryList
+      });
+    }
   }
   initData = () => {
     const params = {
       clinicId: this.props.clinic.clinicId
     };
     this.props.dispatch({ type: 'GET_DEPARTMENTAL_FAVOURITE', params });
+    this.getDrugList();
   };
-  searchDrugList = () => {
-    const params = {
-      keyword: 'chloramphenicol'
-    };
-    this.props.dispatch({ type: 'SEARCH_DRUG_LIST', params });
+  getDrugList = () => {
+    const params = { patientId: this.props.appointmentSelect.patientId };
+    this.props.dispatch({ type: 'GET_DRUG_HISTORY', params });
   };
   // show all the group && checked
   collapseIngredient = id => {
@@ -205,9 +259,34 @@ class Prescription extends Component {
     });
     this.setState({ showDepartmentFavouriteList: departmentFavouriteList });
   };
-
   save = () => {
+    const prescription = {
+      clinicId: this.props.clinic.clinicId,
+      clinicName: this.props.clinic.clinicName,
+      encounterId: this.props.encounter.encounterId,
+      patientId: this.props.appointmentSelect.patientId
+    };
+    const prescriptionDrugList = this.state.medicineList;
+    if (this.state.isUpdate) {
+      const params = {
+        prescription,
+        newPrescriptionDrugList: prescriptionDrugList,
+        oldPrescriptionDrugList: this.props.drugHistoryList
+      };
+      console.log(params);
+      // this.props.dispatch({type: 'UPDATE_ORDER', params});
+    } else {
+      const params = {
+        prescription,
+        prescriptionDrugList
+      };
+      this.props.dispatch({ type: 'SAVE_ORDER', params });
+    }
     this.setState({ openDiag: true });
+  };
+  closeDialog = () => {
+    this.setState({ openDiag: false, isUpdate: true }, () => this.initData());
+    this.props.dispatch({ type: 'CLOSE_CONSULTATION_LOADING' });
   };
   clear = () => {
     this.setState({ isUpdate: false });
@@ -235,7 +314,9 @@ class Prescription extends Component {
     _.forEach(departmentFavourite.drugFavouriteGroupDrugDtoList, item => {
       item.checked = true;
     });
-    let medicineList = oldMedicineList.concat(departmentFavourite.drugFavouriteGroupDrugDtoList);
+    let medicineList = oldMedicineList.concat(
+      departmentFavourite.drugFavouriteGroupDrugDtoList
+    );
     this.setState({
       showDepartmentFavouriteList: departmentFavouriteList,
       medicineList
@@ -263,24 +344,125 @@ class Prescription extends Component {
     this.setState({ showDepartmentFavouriteList: departmentFavouriteList });
   };
   copy = () => {
-    let departmentFavouriteList = _.cloneDeep(
-      this.state.showDepartmentFavouriteList
-    );
-    let oldMedicineList = _.cloneDeep(this.state.medicineList);
-    let checkedList = [];
-    departmentFavouriteList.length > 0 && _.forEach(departmentFavouriteList, item => {
-      _.forEach(item.drugFavouriteGroupDrugDtoList, eve => {
-        eve.checked && checkedList.push(eve);
-      });
-    });
-    let medicineList = oldMedicineList.concat(checkedList);
-    this.setState({medicineList});
+    if(this.state.tabValue === 0) {
+      let departmentFavouriteList = _.cloneDeep(
+        this.state.showDepartmentFavouriteList
+      );
+      let oldMedicineList = _.cloneDeep(this.state.medicineList);
+      let checkedList = [];
+      departmentFavouriteList.length > 0 &&
+        _.forEach(departmentFavouriteList, item => {
+          _.forEach(item.drugFavouriteGroupDrugDtoList, eve => {
+            eve.checked && checkedList.push(eve);
+          });
+        });
+      let medicineList = oldMedicineList.concat(checkedList);
+      this.setState({ medicineList });
+    } else {
+      // let drugHistoryList = _.cloneDeep(
+      //   this.props.drugHistoryList
+      // );
+      // let oldMedicineList = _.cloneDeep(this.state.medicineList);
+      // let checkedList = [];
+      // drugHistoryList.length > 0 &&
+      //   _.forEach(drugHistoryList, item => {
+      //     _.forEach(item.drugFavouriteGroupDrugDtoList, eve => {
+      //       eve.checked && checkedList.push(eve);
+      //     });
+      //   });
+      // let medicineList = oldMedicineList.concat(checkedList);
+      // this.setState({ medicineList });
+    }
   };
-  removeMedicine = (index) => {
+  removeMedicine = index => {
     let oldMedicineList = _.cloneDeep(this.state.medicineList);
     oldMedicineList.splice(index, 1);
-    this.setState({medicineList: oldMedicineList});
-  }
+    this.setState({ medicineList: oldMedicineList });
+  };
+  /* Problems */
+  searchDrugList = () => {
+    if (this.state.searchValue !== '') {
+      const params = {
+        keyword: this.state.searchValue
+      };
+      this.props.dispatch({ type: 'SEARCH_DIAGNOSIS_PROBLEMS', params });
+      this.setState({ open: true });
+    }
+  };
+  changeSearchValue = e => {
+    this.setState({ searchValue: e.target.value, count: -1 });
+    if (e.target.value !== '') {
+      const params = {
+        keyword: e.target.value
+      };
+      this.props.dispatch({ type: 'SEARCH_DRUG_LIST', params });
+      this.setState({ open: true });
+    } else {
+      this.setState({ open: false });
+    }
+  };
+  keyDown = e => {
+    if (this.state.open) {
+      let temp = _.cloneDeep(this.state.count);
+      let len = this.props.searchDrugList.length; //patient count
+      if (e.keyCode === 40) {
+        if (temp > -2 && temp < len - 1) {
+          temp = temp + 1;
+        } else if (temp === len - 1) {
+          temp = -2;
+        } else {
+          temp = 0;
+        }
+      }
+      if (e.keyCode === 38) {
+        if (temp > 0 && temp < len) {
+          temp = temp - 1;
+        } else if (temp === -1) {
+          temp = -2;
+        } else if (temp === 0) {
+          temp = -2;
+        } else {
+          temp = len - 1;
+        }
+      }
+      if (e.keyCode === 13) {
+        if (this.state.count === -1) {
+          this.searchDrugList();
+        } else {
+          if (temp === -2) {
+            this.handleClose({});
+            temp = -1;
+          } else if (temp === -1) {
+            temp = -1;
+          } else {
+            this.handleClose(this.props.searchDrugList[temp]);
+            temp = -1;
+          }
+        }
+      }
+      if (temp > 3) {
+        document.getElementById('myInput').scrollTop = (temp - 3) * 51;
+      } else if (temp > 0 && temp <= 3) {
+        document.getElementById('myInput').scrollTop = 0;
+      }
+      this.setState({ count: temp });
+    } else {
+      if (e.keyCode === 13) {
+        this.searchDrugList();
+      }
+    }
+  };
+  handleClose = item => {
+    let oldMedicineList = _.cloneDeep(this.state.medicineList);
+    if (JSON.stringify(item) !== '{}') {
+      oldMedicineList.push(item);
+    }
+    this.setState({
+      open: false,
+      medicineList: oldMedicineList,
+      searchValue: ''
+    });
+  };
   render() {
     const { classes } = this.props;
     return (
@@ -304,6 +486,7 @@ class Prescription extends Component {
                 onChange={(event, value) => this.setState({ tabValue: value })}
                 indicatorColor={'primary'}
                 textColor={'primary'}
+                style={{borderBottom: '1px solid rgba(0,0,0,0.2)'}}
             >
               <Tab
                   label="Departmental Favourite"
@@ -392,8 +575,43 @@ class Prescription extends Component {
               </Typography>
             )}
             {this.state.tabValue === 1 && (
-              <Typography component="div" className={classes.left_warp_tab}>
-                world
+              <Typography component="div" className={classes.drug_history_tab}>
+                <Typography
+                    component="div"
+                    className={classes.drug_history_item}
+                >
+                  <Typography
+                      conponent="div"
+                      className={classes.drug_history_time}
+                  >
+                    2019-01-02 FCS
+                  </Typography>
+                    <FormGroup
+                        // key={eve.drugId}
+                        row
+                        className={classes.drug_hisotry_record}
+                    >
+                      <Checkbox
+                          className={classes.department_favourite_check}
+                          // checked={eve.checked || false}
+                          color="default"
+                        //   value={`${eve.drugId}${eve.tradeName}`}
+                        //   onClick={() =>
+                        //   this.clickCheckbox(
+                        //     item.drugFavouriteGroupId,
+                        //     eve.drugId
+                        //   )
+                        // }
+                      />
+                      <Typography
+                          component="div"
+                          color="primary"
+                          className={classes.department_favourite_item_detail}
+                      >
+                        Panadol(paracetamol)tablet<br />oral: 500mg qid for 1 week
+                      </Typography>
+                    </FormGroup>
+                </Typography>
               </Typography>
             )}
           </Typography>
@@ -420,13 +638,13 @@ class Prescription extends Component {
                     inputRef={node => {
                     this.anchorel = node;
                   }}
-                    onChange={this.handleToggle}
+                    onChange={this.changeSearchValue}
                     placeholder="Search by ID/ Name/ Phone"
-                    value={this.state.value}
-                    onKeyUp={this.handleEnterKey}
+                    value={this.state.searchValue}
+                    onKeyDown={this.keyDown}
                 />
                 <IconButton
-                    onClick={this.search}
+                    onClick={this.searchDrugList}
                     className={classes.iconButton}
                     aria-label="Search"
                     color={'primary'}
@@ -442,19 +660,28 @@ class Prescription extends Component {
                     <Typography
                         component="div"
                         className={classes.menu_all_list}
+                        ref="myInput"
+                        id="myInput"
                     >
                       {this.props.searchDrugList.map((item, index) => (
                         <MenuItem
                             key={index}
                             onClick={() => this.handleClose(item)}
-                            className={classes.menu_list}
-                            title={item.diagnosisDescription}
+                            title={`${item.tradeName}${item.ingredient} \n ${
+                            item.regimenLine
+                          }`}
+                            className={
+                            this.state.count === index
+                              ? classes.menu_list_select
+                              : classes.menu_list
+                          }
                         >
                           <Typography
                               component={'div'}
                               className={classes.mr15}
                           >
-                            {item.diagnosisDescription}
+                            {item.tradeName} ({item.ingredient}) inj -<br />
+                            {item.regimenLine}
                           </Typography>
                         </MenuItem>
                       ))}
@@ -462,7 +689,11 @@ class Prescription extends Component {
                     <Divider />
                     <MenuItem
                         onClick={() => this.handleClose({})}
-                        className={classes.menu_list}
+                        className={
+                        this.state.count === -2
+                          ? classes.menu_list_select
+                          : classes.menu_list
+                      }
                     >
                       Not Found
                     </MenuItem>
@@ -504,23 +735,34 @@ class Prescription extends Component {
                 onDragOver={this.allowDrag}
                 onDrop={(...arg) => this.drop(...arg)}
             >
-              {this.state.medicineList.map((item,index) => (
-                <FormGroup
-                    key={index}
-                    row
-                    className={classes.medicine_item}
-                >
-                  <RemoveCircle className={classes.medicine_icon} onClick={() => this.removeMedicine(index)}/>
+              {this.state.medicineList.map((item, index) => (
+                <FormGroup key={index} row className={classes.medicine_item}>
+                  <RemoveCircle
+                      className={classes.medicine_icon}
+                      onClick={() => this.removeMedicine(index)}
+                  />
                   <Typography
                       component="div"
                       color="primary"
                       className={classes.department_favourite_item_detail}
                   >
-                  <FormGroup row>
-                    <Typography component="span" style={{fontWeight: 600}}>{item.tradeName} </Typography>
-                    <Typography component="span" style={{color: 'rgba(0,0,0,0.6)'}}>({item.ingredient}) inj -</Typography>
-                  </FormGroup>
-                  <Typography component="div" style={{color: 'rgba(0,0,0,0.6)'}}>{item.regimenLine}</Typography>
+                    <FormGroup row>
+                      <Typography component="span" style={{ fontWeight: 600 }}>
+                        {item.tradeName}{' '}
+                      </Typography>
+                      <Typography
+                          component="span"
+                          style={{ color: 'rgba(0,0,0,0.6)' }}
+                      >
+                        ({item.ingredient}) inj -
+                      </Typography>
+                    </FormGroup>
+                    <Typography
+                        component="div"
+                        style={{ color: 'rgba(0,0,0,0.6)' }}
+                    >
+                      {item.regimenLine}
+                    </Typography>
                   </Typography>
                 </FormGroup>
               ))}
@@ -548,6 +790,20 @@ class Prescription extends Component {
             </Button>
           </Typography>
         </Grid>
+        <Dialog open={this.state.openDiag && this.props.closeDialog}>
+          {this.props.consulationErrorMessage === '' ? (
+            <img src={timg} alt={''} />
+          ) : (
+            <DialogContent>{this.props.consulationErrorMessage}</DialogContent>
+          )}
+          {this.props.consulationErrorMessage !== '' ? (
+            <DialogActions>
+              <Button onClick={this.closeDialog} color="primary">
+                OK
+              </Button>
+            </DialogActions>
+          ) : null}
+        </Dialog>
       </Grid>
     );
   }

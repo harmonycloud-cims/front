@@ -306,7 +306,9 @@ class Attendance extends Component {
                         backgroundColor:
                           item.patientSex === 'female'
                             ? 'rgba(255,0,0,0.2)'
-                            : '#CFECFA'
+                            : item.patientSex === 'male'
+                            ? '#CFECFA'
+                            : 'rgba(255,155,55, 0.4)'
                       }}
                     >
                       <TableCell

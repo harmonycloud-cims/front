@@ -155,7 +155,7 @@ const style = {
   },
   paper: {
     maxHeight: 200,
-    transform: 'translate3d(18px, 0px, 0px)',
+    transform: 'translate3d(18px, 3px, 0px)',
     width: 380
   },
   menu_all_list: {
@@ -438,6 +438,8 @@ class Note extends Component {
         };
         this.props.dispatch({ type: 'SEARCH_DIAGNOSIS_PROBLEMS', params });
         this.setState({ open: true });
+      } else {
+        this.setState({open: false});
       }
     } else {
       this.setState({open: false});
