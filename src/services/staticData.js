@@ -381,3 +381,18 @@ export const patientBasic = {
   street: '',
   search: ''
 };
+export const documentMap = {
+  'Adoption Certificate': '領養證明書',
+  'Birth Certificate - HK': '香港出生證明書',
+  'Document of Identity for Visa Purposes': '香港特別行政區簽證身份書',
+  'Exemption Certificate': '豁免登記領取身份証明書豁免身份證',
+  'HKID Card': '香港身份證',
+  'Travel documents - PRC': '中華人民共和國發之其他旅遊証件',
+  'Travel documents - overseas': '其他國家發之其他旅遊証件',
+  'One-way Permit': '中華人民共和國前往港澳通行證(單程証)',
+  'Recognizance': '擔保書(行街紙)',
+  'Re-entry Permit': '香港特別行政區回港證',
+  'Two-way Permit': '中華人民共和國往來港澳通行證(雙程証)',
+  'eHR document': '電子醫療紀錄文件',
+  'Macao ID card': '澳門身份證'  
+};

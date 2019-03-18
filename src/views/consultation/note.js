@@ -239,9 +239,12 @@ class Note extends Component {
     };
   }
   componentDidMount() {
-    this.initData();
+    this.initData(this.props);
   }
   UNSAFE_componentWillReceiveProps(nextProps) {
+    if (nextProps.appointmentSelect !== this.props.appointmentSelect) {
+      this.initData(nextProps);
+    }
     // medicalRecordList记录
     if (nextProps.medicalRecordList !== this.props.medicalRecordList) {
       let medicalRecord = {};
@@ -304,13 +307,12 @@ class Note extends Component {
       });
     }
   }
-  initData = () => {
-    const { appointmentSelect } = this.props;
+  initData = (props) => {
+    const { appointmentSelect } = props;
     const patientId = appointmentSelect.patientId;
     const params = { patientId };
     const params1 = { clinicId: appointmentSelect.clinicId };
     const params2 = { appointmentId: appointmentSelect.appointmentId };
-    this.props.dispatch({ type: 'GET_PATINET_BY_ID', params });
     this.props.dispatch({ type: 'GET_MEDICAL_RECORD', params });
     this.props.dispatch({ type: 'GET_TEMPLATE', params: params1 });
     this.props.dispatch({ type: 'GET_CHRONICPROBLEM', params });
@@ -594,7 +596,7 @@ class Note extends Component {
     this.setState({ chronicProblemList });
   };
   closeDialog = () => {
-    this.setState({ openDiag: false, isUpdate: true }, () => this.initData());
+    this.setState({ openDiag: false, isUpdate: true }, () => this.initData(this.props));
     this.props.dispatch({ type: 'CLOSE_CONSULTATION_LOADING' });
     // this.props.dispatch({ type: 'CLEAR_CONSULTATION_LOADING' });
     // this.props.close();

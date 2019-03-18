@@ -17,7 +17,8 @@ import {
   Button,
   InputBase,
   IconButton,
-  Paper
+  Paper,
+  Typography
 } from '@material-ui/core';
 import { Search } from '@material-ui/icons';
 import _ from 'lodash';
@@ -71,34 +72,22 @@ const style = {
   table_pagination: {
     position: 'absolute',
     right: 0
+  },
+  tabs: {
+    float: 'left'
+  },
+  next: {
+    float: 'right',
+    marginTop: 6
   }
 };
-// const data = [
-//     {
-//       "clinicalNoteTemplateId": 1,
-//       "templateName": "Fever",
-//       "templateContent": "c/o fever, running nose and sore throat for 3 days, \nNo rash, no travel history\nSL given, FU prn",
-//       "clinicId": 1
-//     },
-//     {
-//       "clinicalNoteTemplateId": 2,
-//       "templateName": "URTI",
-//       "templateContent": "c/o coughing and yellowish sputum, running nose and fever for 3 days,\nSL given, FU prn",
-//       "clinicId": 1
-//     },
-//     {
-//       "clinicalNoteTemplateId": 3,
-//       "templateName": "GE",
-//       "templateContent": "c/o diarrhea after buffet 2 days ago,\rAdvise increased fluid intake",
-//       "clinicId": 1
-//     }
-// ];
 class Consulatation extends Component {
   constructor(props) {
     super(props);
     this.state = {
       roomId: '0',
       attendanceStatus: 'All',
+      // date: '15 Mar 2019',
       date: moment(new Date().getTime()).format('DD MMM YYYY'),
       attendanceList: this.props.attendanceList,
       value: '',
@@ -106,7 +95,13 @@ class Consulatation extends Component {
       tabValue: 0,
       appointmentSelect: {},
       rowsPerPage: 10,
-      page: 0
+      page: 0,
+      clinicNote: {},
+      patinetIndex: 0,
+      newPrescriptionDrugList: [],
+      newAttendingDiagnosisList: [],
+      newChronicDiagnosisList: [],
+      newClinicalNote: ''
     };
   }
 
@@ -158,8 +153,11 @@ class Consulatation extends Component {
     this.setState({ [name]: e.target.value }, () => this.initData());
   };
   // select patient
-  select = item => {
-    this.setState({ ifSelected: true, tabValue: 0, appointmentSelect: item });
+  select = (item, index) => {
+    const patientId = item.patientId;
+    const params = { patientId };
+    this.props.dispatch({ type: 'GET_PATINET_BY_ID', params });
+    this.setState({ ifSelected: true, tabValue: 0, appointmentSelect: item, patientIndex: index });
   };
   closePatient = () => {
     this.setState({ patient: {}, ifSelected: false, appointmentSelect: {} });
@@ -193,6 +191,30 @@ class Consulatation extends Component {
     this.setState({ page: 0, rowsPerPage: event.target.value });
   };
 
+  /* willUnmount */
+  clinicNoteWill = (params) => {
+    this.setState({clinicNote: params});
+  }
+
+  changePrescription = (newPrescriptionDrugList, isUpdate) => {
+    console.log(newPrescriptionDrugList);
+    this.setState({newPrescriptionDrugList, isPrescriptionUpdate: isUpdate});
+  }
+
+  /* nextPatient */
+  nextPatient = () => {
+    let attend = [];
+    _.forEach(this.props.attendanceList, item => {
+      item.attendanceStatus === 'Attend' && attend.push(item);
+    });
+    let index = _.cloneDeep(this.state.patientIndex);
+    if(index === attend.length-1) {
+      index = 0;
+    } else {
+      index = index + 1;
+    }
+    this.select(this.props.attendanceList[index], index);
+  }
   render() {
     const { classes } = this.props;
     return (
@@ -203,23 +225,28 @@ class Consulatation extends Component {
                 patient={this.props.patientById}
                 close={this.closePatient}
             />
-            <Tabs
-                value={this.state.tabValue}
-                onChange={this.changeTabValue}
-                indicatorColor={'primary'}
-                textColor={'primary'}
-            >
-              <Tab label="Note/Diagnosis" />
-              <Tab label="Prescription" />
-            </Tabs>
+            <Typography component="div">
+              <Tabs
+                  value={this.state.tabValue}
+                  onChange={this.changeTabValue}
+                  indicatorColor={'primary'}
+                  textColor={'primary'}
+                  className={classes.tabs}
+              >
+                <Tab label="Note/Diagnosis" />
+                <Tab label="Prescription" />
+              </Tabs>
+              <Button variant="outlined" color="primary" size="small" onClick={() => this.nextPatient()} className={classes.next}>Next Patient</Button>
+            </Typography>
             {this.state.tabValue === 0 && (
               <Note
                   appointmentSelect={this.state.appointmentSelect}
                   close={this.closePatient}
+                  willUnmount={this.clinicNoteWill}
               />
             )}
             {this.state.tabValue === 1 && (
-              <Prescription close={this.closePatient} appointmentSelect={this.state.appointmentSelect} />
+              <Prescription changePrescription={this.changePrescription} close={this.closePatient} appointmentSelect={this.state.appointmentSelect} />
             )}
           </div>
         ) : (
@@ -425,7 +452,7 @@ class Consulatation extends Component {
                                 variant={'outlined'}
                                 color={'primary'}
                                 size={'small'}
-                                onClick={() => this.select(item)}
+                                onClick={() => this.select(item, index)}
                             >
                               {' '}
                               Select{' '}

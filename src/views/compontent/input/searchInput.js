@@ -82,12 +82,12 @@ class SearchInput extends Component {
     this.changeValue(e.target.value);
   };
   changeValue = value => {
-    if (value) {
+    if (value && value !== '') {
       this.setState({ open: true });
+      this.props.change(_.toUpper(value));
     } else {
       this.setState({ open: false });
     }
-    this.props.change(_.toUpper(value));
     this.setState({ value: value });
   };
   // whichone choose

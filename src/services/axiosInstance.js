@@ -1,5 +1,7 @@
 import axios from 'axios';
 import Promise from 'babel-polyfill';
+import NProgress from 'nprogress';
+import 'nprogress/nprogress.css';
 // import configureStore from '../store/storeConfig';
 
 // To add to window  解决promise 在ie中未定义的问题
@@ -7,8 +9,29 @@ if (!window.Promise) {
   window.Promise = Promise;
 }
 
+NProgress.configure({
+  minimum: 0.1,
+  easing: 'ease',
+  speed: 800,
+  showSpinner: false
+});
+let needLoadingRequestCount = 0;
+export function showFullScreenLoading() {
+  if (needLoadingRequestCount === 0) {
+      NProgress.start();
+  }
+  needLoadingRequestCount++;
+}
+
+export function tryHideFullScreenLoading() {
+  if (needLoadingRequestCount <= 0) return;
+  needLoadingRequestCount--;
+  if (needLoadingRequestCount === 0) return NProgress.done();
+}
+
 axios.interceptors.request.use(
   config => {
+    showFullScreenLoading();
     if (
       !(config.url.indexOf('/login') > -1 || config.url.indexOf('/user') > -1)
     ) {
@@ -28,9 +51,11 @@ axios.interceptors.request.use(
 // http response 拦截器
 axios.interceptors.response.use(
   response => {
+    tryHideFullScreenLoading();
     return response;
   },
   err => {
+    tryHideFullScreenLoading();
     if (err && err.response) {
       switch (err.response.status) {
         case 400:

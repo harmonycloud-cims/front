@@ -6,6 +6,7 @@ import IndexWarp from './views/index';
 import Welcome from './views/welcome';
 import Register from './views/regist/register';
 import Appointment from './views/appointment/appointment';
+import Print from './views/appointment/print';
 import Attendance from './views/attendance/attendance';
 import Consultation from './views/consultation/consultation';
 import Drug from './views/drug/drug';
@@ -16,7 +17,9 @@ import Result from './views/result/result';
 const routes = (
   <Switch>
     <Route path="/login" component={Login} />
+    <Route path="/print" component={Print} />
     <Redirect exact from="/" to="/login" />
+    {/* <Redirect exact from="/" to="/print" /> */}
     <Route
         path="/index"
         render={() => (

@@ -29,6 +29,7 @@ import Patient from '../compontent/patient';
 import moment from 'moment';
 import { caluDate } from '../../services/utils';
 import { InlineDatePicker } from 'material-ui-pickers';
+import Print from './print';
 
 function mapStateToProps(state) {
   return {
@@ -130,6 +131,11 @@ const style = {
     left: '74%',
     height: 20,
     padding: '4px 0 0 0'
+  },
+  print: {
+    position: 'absolute',
+    zIndex: -1,
+    opacity: 0
   }
 };
 class Appointment extends Component {
@@ -149,7 +155,8 @@ class Appointment extends Component {
         .add(1, 'days')
         .format('DD MMM YYYY'),
       time: '09:00',
-      bookSuccess: false
+      bookSuccess: false,
+      print: false
     };
   }
   componentDidMount() {
@@ -175,7 +182,7 @@ class Appointment extends Component {
       !nextProps.bookAppointmentDialog &&
       nextProps.bookAppointmentDialog !== this.props.bookAppointmentDialog
     ) {
-      this.setState({ isSelected: false }, () => {
+      this.setState({ isSelected: false, print: false }, () => {
         this.initData(this.props);
       });
     }
@@ -288,7 +295,7 @@ class Appointment extends Component {
       `${this.state.date} ${this.state.time}`,
       'DD MMM YYYY HH:mm'
     ).format('YYYY-MM-DDTHH:mm:ss.sssZ');
-    const params = {
+    this.params = {
       clinicId: this.props.clinic.clinicId,
       clinicName: this.props.clinic.clinicName,
       date: date,
@@ -303,9 +310,12 @@ class Appointment extends Component {
       roomId: this.state.room.roomId,
       roomName: this.state.room.roomName
     };
-    this.setState({ bookSuccess: true }, () =>
-      this.props.dispatch({ type: 'BOOK_APPOINTMENT', params })
-    );
+    this.setState({ bookSuccess: true, print: true }, () => {
+      this.props.dispatch({ type: 'BOOK_APPOINTMENT', params: this.params });
+      document.body.innerHTML = window.document.getElementById('print').innerHTML;
+      window.print();
+      window.location.reload();
+    });
   };
   closeDialog = () => {
     this.setState({ bookSuccess: false }, () =>
@@ -319,6 +329,11 @@ class Appointment extends Component {
     const { classes } = this.props;
     return (
       <div className={'detail_warp'}>
+        {
+          this.state.print ? <Typography component="div" className={classes.print} id="print">
+            <Print print={this.params} patient={this.state.patient}/>
+          </Typography> : null
+        }
         {this.state.isSelected ? (
           <Patient patient={this.state.patient} close={this.closePatient} />
         ) : (

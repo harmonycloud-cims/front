@@ -32,6 +32,7 @@ import {
 import { withStyles } from '@material-ui/core/styles';
 import _ from 'lodash';
 import timg from '../../images/timg.gif';
+import moment from 'moment';
 
 function mapStateToProps(state) {
   return {
@@ -39,6 +40,7 @@ function mapStateToProps(state) {
     encounter: state.updateConsultation.encounter,
     searchDrugList: state.updatePrescription.searchDrugList,
     drugHistoryList: state.updatePrescription.drugHistoryList,
+    prescriptionLatest: state.updatePrescription.prescriptionLatest,
     departmentFavouriteList: state.updatePrescription.departmentFavouriteList,
     closeDialog: state.updateConsultation.closeDialog,
     openSearchProgress: state.updateConsultation.openSearchProgress,
@@ -198,7 +200,7 @@ const style = {
   drug_history_time: {
     padding: '0 0 5px 10px'
   },
-  drug_hisotry_record: {
+  drug_history_record: {
     paddingLeft: 5
   }
 };
@@ -211,6 +213,7 @@ class Prescription extends Component {
       searchValue: '',
       grade: 'adult',
       showDepartmentFavouriteList: this.props.departmentFavouriteList,
+      showDrugHistoryList: this.props.drugHistoryList,
       medicineList: [],
       count: -1,
       isUpdate: false,
@@ -230,8 +233,14 @@ class Prescription extends Component {
     }
     if (nextProps.drugHistoryList !== this.props.drugHistoryList) {
       this.setState({
-        drugHistoryList: nextProps.drugHistoryList
+        showDrugHistoryList: nextProps.drugHistoryList
       });
+    }
+    if (nextProps.prescriptionLatest !== this.props.prescriptionLatest) {
+      nextProps.prescriptionLatest &&
+      JSON.stringify(nextProps.prescriptionLatest) !== '{}' &&
+      this.setState({ isUpdate: true, medicineList: nextProps.prescriptionLatest.prescriptionDrugBoList }) &&
+      this.props.changePrescription( nextProps.prescriptionLatest.prescriptionDrugBoList, true);
     }
   }
   initData = () => {
@@ -240,10 +249,15 @@ class Prescription extends Component {
     };
     this.props.dispatch({ type: 'GET_DEPARTMENTAL_FAVOURITE', params });
     this.getDrugList();
+    this.getPrescription();
   };
   getDrugList = () => {
     const params = { patientId: this.props.appointmentSelect.patientId };
     this.props.dispatch({ type: 'GET_DRUG_HISTORY', params });
+  };
+  getPrescription = () => {
+    const params = { encounterId: this.props.encounter.encounterId };
+    this.props.dispatch({ type: 'GET_PRESCRIPTION', params });
   };
   // show all the group && checked
   collapseIngredient = id => {
@@ -269,12 +283,11 @@ class Prescription extends Component {
     const prescriptionDrugList = this.state.medicineList;
     if (this.state.isUpdate) {
       const params = {
-        prescription,
+        oldPrescription: prescription,
         newPrescriptionDrugList: prescriptionDrugList,
-        oldPrescriptionDrugList: this.props.drugHistoryList
+        oldPrescriptionDrugList: this.props.prescriptionLatest.prescriptionDrugBoList
       };
-      console.log(params);
-      // this.props.dispatch({type: 'UPDATE_ORDER', params});
+      this.props.dispatch({type: 'UPDATE_ORDER', params});
     } else {
       const params = {
         prescription,
@@ -321,30 +334,24 @@ class Prescription extends Component {
       showDepartmentFavouriteList: departmentFavouriteList,
       medicineList
     });
+    this.props.changePrescription(medicineList, this.state.isUpdate);
   };
   // click ‘copy’ to add medicine
-  clickCheckbox = (groupId, drugId) => {
-    let departmentFavouriteList = _.cloneDeep(
-      this.state.showDepartmentFavouriteList
-    );
-    let departmentFavourite = _.find(departmentFavouriteList, item => {
-      return item.drugFavouriteGroupId === groupId;
-    });
-    if (departmentFavourite.drugFavouriteGroupDrugDtoList) {
-      let drug = _.find(
-        departmentFavourite.drugFavouriteGroupDrugDtoList,
-        item => {
-          return item.drugId === drugId;
-        }
+  clickCheckbox = (index, ind) => {
+    if(this.state.tabValue === 0) {
+      let departmentFavouriteList = _.cloneDeep(
+        this.state.showDepartmentFavouriteList
       );
-      if (drug) {
-        drug.checked = !drug.checked;
-      }
+      departmentFavouriteList[index].drugFavouriteGroupDrugDtoList[ind].checked = !departmentFavouriteList[index].drugFavouriteGroupDrugDtoList[ind].checked;
+      this.setState({ showDepartmentFavouriteList: departmentFavouriteList });
+    } else {
+      let drugHistoryList = _.cloneDeep(this.state.showDrugHistoryList);
+      drugHistoryList[index].prescriptionDrugBoList[ind].checked = !drugHistoryList[index].prescriptionDrugBoList[ind].checked;
+      this.setState({showDrugHistoryList: drugHistoryList});
     }
-    this.setState({ showDepartmentFavouriteList: departmentFavouriteList });
   };
   copy = () => {
-    if(this.state.tabValue === 0) {
+    if (this.state.tabValue === 0) {
       let departmentFavouriteList = _.cloneDeep(
         this.state.showDepartmentFavouriteList
       );
@@ -358,26 +365,29 @@ class Prescription extends Component {
         });
       let medicineList = oldMedicineList.concat(checkedList);
       this.setState({ medicineList });
+      this.props.changePrescription(medicineList, this.state.isUpdate);
     } else {
-      // let drugHistoryList = _.cloneDeep(
-      //   this.props.drugHistoryList
-      // );
-      // let oldMedicineList = _.cloneDeep(this.state.medicineList);
-      // let checkedList = [];
-      // drugHistoryList.length > 0 &&
-      //   _.forEach(drugHistoryList, item => {
-      //     _.forEach(item.drugFavouriteGroupDrugDtoList, eve => {
-      //       eve.checked && checkedList.push(eve);
-      //     });
-      //   });
-      // let medicineList = oldMedicineList.concat(checkedList);
-      // this.setState({ medicineList });
+      let drugHistoryList = _.cloneDeep(
+        this.state.showDrugHistoryList
+      );
+      let oldMedicineList = _.cloneDeep(this.state.medicineList);
+      let checkedList = [];
+      drugHistoryList.length > 0 &&
+        _.forEach(drugHistoryList, item => {
+          _.forEach(item.prescriptionDrugBoList, eve => {
+            eve.checked && checkedList.push(eve);
+          });
+        });
+      let medicineList = oldMedicineList.concat(checkedList);
+      this.setState({ medicineList });
+      this.props.changePrescription(medicineList, this.state.isUpdate);
     }
   };
   removeMedicine = index => {
     let oldMedicineList = _.cloneDeep(this.state.medicineList);
     oldMedicineList.splice(index, 1);
     this.setState({ medicineList: oldMedicineList });
+    this.props.changePrescription(oldMedicineList, this.state.isUpdate);
   };
   /* Problems */
   searchDrugList = () => {
@@ -462,6 +472,7 @@ class Prescription extends Component {
       medicineList: oldMedicineList,
       searchValue: ''
     });
+    this.props.changePrescription(oldMedicineList, this.state.isUpdate);
   };
   render() {
     const { classes } = this.props;
@@ -486,21 +497,21 @@ class Prescription extends Component {
                 onChange={(event, value) => this.setState({ tabValue: value })}
                 indicatorColor={'primary'}
                 textColor={'primary'}
-                style={{borderBottom: '1px solid rgba(0,0,0,0.2)'}}
+                style={{ borderBottom: '1px solid rgba(0,0,0,0.2)' }}
             >
               <Tab
                   label="Departmental Favourite"
                   style={{ minWidth: 140, width: 140 }}
               />
-              <Tab label="Drug Histiry" style={{ minWidth: 140, width: 140 }} />
+              <Tab label="Drug History" style={{ minWidth: 140, width: 140 }} />
             </Tabs>
             {this.state.tabValue === 0 && (
               <Typography component="div" className={classes.left_warp_tab}>
                 {this.state.showDepartmentFavouriteList.length > 0
-                  ? this.state.showDepartmentFavouriteList.map(item => (
+                  ? this.state.showDepartmentFavouriteList.map((item, index) => (
                       <Typography
                           component="div"
-                          key={item.drugFavouriteGroupId}
+                          key={index}
                           className={classes.department_favourite_item}
                           draggable="true"
                           onDragStart={(...arg) =>
@@ -536,9 +547,9 @@ class Prescription extends Component {
                           </Typography>
                         </FormGroup>
                         {item.isCollapse
-                          ? item.drugFavouriteGroupDrugDtoList.map(eve => (
+                          ? item.drugFavouriteGroupDrugDtoList.map((eve, ind) => (
                               <FormGroup
-                                  key={eve.drugId}
+                                  key={ind}
                                   row
                                   className={
                                   classes.left_warp_favourite_ingredient
@@ -550,10 +561,7 @@ class Prescription extends Component {
                                     color="default"
                                     value={`${eve.drugId}${eve.tradeName}`}
                                     onClick={() =>
-                                    this.clickCheckbox(
-                                      item.drugFavouriteGroupId,
-                                      eve.drugId
-                                    )
+                                    this.clickCheckbox(index, ind)
                                   }
                                 />
                                 <Typography
@@ -576,42 +584,43 @@ class Prescription extends Component {
             )}
             {this.state.tabValue === 1 && (
               <Typography component="div" className={classes.drug_history_tab}>
-                <Typography
-                    component="div"
-                    className={classes.drug_history_item}
-                >
-                  <Typography
-                      conponent="div"
-                      className={classes.drug_history_time}
-                  >
-                    2019-01-02 FCS
-                  </Typography>
-                    <FormGroup
-                        // key={eve.drugId}
-                        row
-                        className={classes.drug_hisotry_record}
+                {this.state.showDrugHistoryList.length > 0 &&
+                  this.state.showDrugHistoryList.map((item, index) => (
+                    <Typography
+                        key={index}
+                        component="div"
+                        className={classes.drug_history_item}
                     >
-                      <Checkbox
-                          className={classes.department_favourite_check}
-                          // checked={eve.checked || false}
-                          color="default"
-                        //   value={`${eve.drugId}${eve.tradeName}`}
-                        //   onClick={() =>
-                        //   this.clickCheckbox(
-                        //     item.drugFavouriteGroupId,
-                        //     eve.drugId
-                        //   )
-                        // }
-                      />
                       <Typography
-                          component="div"
-                          color="primary"
-                          className={classes.department_favourite_item_detail}
+                          conponent="div"
+                          className={classes.drug_history_time}
                       >
-                        Panadol(paracetamol)tablet<br />oral: 500mg qid for 1 week
+                        {moment(item.prescription.createDate).format('DD MMM YYYY')} {item.prescription.clinicName}
                       </Typography>
-                    </FormGroup>
-                </Typography>
+                      {
+                        item.prescriptionDrugBoList && item.prescriptionDrugBoList.length > 0 && item.prescriptionDrugBoList.map((eve, ind) =>
+                        <FormGroup key={ind} row className={classes.drug_history_record}>
+                        <Checkbox
+                            className={classes.department_favourite_check}
+                            checked={eve.checked || false}
+                            color="default"
+                            value={`${eve.drugId}${eve.tradeName}`}
+                            onClick={() => this.clickCheckbox(index, ind)
+                          }
+                        />
+                        <Typography
+                            component="div"
+                            color="primary"
+                            className={classes.department_favourite_item_detail}
+                        >
+                          {eve.tradeName}({eve.ingredient}) inj -<br />
+                          {eve.regimenLine}
+                        </Typography>
+                      </FormGroup>
+                    )
+                      }
+                      </Typography>
+                  ))}
               </Typography>
             )}
           </Typography>

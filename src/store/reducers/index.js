@@ -256,14 +256,24 @@ const updateConsultation = (state = consultationState, action = {}) => {
 const prescriptionState = {
   departmentFavouriteList: [],
   drugHistoryList: [],
-  searchDrugList: []
+  searchDrugList: [],
+  prescriptionLatest: {}
 };
 const updatePrescription = (state = prescriptionState, action = {}) => {
   switch (action.type) {
     case 'UPDATE_DRUG_LIST':
       return { ...state, searchDrugList: action.searchDrugList };
-    case 'UPDATE_DRUG_HISTORY':
-      return { ...state, drugHistoryList: action.drugHistoryList };
+    case 'UPDATE_DRUG_HISTORY':{
+      let drugHistoryList = action.drugHistoryList;
+      drugHistoryList.length > 0 && _.forEach(drugHistoryList, item => {
+        item.prescriptionDrugBoList && item.prescriptionDrugBoList.length > 0 && _.forEach(item.prescriptionDrugBoList, eve => {
+          eve.checked = false;
+        });
+      });
+      return { ...state, drugHistoryList };
+    }
+    case 'UPDATE_PRESCRIPTION':
+      return { ...state, prescriptionLatest: action.data };
     case 'UPDATE_DEPARTMENTAL_FAVOURITE': {
       let departmentFavouriteList = action.departmentFavouriteList;
       if(departmentFavouriteList.length > 0) {

@@ -562,13 +562,40 @@ function* getDrugHistory() {
           drugHistoryList: data.data
         });
       } else {
-        console.log(data.errorMessage);
+        yield put({
+          type: 'UPDATE_DRUG_HISTORY',
+          drugHistoryList: []
+        });
       }
     } catch (error) {
       console.log(error);
     }
   }
 }
+function* getPrescription() {
+  while (true) {
+    let { params } = yield take('GET_PRESCRIPTION');
+    try {
+      let { data } = yield call(axios.get, '/order/getPrescription', {
+        params: params
+      }); //阻塞，请求后台数据
+      if (data.success) {
+        yield put({
+          type: 'UPDATE_PRESCRIPTION',
+          data: data.data
+        });
+      } else {
+        yield put({
+          type: 'UPDATE_PRESCRIPTION',
+          data: {}
+        });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+}
+
 function* saveOrder() {
   while (true) {
     let { params } = yield take('SAVE_ORDER');
@@ -673,4 +700,5 @@ export default function* rootSaga() {
   yield fork(searchDrugList);
   yield fork(saveOrder);
   yield fork(updateOrder);
+  yield fork(getPrescription);
 }
