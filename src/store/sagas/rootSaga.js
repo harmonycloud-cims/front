@@ -472,7 +472,7 @@ function* getClinicNote() {
 function* saveConsultation() {
   while (true) {
     let { params } = yield take('SAVE_CONSULTATION');
-    yield put({ type: 'OPEN_CONSULTATION_LOADING', data: true });
+    yield put({ type: 'OPEN_CONSULTATION_LOADING', data: true, saveName: 'note' });
     try {
       let { data } = yield call(axios.post, '/bff/insert', params); //阻塞，请求后台数据
       if (data.success) {
@@ -491,7 +491,7 @@ function* saveConsultation() {
 function* updateConsultation() {
   while (true) {
     let { params } = yield take('UPDATE_CONSULTATION');
-    yield put({ type: 'OPEN_CONSULTATION_LOADING', data: true });
+    yield put({ type: 'OPEN_CONSULTATION_LOADING', data: true, saveName: 'note' });
     try {
       let { data } = yield call(axios.post, '/bff/update', params); //阻塞，请求后台数据
       if (data.success) {
@@ -599,7 +599,7 @@ function* getPrescription() {
 function* saveOrder() {
   while (true) {
     let { params } = yield take('SAVE_ORDER');
-    yield put({ type: 'OPEN_CONSULTATION_LOADING', data: true });
+    yield put({ type: 'OPEN_CONSULTATION_LOADING', data: true, saveName: 'prescription' });
     try {
       let { data } = yield call(axios.post, '/order/saveOrder', params); //阻塞，请求后台数据
       if (data.success) {
@@ -618,7 +618,7 @@ function* saveOrder() {
 function* updateOrder() {
   while (true) {
     let { params } = yield take('UPDATE_ORDER');
-    yield put({ type: 'OPEN_CONSULTATION_LOADING', data: true });
+    yield put({ type: 'OPEN_CONSULTATION_LOADING', data: true, saveName: 'prescription' });
     try {
       let { data } = yield call(axios.post, '/order/updateOrder', params); //阻塞，请求后台数据
       if (data.success) {
@@ -659,7 +659,7 @@ function* searchDrugList() {
 function* nextPatient() {
   while (true) {
     let { params } = yield take('NEXT_PATIENT');
-    yield put({ type: 'OPEN_CONSULTATION_LOADING', data: true });
+    yield put({ type: 'OPEN_CONSULTATION_LOADING', data: true, saveName: 'nextPatient' });
     try {
       let { data } = yield call(axios.post, '/bff/nextPatient', params); //阻塞，请求后台数据
       if (data.success) {

@@ -18,9 +18,6 @@ import {
   Paper,
   MenuItem,
   Divider,
-  Dialog,
-  DialogActions,
-  DialogContent,
   IconButton,
   CircularProgress
 } from '@material-ui/core';
@@ -28,21 +25,11 @@ import { Close, ArrowLeft, ArrowRight, Remove, Search } from '@material-ui/icons
 import { withStyles } from '@material-ui/core/styles';
 import _ from 'lodash';
 import moment from 'moment';
-import timg from '../../images/timg.gif';
 
 function mapStateToProps(state) {
   return {
-    medicalRecordList: state.updateConsultation.medicalRecordList,
-    templateList: state.updateConsultation.templateList,
-    chronicProblemList: state.updateConsultation.chronicProblemList,
     diagnosisProblemList: state.updateConsultation.diagnosisProblemList,
-    encounter: state.updateConsultation.encounter,
-    clinicNote: state.updateConsultation.clinicNote,
-    attendingProblemList: state.updateConsultation.attendingProblemList,
-    closeDialog: state.updateConsultation.closeDialog,
-    openSearchProgress: state.updateConsultation.openSearchProgress,
-    prescriptionLatest: state.updatePrescription.prescriptionLatest,
-    consulationErrorMessage: state.updateConsultation.consulationErrorMessage
+    openSearchProgress: state.updateConsultation.openSearchProgress
   };
 }
 const style = {
@@ -221,31 +208,23 @@ class Note extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      medicalRecordList: this.props.medicalRecordList,
+      medicalRecordList: _.cloneDeep(this.props.medicalRecordList),
       medicalRecord: {},
-      templateList: this.props.templateList,
-      clinicalNotesOrigin: '',
-      clinicalNotes: '',
-      chronicProblemListOrigin: [],
-      chronicProblemList: [],
-      attendingProblemListOrigin: [],
-      attendingProblemList: [],
+      templateList: _.cloneDeep(this.props.templateList),
+      clinicalNotes: _.cloneDeep(this.props.clinicalNotes),
+      chronicProblemList: _.cloneDeep(this.props.chronicProblemList),
+      attendingProblemList: _.cloneDeep(this.props.attendingProblemList),
+
       searchValue: '',
-      open: false,
-      selectDiagnosis: {},
+      open: false, // open search result
+      selectDiagnosis: {}, //select to add attendancePromlemList
+
       ifTransfer: 0, //0表示attending Problem 和chronicProblem不能互相copy，1.attending->chronic, 2.chronic->attending
-      isUpdate: false,
       openDiag: false,
-      count: -1
+      count: -1   //keyboard select;
     };
   }
-  componentDidMount() {
-    this.initData(this.props);
-  }
   UNSAFE_componentWillReceiveProps(nextProps) {
-    if (nextProps.appointmentSelect !== this.props.appointmentSelect) {
-      this.initData(nextProps);
-    }
     // medicalRecordList记录
     if (nextProps.medicalRecordList !== this.props.medicalRecordList) {
       let medicalRecord = {};
@@ -270,78 +249,30 @@ class Note extends Component {
     // chronicProblem
     if (nextProps.chronicProblemList !== this.props.chronicProblemList) {
       let chronicProblemList = _.cloneDeep(nextProps.chronicProblemList);
-      this.setState({
-        chronicProblemList,
-        chronicProblemListOrigin: chronicProblemList
-      });
-      this.props.changeNote(this.state.attendingProblemList, chronicProblemList, this.state.clinicalNotes, this.state.isUpdate);
-    }
-    // encounter
-    if (nextProps.encounter !== this.props.encounter) {
-      if (nextProps.encounter && JSON.stringify(nextProps.encounter) !== '{}') {
-        let params = { encounterId: nextProps.encounter.encounterId };
-        this.props.dispatch({ type: 'GET_CLINIC_NOTE', params });
-        this.props.dispatch({ type: 'GET_ATTENDING_PROBLEM', params });
-        this.props.dispatch({ type: 'GET_PRESCRIPTION', params });
-      }
+      this.setState({chronicProblemList});
     }
     // clinicalNotes
-    if (nextProps.clinicNote !== this.props.clinicNote) {
-      let clinicalNotes = '';
-      let isUpdate = false;
-      if (nextProps.clinicNote) {
-        if(nextProps.clinicNote.noteContent) {
-          clinicalNotes = _.cloneDeep(nextProps.clinicNote.noteContent);
-        }
-        isUpdate = true;
-      }
-      this.setState({
-        clinicalNotes,
-        clinicalNotesOrigin: clinicalNotes,
-        isUpdate
-      });
-      this.props.changeNote(this.state.attendingProblemList, this.state.chronicProblemList, clinicalNotes, isUpdate);
+    if (nextProps.clinicalNotes !== this.props.clinicalNotes) {
+      this.setState({clinicalNotes: _.cloneDeep(nextProps.clinicalNotes)});
     }
     // attendingProblem
     if (nextProps.attendingProblemList !== this.props.attendingProblemList) {
       let attendingProblemList = _.cloneDeep(nextProps.attendingProblemList);
-      this.setState({
-        attendingProblemList,
-        attendingProblemListOrigin: attendingProblemList
-      });
-      this.props.changeNote(attendingProblemList, this.state.chronicProblemList, this.state.clinicalNotes, this.state.isUpdate);
-    }
-    if (nextProps.prescriptionLatest !== this.props.prescriptionLatest) {
-      nextProps.prescriptionLatest &&
-      JSON.stringify(nextProps.prescriptionLatest) !== '{}' &&
-      this.props.changePrescription( nextProps.prescriptionLatest.prescriptionDrugBoList, true);
-    }
-    if (nextProps.first !== this.props.first) {
-      this.initData(nextProps);
+      this.setState({attendingProblemList});
     }
   }
-  initData = (props) => {
-    if(props.first) {
-      const { appointmentSelect } = props;
-      const patientId = appointmentSelect.patientId;
-      const params = { patientId };
-      const params1 = { clinicId: appointmentSelect.clinicId };
-      const params2 = { appointmentId: appointmentSelect.appointmentId };
-      this.props.dispatch({ type: 'GET_MEDICAL_RECORD', params });
-      this.props.dispatch({ type: 'GET_TEMPLATE', params: params1 });
-      this.props.dispatch({ type: 'GET_CHRONICPROBLEM', params });
-      this.props.dispatch({ type: 'GET_ENCOUNTERID', params: params2 });
-      this.props.firstEnter();
-    } else {
-      const { attendingProblemList, chronicProblemList, clinicNotes, isUpdate } = props;
-      this.setState({
-        clinicNotes,
-        chronicProblemList,
-        attendingProblemList,
-        isUpdate
-      });
-    }
-  }
+  changeMedicalRecord = medicalRecord => {
+    this.setState({ medicalRecord });
+  };
+
+  // change clinicalNotes
+  copy = () => {
+    let notes = this.state.medicalRecord.noteContent;
+    let clinicalNotes = _.cloneDeep(this.state.clinicalNotes);
+    clinicalNotes = clinicalNotes + notes;
+    this.setState({ clinicalNotes });
+    this.props.changeNote(this.state.attendingProblemList, this.state.chronicProblemList, clinicalNotes);
+  };
   changeCheck = (e, checked, item) => {
     let templateList = _.cloneDeep(this.state.templateList);
     let clinicalNotes = '';
@@ -355,109 +286,15 @@ class Note extends Component {
       }
     });
     this.setState({ templateList, clinicalNotes });
-    this.props.changeNote(this.state.attendingProblemList, this.state.chronicProblemList, clinicalNotes, this.state.isUpdate);
-  };
-  changeMedicalRecord = medicalRecord => {
-    this.setState({ medicalRecord });
+    this.props.changeNote(this.state.attendingProblemList, this.state.chronicProblemList, clinicalNotes);
   };
   editClinicalNotes = e => {
     this.setState({ clinicalNotes: e.target.value });
-    this.props.changeNote(this.state.attendingProblemList, this.state.chronicProblemList, e.target.value, this.state.isUpdate);
+    this.props.changeNote(this.state.attendingProblemList, this.state.chronicProblemList, e.target.value);
   };
-  save = () => {
-    const patientId = this.props.appointmentSelect.patientId;
-    const encounterId = this.props.encounter.encounterId;
-    const attendingDiagnosisList = [];
-    const chronicDiagnosisList = [];
-    const clinicalNote = {
-      encounterId,
-      noteContent: this.state.clinicalNotes,
-      patientId,
-      recordType: 'Dr Note'
-    };
-    if (this.state.isUpdate) {
-      _.forEach(this.state.attendingProblemList, item => {
-        let attendingProblem = {
-          diagnosisId: item.diagnosisId,
-          encounterId,
-          patientId
-        };
-        _.forEach(this.props.attendingProblemList, eve => {
-          if(item.diagnosisId === eve.diagnosisId){
-            attendingProblem.id = eve.attendingDiagnosisId;
-          }
-        });
-        attendingDiagnosisList.push(attendingProblem);
-      });
-      _.forEach(this.state.chronicProblemList, item => {
-        let chronicProblem = {
-          status: item.status,
-          diagnosisId: item.diagnosisId,
-          encounterId,
-          patientId
-        };
-        _.forEach(this.props.chronicProblemList, eve => {
-          if(item.diagnosisId === eve.diagnosisId){
-            chronicProblem.id = eve.chronicDiagnosisId;
-          }
-        });
-        chronicDiagnosisList.push(chronicProblem);
-      });
-      const params = {
-        newAttendingDiagnosisList: attendingDiagnosisList,
-        newChronicDiagnosisList: chronicDiagnosisList,
-        newClinicalNote: clinicalNote,
-        oldAttendingDiagnosisList: this.props.attendingProblemList,
-        oldChronicDiagnosisList: this.props.chronicProblemList,
-        oldClinicalNote: this.props.clinicNote
-      };
-      this.props.dispatch({ type: 'UPDATE_CONSULTATION', params: params });
-      this.setState({ openDiag: true });
-    } else {
-      _.forEach(this.state.attendingProblemList, item => {
-        attendingDiagnosisList.push({
-          diagnosisId: item.diagnosisId,
-          encounterId,
-          patientId
-        });
-      });
-      _.forEach(this.state.chronicProblemList, item => {
-        chronicDiagnosisList.push({
-          status: item.status,
-          diagnosisId: item.diagnosisId,
-          encounterId,
-          patientId
-        });
-      });
-      const params = {
-        attendingDiagnosisList,
-        chronicDiagnosisList,
-        clinicalNote
-      };
-      this.props.dispatch({ type: 'SAVE_CONSULTATION', params });
-      this.setState({ openDiag: true });
-    }
-  };
-  clear = () => {
-    this.setState({ isUpdate: false });
-    this.props.close();
-    // let clinicalNotes = _.cloneDeep(this.state.clinicalNotesOrigin);
-    // let attendingProblemList = _.cloneDeep(this.state.attendingProblemListOrigin);
-    // let chronicProblemList = _.cloneDeep(this.state.chronicProblemListOrigin);
-    // let templateList = _.cloneDeep(this.state.templateList);
-    // _.forEach(templateList, item => {
-    //   item.checked = false;
-    // });
-    // this.setState({templateList, clinicalNotes, attendingProblemList, chronicProblemList, searchValue: ''});
-  };
-  copy = () => {
-    let notes = this.state.medicalRecord.noteContent;
-    let clinicalNotes = _.cloneDeep(this.state.clinicalNotes);
-    clinicalNotes = clinicalNotes + notes;
-    this.setState({ clinicalNotes });
-    this.props.changeNote(this.state.attendingProblemList, this.state.chronicProblemList, clinicalNotes, this.state.isUpdate);
-  };
+
   /* Problems */
+  // search
   changeSearchValue = e => {
     this.setState({ searchValue: e.target.value, count: -1 });
     if (e.target.value !== '') {
@@ -547,7 +384,7 @@ class Note extends Component {
       }
     }
     this.setState({ open: false, attendingProblemList, searchValue: '' });
-    this.props.changeNote(attendingProblemList, this.state.chronicProblemList, this.state.clinicalNotes, this.state.isUpdate);
+    this.props.changeNote(attendingProblemList, this.state.chronicProblemList, this.state.clinicalNotes);
   };
   // index 0表示在attendingProblems里， 1表示在chronic Problems
   clickDiagnosis = (selectDiagnosis, index) => {
@@ -584,14 +421,14 @@ class Note extends Component {
         return item.diagnosisId === diagnosis.diagnosisId;
       });
       this.setState({ attendingProblemList });
-    this.props.changeNote(attendingProblemList, this.state.chronicProblemList, this.state.clinicalNotes, this.state.isUpdate);
+    this.props.changeNote(attendingProblemList, this.state.chronicProblemList, this.state.clinicalNotes);
     } else {
       let chronicProblemList = _.cloneDeep(this.state.chronicProblemList);
       _.remove(chronicProblemList, item => {
         return item.diagnosisId === diagnosis.diagnosisId;
       });
       this.setState({ chronicProblemList });
-    this.props.changeNote(this.state.attendingProblemList, chronicProblemList, this.state.clinicalNotes, this.state.isUpdate);
+    this.props.changeNote(this.state.attendingProblemList, chronicProblemList, this.state.clinicalNotes);
     }
   };
   transfer = index => {
@@ -616,7 +453,7 @@ class Note extends Component {
       attendingProblemList,
       chronicProblemList
     });
-    this.props.changeNote(attendingProblemList, chronicProblemList, this.state.clinicalNotes, this.state.isUpdate);
+    this.props.changeNote(attendingProblemList, chronicProblemList, this.state.clinicalNotes);
   };
   changeChronicPromblemStatus = (e, chronicProblem) => {
     let chronicProblemList = _.cloneDeep(this.state.chronicProblemList);
@@ -625,15 +462,9 @@ class Note extends Component {
     });
     problem.status = e.target.value;
     this.setState({ chronicProblemList });
-    this.props.changeNote(this.state.attendingProblemList, chronicProblemList, this.state.clinicalNotes, this.state.isUpdate);
+    this.props.changeNote(this.state.attendingProblemList, chronicProblemList, this.state.clinicalNotes);
   };
-  closeDialog = () => {
-    this.setState({ openDiag: false, isUpdate: true }, () => this.initData(this.props));
-    this.props.dispatch({ type: 'CLOSE_CONSULTATION_LOADING' });
-    this.props.changeNote(this.state.attendingProblemList, this.state.chronicProblemList, this.state.clinicalNotes, true);
-    // this.props.dispatch({ type: 'CLEAR_CONSULTATION_LOADING' });
-    // this.props.close();
-  };
+
   render() {
     const { classes } = this.props;
     return (
@@ -942,7 +773,7 @@ class Note extends Component {
                     variant="outlined"
                     color="primary"
                     size="small"
-                    onClick={this.clear}
+                    onClick={this.props.cancel}
                 >
                   {' '}
                   Cancel{' '}
@@ -953,7 +784,7 @@ class Note extends Component {
                     variant="outlined"
                     color="primary"
                     size="small"
-                    onClick={this.save}
+                    onClick={() => this.props.save('note')}
                 >
                   {' '}
                   Save{' '}
@@ -962,20 +793,6 @@ class Note extends Component {
             </Grid>
           </Typography>
         </Grid>
-        <Dialog open={this.state.openDiag && this.props.closeDialog}>
-          {this.props.consulationErrorMessage === '' ? (
-            <img src={timg} alt={''} />
-          ) : (
-            <DialogContent>{this.props.consulationErrorMessage}</DialogContent>
-          )}
-          {this.props.consulationErrorMessage !== '' ? (
-            <DialogActions>
-              <Button onClick={this.closeDialog} color="primary">
-                OK
-              </Button>
-            </DialogActions>
-          ) : null}
-        </Dialog>
       </Grid>
     );
   }

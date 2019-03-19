@@ -16,10 +16,7 @@ import {
   IconButton,
   Tabs,
   Radio,
-  Checkbox,
-  Dialog,
-  DialogActions,
-  DialogContent
+  Checkbox
 } from '@material-ui/core';
 import {
   Search,
@@ -31,20 +28,12 @@ import {
 } from '@material-ui/icons';
 import { withStyles } from '@material-ui/core/styles';
 import _ from 'lodash';
-import timg from '../../images/timg.gif';
 import moment from 'moment';
 
 function mapStateToProps(state) {
   return {
-    clinic: state.updateUser.clinic,
-    encounter: state.updateConsultation.encounter,
     searchDrugList: state.updatePrescription.searchDrugList,
-    drugHistoryList: state.updatePrescription.drugHistoryList,
-    prescriptionLatest: state.updatePrescription.prescriptionLatest,
-    departmentFavouriteList: state.updatePrescription.departmentFavouriteList,
-    closeDialog: state.updateConsultation.closeDialog,
-    openSearchProgress: state.updateConsultation.openSearchProgress,
-    consulationErrorMessage: state.updateConsultation.consulationErrorMessage
+    openSearchProgress: state.updateConsultation.openSearchProgress
   };
 }
 const style = {
@@ -208,72 +197,34 @@ class Prescription extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      // change tabs
       tabValue: 0,
-      open: false, //search result
+
+      // search drug
+      open: false,
       searchValue: '',
-      grade: 'adult',
-      showDepartmentFavouriteList: this.props.departmentFavouriteList,
-      showDrugHistoryList: this.props.drugHistoryList,
-      medicineList: [],
       count: -1,
-      isUpdate: false,
-      openDiag: false
+      grade: 'adult',
+
+      showDepartmentFavouriteList: _.cloneDeep(this.props.departmentFavouriteList),
+      showDrugHistoryList: _.cloneDeep(this.props.drugHistoryList),
+      medicineList: _.cloneDeep(this.props.medicineList)
     };
-  }
-  componentDidMount() {
-    this.initData();
-    this.props.firstEnter();
   }
   UNSAFE_componentWillReceiveProps(nextProps) {
-    if (
-      nextProps.departmentFavouriteList !== this.props.departmentFavouriteList
-    ) {
-      this.setState({
-        showDepartmentFavouriteList: nextProps.departmentFavouriteList
-      });
+    if (nextProps.departmentFavouriteList !== this.props.departmentFavouriteList) {
+      this.setState({showDepartmentFavouriteList: nextProps.departmentFavouriteList});
     }
     if (nextProps.drugHistoryList !== this.props.drugHistoryList) {
-      this.setState({
-        showDrugHistoryList: nextProps.drugHistoryList
-      });
+      this.setState({showDrugHistoryList: nextProps.drugHistoryList});
     }
-    if (nextProps.prescriptionLatest !== this.props.prescriptionLatest) {
-      nextProps.prescriptionLatest &&
-      JSON.stringify(nextProps.prescriptionLatest) !== '{}' &&
-      nextProps.prescriptionLatest.prescriptionDrugBoList &&
-      this.setState({ isUpdate: true, medicineList: nextProps.prescriptionLatest.prescriptionDrugBoList }) &&
-      this.props.changePrescription( nextProps.prescriptionLatest.prescriptionDrugBoList, true);
+    if (nextProps.medicineList !== this.props.medicineList) {
+      this.setState({medicineList: nextProps.medicineList});
     }
   }
-  initData = () => {
-    if(this.props.first) {
-      this.getDepartmentFavourite();
-      this.getDrugList();
-      this.getPrescription();
-    } else {
-      const { isUpdate, medicineList } = this.props;
-      this.setState({isUpdate, medicineList});
-    }
-  };
-  getDepartmentFavourite = () => {
-    const params = {
-      clinicId: this.props.clinic.clinicId
-    };
-    this.props.dispatch({ type: 'GET_DEPARTMENTAL_FAVOURITE', params });
-  }
-  getDrugList = () => {
-    const params = { patientId: this.props.appointmentSelect.patientId };
-    this.props.dispatch({ type: 'GET_DRUG_HISTORY', params });
-  };
-  getPrescription = () => {
-    const params = { encounterId: this.props.encounter.encounterId };
-    this.props.dispatch({ type: 'GET_PRESCRIPTION', params });
-  };
   // show all the group && checked
   collapseIngredient = id => {
-    let departmentFavouriteList = _.cloneDeep(
-      this.state.showDepartmentFavouriteList
-    );
+    let departmentFavouriteList = _.cloneDeep(this.state.showDepartmentFavouriteList);
     let departmentFavourite = _.find(departmentFavouriteList, item => {
       return item.drugFavouriteGroupId === id;
     });
@@ -282,39 +233,6 @@ class Prescription extends Component {
       item.checked = !item.checked;
     });
     this.setState({ showDepartmentFavouriteList: departmentFavouriteList });
-  };
-  save = () => {
-    const prescription = {
-      clinicId: this.props.clinic.clinicId,
-      clinicName: this.props.clinic.clinicName,
-      encounterId: this.props.encounter.encounterId,
-      patientId: this.props.appointmentSelect.patientId
-    };
-    const prescriptionDrugList = this.state.medicineList;
-    if (this.state.isUpdate) {
-      const params = {
-        oldPrescription: prescription,
-        newPrescriptionDrugList: prescriptionDrugList,
-        oldPrescriptionDrugList: this.props.prescriptionLatest.prescriptionDrugBoList
-      };
-      this.props.dispatch({type: 'UPDATE_ORDER', params});
-    } else {
-      const params = {
-        prescription,
-        prescriptionDrugList
-      };
-      this.props.dispatch({ type: 'SAVE_ORDER', params });
-    }
-    this.setState({ openDiag: true });
-  };
-  closeDialog = () => {
-    this.setState({ openDiag: false, isUpdate: true }, () => this.initData());
-    this.props.dispatch({ type: 'CLOSE_CONSULTATION_LOADING' });
-    this.props.changePrescription(this.state.medicineList, true);
-  };
-  clear = () => {
-    this.setState({ isUpdate: false });
-    this.props.close();
   };
   // 'drag and drop' add medicine
   drag = (e, id) => {
@@ -345,8 +263,9 @@ class Prescription extends Component {
       showDepartmentFavouriteList: departmentFavouriteList,
       medicineList
     });
-    this.props.changePrescription(medicineList, this.state.isUpdate);
+    this.props.changePrescription(medicineList);
   };
+
   // click ‘copy’ to add medicine
   clickCheckbox = (index, ind) => {
     if(this.state.tabValue === 0) {
@@ -376,7 +295,7 @@ class Prescription extends Component {
         });
       let medicineList = oldMedicineList.concat(checkedList);
       this.setState({ medicineList });
-      this.props.changePrescription(medicineList, this.state.isUpdate);
+      this.props.changePrescription(medicineList);
     } else {
       let drugHistoryList = _.cloneDeep(
         this.state.showDrugHistoryList
@@ -391,16 +310,17 @@ class Prescription extends Component {
         });
       let medicineList = oldMedicineList.concat(checkedList);
       this.setState({ medicineList });
-      this.props.changePrescription(medicineList, this.state.isUpdate);
+      this.props.changePrescription(medicineList);
     }
   };
   removeMedicine = index => {
     let oldMedicineList = _.cloneDeep(this.state.medicineList);
     oldMedicineList.splice(index, 1);
     this.setState({ medicineList: oldMedicineList });
-    this.props.changePrescription(oldMedicineList, this.state.isUpdate);
+    this.props.changePrescription(oldMedicineList);
   };
-  /* Problems */
+
+  /* search */
   searchDrugList = () => {
     if (this.state.searchValue !== '') {
       const params = {
@@ -483,8 +403,9 @@ class Prescription extends Component {
       medicineList: oldMedicineList,
       searchValue: ''
     });
-    this.props.changePrescription(oldMedicineList, this.state.isUpdate);
+    this.props.changePrescription(oldMedicineList);
   };
+
   render() {
     const { classes } = this.props;
     return (
@@ -792,7 +713,7 @@ class Prescription extends Component {
                 variant="outlined"
                 color="primary"
                 size="small"
-                onClick={this.clear}
+                onClick={this.props.cancel}
             >
               {' '}
               Cancel{' '}
@@ -803,27 +724,13 @@ class Prescription extends Component {
                 variant="outlined"
                 color="primary"
                 size="small"
-                onClick={this.save}
+                onClick={() => this.props.save('prescription')}
             >
               {' '}
               Save{' '}
             </Button>
           </Typography>
         </Grid>
-        <Dialog open={this.state.openDiag && this.props.closeDialog}>
-          {this.props.consulationErrorMessage === '' ? (
-            <img src={timg} alt={''} />
-          ) : (
-            <DialogContent>{this.props.consulationErrorMessage}</DialogContent>
-          )}
-          {this.props.consulationErrorMessage !== '' ? (
-            <DialogActions>
-              <Button onClick={this.closeDialog} color="primary">
-                OK
-              </Button>
-            </DialogActions>
-          ) : null}
-        </Dialog>
       </Grid>
     );
   }

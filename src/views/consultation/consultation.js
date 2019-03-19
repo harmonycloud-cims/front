@@ -18,7 +18,10 @@ import {
   InputBase,
   IconButton,
   Paper,
-  Typography
+  Typography,
+  Dialog,
+  DialogActions,
+  DialogContent
 } from '@material-ui/core';
 import { Search } from '@material-ui/icons';
 import _ from 'lodash';
@@ -28,6 +31,7 @@ import Patient from '../compontent/patient';
 import Note from './note';
 import Prescription from './prescription';
 import { InlineDatePicker } from 'material-ui-pickers';
+import timg from '../../images/timg.gif';
 
 function mapStateToProps(state) {
   return {
@@ -46,8 +50,14 @@ function mapStateToProps(state) {
     chronicProblemList: state.updateConsultation.chronicProblemList,
     clinicNote: state.updateConsultation.clinicNote,
     attendingProblemList: state.updateConsultation.attendingProblemList,
-
-    prescriptionLatest: state.updatePrescription.prescriptionLatest
+    // get prescription information
+    departmentFavouriteList: state.updatePrescription.departmentFavouriteList,
+    drugHistoryList: state.updatePrescription.drugHistoryList,
+    prescriptionLatest: state.updatePrescription.prescriptionLatest,
+    // dialog
+    closeDialog: state.updateConsultation.closeDialog,
+    saveName: state.updateConsultation.saveName,
+    consulationErrorMessage: state.updateConsultation.consulationErrorMessage
   };
 }
 const style = {
@@ -106,21 +116,21 @@ class Consulatation extends Component {
       page: 0,
       // select patinet
       ifSelected: false,
-      patinetIndex: 0,
+      patientIndex: 0,
       appointmentSelect: {}, // SELECT which attendanceList
 
       // select detail
       tabValue: 0,
       // clinicNote page
-      isNoteFirst: true,
       isNoteUpdate: false,
       newAttendingDiagnosisList: [],
       newChronicDiagnosisList: [],
       newClinicalNote: '',
       // prescription page
-      isPrescriptionFirst: true,
       isPrescriptionUpdate: false,
-      newPrescriptionDrugList: []
+      newPrescriptionDrugList: [],
+
+      openDiag: false
     };
   }
 
@@ -135,6 +145,49 @@ class Consulatation extends Component {
     // select页面attendaceList变换
     if (nextProps.attendanceList !== this.props.attendanceList) {
       this.setState({ attendanceList: nextProps.attendanceList, value: '' });
+    }
+    // chronicProblem
+    if (nextProps.chronicProblemList !== this.props.chronicProblemList) {
+      let newChronicDiagnosisList = _.cloneDeep(nextProps.chronicProblemList);
+      this.setState({newChronicDiagnosisList});
+    }
+    // encounter
+    if (nextProps.encounter !== this.props.encounter) {
+      if (nextProps.encounter && JSON.stringify(nextProps.encounter) !== '{}') {
+        let params = { encounterId: nextProps.encounter.encounterId };
+        this.props.dispatch({ type: 'GET_CLINIC_NOTE', params });
+        this.props.dispatch({ type: 'GET_ATTENDING_PROBLEM', params });
+        this.props.dispatch({ type: 'GET_PRESCRIPTION', params });
+      }
+    }
+    // clinicalNotes
+    if (nextProps.clinicNote !== this.props.clinicNote) {
+      let newClinicalNote = '';
+      let isNoteUpdate = false;
+      if (nextProps.clinicNote) {
+        if(nextProps.clinicNote.noteContent) {
+          newClinicalNote = _.cloneDeep(nextProps.clinicNote.noteContent);
+        }
+        isNoteUpdate = true;
+      }
+      this.setState({newClinicalNote, isNoteUpdate});
+    }
+    // attendingProblem
+    if (nextProps.attendingProblemList !== this.props.attendingProblemList) {
+      let newAttendingDiagnosisList = _.cloneDeep(nextProps.attendingProblemList);
+      this.setState({newAttendingDiagnosisList});
+    }
+    // prescription
+    if (nextProps.prescriptionLatest !== this.props.prescriptionLatest) {
+      let isPrescriptionUpdate = false;
+      let newPrescriptionDrugList = [];
+      if(nextProps.prescriptionLatest && JSON.stringify(nextProps.prescriptionLatest) !== '{}') {
+        isPrescriptionUpdate = true;
+        if(nextProps.prescriptionLatest.prescriptionDrugBoList) {
+          newPrescriptionDrugList = nextProps.prescriptionLatest.prescriptionDrugBoList;
+        }
+      }
+      this.setState({isPrescriptionUpdate, newPrescriptionDrugList});
     }
   }
   componentWillUnmount() {
@@ -183,12 +236,37 @@ class Consulatation extends Component {
   // select patient
   select = (item, index) => {
     const patientId = item.patientId;
-    const params = { patientId };
-    this.props.dispatch({ type: 'GET_PATINET_BY_ID', params });
+    this.params = { patientId };
+    this.params1 = { clinicId: item.clinicId };
+    this.params2 = { appointmentId: item.appointmentId };
+    // patient
+    this.props.dispatch({ type: 'GET_PATINET_BY_ID', params: this.params });
+    // clinicNote page
+    this.props.dispatch({ type: 'GET_MEDICAL_RECORD', params: this.params });
+    this.props.dispatch({ type: 'GET_TEMPLATE', params: this.params1 });
+    this.props.dispatch({ type: 'GET_CHRONICPROBLEM', params: this.params });
+    this.props.dispatch({ type: 'GET_ENCOUNTERID', params: this.params2 });
+    // prescription page
+    this.props.dispatch({ type: 'GET_DEPARTMENTAL_FAVOURITE', params: this.params1 });
+    this.props.dispatch({ type: 'GET_DRUG_HISTORY', params: this.params });
     this.setState({ ifSelected: true, tabValue: 0, appointmentSelect: item, patientIndex: index });
   };
+  getClinicNote = () => {
+    this.params3 = { encounterId: this.props.encounter.encounterId };
+    // clinicNote page
+    this.props.dispatch({ type: 'GET_MEDICAL_RECORD', params: this.params });
+    this.props.dispatch({ type: 'GET_CHRONICPROBLEM', params: this.params });
+    this.props.dispatch({ type: 'GET_CLINIC_NOTE', params: this.params3 });
+    this.props.dispatch({ type: 'GET_ATTENDING_PROBLEM', params: this.params3 });
+  }
+  getPrescription = () => {
+    this.params3 = { encounterId: this.props.encounter.encounterId };
+    // prescription page
+    this.props.dispatch({ type: 'GET_DRUG_HISTORY', params: this.params });
+    this.props.dispatch({ type: 'GET_PRESCRIPTION', params: this.params3 });
+  }
   closePatient = () => {
-    this.setState({ patient: {}, ifSelected: false, appointmentSelect: {}, isPrescriptionFirst: true, isNoteFirst: true });
+    this.setState({ifSelected: false, appointmentSelect: {}, patientIndex: 0});
     this.initData();
   };
   // 快捷搜索
@@ -210,18 +288,123 @@ class Consulatation extends Component {
     this.setState({ tabValue: value });
   };
 
-  changePrescription = (newPrescriptionDrugList, isUpdate) => {
+  changePrescription = (newPrescriptionDrugList) => {
     let prescriptionDrugList = [];
     if(newPrescriptionDrugList) {
       prescriptionDrugList = newPrescriptionDrugList;
     }
-    this.setState({newPrescriptionDrugList: prescriptionDrugList, isPrescriptionUpdate: isUpdate});
+    this.setState({newPrescriptionDrugList: prescriptionDrugList});
   }
-  changeNote = (newAttendingDiagnosisList, newChronicDiagnosisList, newClinicalNote, isNoteUpdate) => {
+  changeNote = (newAttendingDiagnosisList, newChronicDiagnosisList, newClinicalNote) => {
     this.setState({
-      newAttendingDiagnosisList, newChronicDiagnosisList, newClinicalNote, isNoteUpdate
+      newAttendingDiagnosisList, newChronicDiagnosisList, newClinicalNote
     });
   }
+
+  save = (name) => {
+    const encounterId = this.props.encounter.encounterId;
+    const patientId = this.state.appointmentSelect.patientId;
+    if(name === 'note') {
+      const attendingDiagnosisList = [];
+      const chronicDiagnosisList = [];
+      const clinicalNote = {
+        encounterId,
+        noteContent: this.state.newClinicalNote,
+        patientId,
+        recordType: 'Dr Note'
+      };
+      if (this.state.isNoteUpdate) {
+        _.forEach(this.state.newAttendingDiagnosisList, item => {
+          let attendingProblem = {
+            diagnosisId: item.diagnosisId,
+            encounterId,
+            patientId
+          };
+          _.forEach(this.props.attendingProblemList, eve => {
+            if(item.diagnosisId === eve.diagnosisId){
+              attendingProblem.id = eve.attendingDiagnosisId;
+            }
+          });
+          attendingDiagnosisList.push(attendingProblem);
+        });
+        _.forEach(this.state.newChronicDiagnosisList, item => {
+          let chronicProblem = {
+            status: item.status,
+            diagnosisId: item.diagnosisId,
+            encounterId,
+            patientId
+          };
+          _.forEach(this.props.chronicProblemList, eve => {
+            if(item.diagnosisId === eve.diagnosisId){
+              chronicProblem.id = eve.chronicDiagnosisId;
+            }
+          });
+          chronicDiagnosisList.push(chronicProblem);
+        });
+        const params = {
+          newAttendingDiagnosisList: attendingDiagnosisList,
+          newChronicDiagnosisList: chronicDiagnosisList,
+          newClinicalNote: clinicalNote,
+          oldAttendingDiagnosisList: this.props.attendingProblemList,
+          oldChronicDiagnosisList: this.props.chronicProblemList,
+          oldClinicalNote: this.props.clinicNote
+        };
+        this.props.dispatch({ type: 'UPDATE_CONSULTATION', params: params });
+        this.setState({ openDiag: true });
+      } else {
+        _.forEach(this.state.newAttendingDiagnosisList, item => {
+          attendingDiagnosisList.push({
+            diagnosisId: item.diagnosisId,
+            encounterId,
+            patientId
+          });
+        });
+        _.forEach(this.state.newChronicDiagnosisList, item => {
+          chronicDiagnosisList.push({
+            status: item.status,
+            diagnosisId: item.diagnosisId,
+            encounterId,
+            patientId
+          });
+        });
+        const params = {
+          attendingDiagnosisList,
+          chronicDiagnosisList,
+          clinicalNote
+        };
+        this.props.dispatch({ type: 'SAVE_CONSULTATION', params });
+        this.setState({ openDiag: true, isNoteUpdate: true });
+      }
+    } else if(name === 'prescription') {
+      const prescription = {
+        clinicId: this.props.clinic.clinicId,
+        clinicName: this.props.clinic.clinicName,
+        encounterId,
+        patientId
+      };
+      const prescriptionDrugList = this.state.newPrescriptionDrugList;
+      if (this.state.isPrescriptionUpdate) {
+        const params = {
+          oldPrescription: this.props.prescriptionLatest.prescription,
+          newPrescriptionDrugList: prescriptionDrugList,
+          oldPrescriptionDrugList: this.props.prescriptionLatest.prescriptionDrugBoList
+        };
+        this.props.dispatch({type: 'UPDATE_ORDER', params});
+      } else {
+        const params = {
+          prescription,
+          prescriptionDrugList
+        };
+        this.props.dispatch({ type: 'SAVE_ORDER', params });
+      }
+      this.setState({ openDiag: true, isPrescriptionUpdate: true });
+    }
+  }
+  cancel = () => {
+    this.setState({isNoteUpdate: false, isPrescriptionUpdate: false});
+    this.closePatient();
+  }
+
   /* nextPatient */
   nextPatient = () => {
     // save
@@ -281,11 +464,10 @@ class Consulatation extends Component {
       oldPrescription,
       oldPrescriptionDrugList
     };
-    console.log(params);
+    this.setState({openDiag: true});
     this.props.dispatch({type: 'NEXT_PATIENT', params});
-    this.getnextPatient();
   }
-  getnextPatient = () => {
+  getNextPatient = () => {
     // next patient
     let attend = [];
     _.forEach(this.props.attendanceList, item => {
@@ -297,9 +479,20 @@ class Consulatation extends Component {
     } else {
       index = index + 1;
     }
-    this.setState({isNoteFirst: true, isPrescriptionFirst: true});
     this.select(this.props.attendanceList[index], index);
   }
+  closeDialog = () => {
+    this.setState({ openDiag: false });
+    this.props.dispatch({ type: 'CLOSE_CONSULTATION_LOADING' });
+    if(this.props.saveName === 'note') {
+      this.getClinicNote();
+    } else if(this.props.saveName === 'prescription') {
+      this.getPrescription();
+    } else {
+      this.getNextPatient();
+    }
+  };
+
   render() {
     const { classes } = this.props;
     return (
@@ -325,27 +518,31 @@ class Consulatation extends Component {
             </Typography>
             {this.state.tabValue === 0 && (
               <Note
-                  close={this.closePatient}
-                  appointmentSelect={this.state.appointmentSelect}
+                  appointmentSelect={this.state.appointmentSelect}    // 123456789012345678912345678
                   changeNote={this.changeNote}
-                  first={this.state.isNoteFirst}
+
+                  medicalRecordList={this.props.medicalRecordList}
+                  templateList={this.props.templateList}
                   attendingProblemList={this.state.newAttendingDiagnosisList}
                   chronicProblemList={this.state.newChronicDiagnosisList}
-                  clinicNotes={this.state.newClinicalNote}
-                  firstEnter={() => this.setState({isNoteFirst: false})}
-                  isUpdate={this.state.isNoteUpdate}
-                  changePrescription={this.changePrescription}
+                  clinicalNotes={this.state.newClinicalNote}
+
+                  save={this.save}
+                  cancel={this.cancel}
               />
             )}
             {this.state.tabValue === 1 && (
               <Prescription
                   changePrescription={this.changePrescription}
-                  close={this.closePatient}
-                  appointmentSelect={this.state.appointmentSelect}
-                  first={this.state.isPrescriptionFirst}
+                  appointmentSelect={this.state.appointmentSelect}// 123456789012345678912345678
+
+                  departmentFavouriteList={this.props.departmentFavouriteList}
+                  drugHistoryList={this.props.drugHistoryList}
                   medicineList={this.state.newPrescriptionDrugList}
-                  firstEnter={() => this.setState({isPrescriptionFirst: false})}
                   isUpdate={this.state.isPrescriptionUpdate}
+
+                  save={this.save}
+                  cancel={this.cancel}
               />
             )}
           </div>
@@ -580,6 +777,20 @@ class Consulatation extends Component {
             </Grid>
           </Grid>
         )}
+        <Dialog open={this.state.openDiag && this.props.closeDialog}>
+          {this.props.consulationErrorMessage === '' ? (
+            <img src={timg} alt={''} />
+          ) : (
+            <DialogContent>{this.props.consulationErrorMessage}</DialogContent>
+          )}
+          {this.props.consulationErrorMessage !== '' ? (
+            <DialogActions>
+              <Button onClick={this.closeDialog} color="primary">
+                OK
+              </Button>
+            </DialogActions>
+          ) : null}
+        </Dialog>
       </div>
     );
   }

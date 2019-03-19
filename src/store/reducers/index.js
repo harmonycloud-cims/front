@@ -205,11 +205,12 @@ const consultationState = {
   chronicProblemList: [],
   diagnosisProblemList: [],
   encounter: {},
-  clinicNote: '',
+  clinicNote: null,
   attendingProblemList: [],
   closeDialog: false,
   consulationErrorMessage: '',
-  openSearchProgress: false
+  openSearchProgress: false,
+  saveName: 'note' //note, prescription, nextPatient
 };
 const updateConsultation = (state = consultationState, action = {}) => {
   switch (action.type) {
@@ -242,7 +243,7 @@ const updateConsultation = (state = consultationState, action = {}) => {
     case 'UPDATE_ATTENDING_PROBLEM':
       return { ...state, attendingProblemList: action.attendingProblemList };
     case 'OPEN_CONSULTATION_LOADING':
-      return { ...state, consulationErrorMessage: '', closeDialog: action.data };
+      return { ...state, consulationErrorMessage: '', closeDialog: action.data, saveName: action.saveName };
     case 'CONSULTATION_LOADING_SUCCESS':
       return { ...state, consulationErrorMessage: 'Save successful' };
     case 'CLOSE_CONSULTATION_LOADING':
