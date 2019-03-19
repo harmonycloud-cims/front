@@ -656,6 +656,25 @@ function* fectchDrugList(action) {
 function* searchDrugList() {
   yield takeLatest('SEARCH_DRUG_LIST', fectchDrugList);
 }
+function* nextPatient() {
+  while (true) {
+    let { params } = yield take('NEXT_PATIENT');
+    yield put({ type: 'OPEN_CONSULTATION_LOADING', data: true });
+    try {
+      let { data } = yield call(axios.post, '/bff/nextPatient', params); //阻塞，请求后台数据
+      if (data.success) {
+        yield put({ type: 'CONSULTATION_LOADING_SUCCESS' });
+      } else {
+        yield put({
+          type: 'CONSULTATION_LOADING_ERROR',
+          data: data.errorMessage
+        });
+      }
+    } catch (error) {
+      yield put({ type: 'CONSULTATION_LOADING_ERROR', data: error });
+    }
+  }
+}
 
 export default function* rootSaga() {
   yield fork(getClinicList);
@@ -701,4 +720,5 @@ export default function* rootSaga() {
   yield fork(saveOrder);
   yield fork(updateOrder);
   yield fork(getPrescription);
+  yield fork(nextPatient);
 }

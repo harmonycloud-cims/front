@@ -31,14 +31,23 @@ import { InlineDatePicker } from 'material-ui-pickers';
 
 function mapStateToProps(state) {
   return {
-    patientList: state.updatePatient.patientList,
-    patientById: state.updatePatient.patientById,
+    clinic: state.updateUser.clinic,
     clinicList: state.updateUser.clinicList,
     allRoomList: state.updateUser.allRoomList,
+    // select patient
+    patientById: state.updatePatient.patientById,
+    // attendanceList
     attendanceList: state.updateAppointment.attendanceList,
+    // get encounterId
+    encounter: state.updateConsultation.encounter,
+    // get clinicNote information
     medicalRecordList: state.updateConsultation.medicalRecordList,
     templateList: state.updateConsultation.templateList,
-    chronicProblemList: state.updateConsultation.chronicProblemList
+    chronicProblemList: state.updateConsultation.chronicProblemList,
+    clinicNote: state.updateConsultation.clinicNote,
+    attendingProblemList: state.updateConsultation.attendingProblemList,
+
+    prescriptionLatest: state.updatePrescription.prescriptionLatest
   };
 }
 const style = {
@@ -85,23 +94,33 @@ class Consulatation extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      // select items
       roomId: '0',
       attendanceStatus: 'All',
-      // date: '15 Mar 2019',
       date: moment(new Date().getTime()).format('DD MMM YYYY'),
+      // attendanceList show
       attendanceList: this.props.attendanceList,
       value: '',
-      ifSelected: false,
-      tabValue: 0,
-      appointmentSelect: {},
+      // pagination
       rowsPerPage: 10,
       page: 0,
-      clinicNote: {},
+      // select patinet
+      ifSelected: false,
       patinetIndex: 0,
-      newPrescriptionDrugList: [],
+      appointmentSelect: {}, // SELECT which attendanceList
+
+      // select detail
+      tabValue: 0,
+      // clinicNote page
+      isNoteFirst: true,
+      isNoteUpdate: false,
       newAttendingDiagnosisList: [],
       newChronicDiagnosisList: [],
-      newClinicalNote: ''
+      newClinicalNote: '',
+      // prescription page
+      isPrescriptionFirst: true,
+      isPrescriptionUpdate: false,
+      newPrescriptionDrugList: []
     };
   }
 
@@ -141,6 +160,7 @@ class Consulatation extends Component {
       this.initData()
     );
   };
+  // change status
   changeAttendanceStatus = (e, checked) => {
     if (checked) {
       this.setState({ attendanceStatus: e.target.value }, () =>
@@ -152,6 +172,14 @@ class Consulatation extends Component {
   changeInformation = (e, name) => {
     this.setState({ [name]: e.target.value }, () => this.initData());
   };
+  /* table pagination 分页 */
+  handleChangePage = (event, page) => {
+    this.setState({ page });
+  };
+  handleChangeRowsPerPage = event => {
+    this.setState({ page: 0, rowsPerPage: event.target.value });
+  };
+
   // select patient
   select = (item, index) => {
     const patientId = item.patientId;
@@ -160,7 +188,7 @@ class Consulatation extends Component {
     this.setState({ ifSelected: true, tabValue: 0, appointmentSelect: item, patientIndex: index });
   };
   closePatient = () => {
-    this.setState({ patient: {}, ifSelected: false, appointmentSelect: {} });
+    this.setState({ patient: {}, ifSelected: false, appointmentSelect: {}, isPrescriptionFirst: true, isNoteFirst: true });
     this.initData();
   };
   // 快捷搜索
@@ -177,32 +205,88 @@ class Consulatation extends Component {
     this.setState({ value: e.target.value, attendanceList: attend });
   };
 
-  /* consultation */
   // tab change
   changeTabValue = (event, value) => {
     this.setState({ tabValue: value });
   };
 
-  /* table pagination */
-  handleChangePage = (event, page) => {
-    this.setState({ page });
-  };
-  handleChangeRowsPerPage = event => {
-    this.setState({ page: 0, rowsPerPage: event.target.value });
-  };
-
-  /* willUnmount */
-  clinicNoteWill = (params) => {
-    this.setState({clinicNote: params});
-  }
-
   changePrescription = (newPrescriptionDrugList, isUpdate) => {
-    console.log(newPrescriptionDrugList);
-    this.setState({newPrescriptionDrugList, isPrescriptionUpdate: isUpdate});
+    let prescriptionDrugList = [];
+    if(newPrescriptionDrugList) {
+      prescriptionDrugList = newPrescriptionDrugList;
+    }
+    this.setState({newPrescriptionDrugList: prescriptionDrugList, isPrescriptionUpdate: isUpdate});
   }
-
+  changeNote = (newAttendingDiagnosisList, newChronicDiagnosisList, newClinicalNote, isNoteUpdate) => {
+    this.setState({
+      newAttendingDiagnosisList, newChronicDiagnosisList, newClinicalNote, isNoteUpdate
+    });
+  }
   /* nextPatient */
   nextPatient = () => {
+    // save
+    const encounterId = this.props.encounter.encounterId;
+    const patientId = this.state.appointmentSelect.patientId;
+    let newAttendingDiagnosisList = [];
+    _.forEach(this.state.newAttendingDiagnosisList, item => {
+      newAttendingDiagnosisList.push({
+        diagnosisId: item.diagnosisId,
+        encounterId,
+        patientId
+      });
+    });
+    let newChronicDiagnosisList = [];
+    _.forEach(this.state.newChronicDiagnosisList, item => {
+      newChronicDiagnosisList.push({
+        status: item.status,
+        diagnosisId: item.diagnosisId,
+        encounterId,
+        patientId
+      });
+    });
+    let newClinicalNote = {
+      encounterId,
+      noteContent: this.state.newClinicalNote,
+      patientId,
+      recordType: 'Dr Note'
+    };
+    let newPrescriptionDrugList = this.state.newPrescriptionDrugList;
+    let oldAttendingDiagnosisList = null;
+    let oldChronicDiagnosisList = null;
+    let oldClinicalNote = null;
+    if(this.state.isNoteUpdate) {
+      oldAttendingDiagnosisList = this.props.attendingProblemList;
+      oldChronicDiagnosisList = this.props.chronicProblemList;
+      oldClinicalNote = this.props.clinicNote;
+    }
+    let oldPrescription = {
+      clinicId: this.props.clinic.clinicId,
+      clinicName: this.props.clinic.clinicName,
+      encounterId,
+      patientId
+    };
+    let oldPrescriptionDrugList = null;
+    if(this.state.isPrescriptionUpdate) {
+      oldPrescription = this.props.prescriptionLatest.prescription;
+      oldPrescriptionDrugList = this.props.prescriptionLatest.prescriptionDrugBoList;
+    }
+    const params = {
+      newAttendingDiagnosisList,
+      newChronicDiagnosisList,
+      newClinicalNote,
+      newPrescriptionDrugList,
+      oldAttendingDiagnosisList,
+      oldChronicDiagnosisList,
+      oldClinicalNote,
+      oldPrescription,
+      oldPrescriptionDrugList
+    };
+    console.log(params);
+    this.props.dispatch({type: 'NEXT_PATIENT', params});
+    this.getnextPatient();
+  }
+  getnextPatient = () => {
+    // next patient
     let attend = [];
     _.forEach(this.props.attendanceList, item => {
       item.attendanceStatus === 'Attend' && attend.push(item);
@@ -213,6 +297,7 @@ class Consulatation extends Component {
     } else {
       index = index + 1;
     }
+    this.setState({isNoteFirst: true, isPrescriptionFirst: true});
     this.select(this.props.attendanceList[index], index);
   }
   render() {
@@ -240,13 +325,28 @@ class Consulatation extends Component {
             </Typography>
             {this.state.tabValue === 0 && (
               <Note
-                  appointmentSelect={this.state.appointmentSelect}
                   close={this.closePatient}
-                  willUnmount={this.clinicNoteWill}
+                  appointmentSelect={this.state.appointmentSelect}
+                  changeNote={this.changeNote}
+                  first={this.state.isNoteFirst}
+                  attendingProblemList={this.state.newAttendingDiagnosisList}
+                  chronicProblemList={this.state.newChronicDiagnosisList}
+                  clinicNotes={this.state.newClinicalNote}
+                  firstEnter={() => this.setState({isNoteFirst: false})}
+                  isUpdate={this.state.isNoteUpdate}
+                  changePrescription={this.changePrescription}
               />
             )}
             {this.state.tabValue === 1 && (
-              <Prescription changePrescription={this.changePrescription} close={this.closePatient} appointmentSelect={this.state.appointmentSelect} />
+              <Prescription
+                  changePrescription={this.changePrescription}
+                  close={this.closePatient}
+                  appointmentSelect={this.state.appointmentSelect}
+                  first={this.state.isPrescriptionFirst}
+                  medicineList={this.state.newPrescriptionDrugList}
+                  firstEnter={() => this.setState({isPrescriptionFirst: false})}
+                  isUpdate={this.state.isPrescriptionUpdate}
+              />
             )}
           </div>
         ) : (

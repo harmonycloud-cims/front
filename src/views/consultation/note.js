@@ -41,6 +41,7 @@ function mapStateToProps(state) {
     attendingProblemList: state.updateConsultation.attendingProblemList,
     closeDialog: state.updateConsultation.closeDialog,
     openSearchProgress: state.updateConsultation.openSearchProgress,
+    prescriptionLatest: state.updatePrescription.prescriptionLatest,
     consulationErrorMessage: state.updateConsultation.consulationErrorMessage
   };
 }
@@ -273,6 +274,7 @@ class Note extends Component {
         chronicProblemList,
         chronicProblemListOrigin: chronicProblemList
       });
+      this.props.changeNote(this.state.attendingProblemList, chronicProblemList, this.state.clinicalNotes, this.state.isUpdate);
     }
     // encounter
     if (nextProps.encounter !== this.props.encounter) {
@@ -280,6 +282,7 @@ class Note extends Component {
         let params = { encounterId: nextProps.encounter.encounterId };
         this.props.dispatch({ type: 'GET_CLINIC_NOTE', params });
         this.props.dispatch({ type: 'GET_ATTENDING_PROBLEM', params });
+        this.props.dispatch({ type: 'GET_PRESCRIPTION', params });
       }
     }
     // clinicalNotes
@@ -297,6 +300,7 @@ class Note extends Component {
         clinicalNotesOrigin: clinicalNotes,
         isUpdate
       });
+      this.props.changeNote(this.state.attendingProblemList, this.state.chronicProblemList, clinicalNotes, isUpdate);
     }
     // attendingProblem
     if (nextProps.attendingProblemList !== this.props.attendingProblemList) {
@@ -305,18 +309,38 @@ class Note extends Component {
         attendingProblemList,
         attendingProblemListOrigin: attendingProblemList
       });
+      this.props.changeNote(attendingProblemList, this.state.chronicProblemList, this.state.clinicalNotes, this.state.isUpdate);
+    }
+    if (nextProps.prescriptionLatest !== this.props.prescriptionLatest) {
+      nextProps.prescriptionLatest &&
+      JSON.stringify(nextProps.prescriptionLatest) !== '{}' &&
+      this.props.changePrescription( nextProps.prescriptionLatest.prescriptionDrugBoList, true);
+    }
+    if (nextProps.first !== this.props.first) {
+      this.initData(nextProps);
     }
   }
   initData = (props) => {
-    const { appointmentSelect } = props;
-    const patientId = appointmentSelect.patientId;
-    const params = { patientId };
-    const params1 = { clinicId: appointmentSelect.clinicId };
-    const params2 = { appointmentId: appointmentSelect.appointmentId };
-    this.props.dispatch({ type: 'GET_MEDICAL_RECORD', params });
-    this.props.dispatch({ type: 'GET_TEMPLATE', params: params1 });
-    this.props.dispatch({ type: 'GET_CHRONICPROBLEM', params });
-    this.props.dispatch({ type: 'GET_ENCOUNTERID', params: params2 });
+    if(props.first) {
+      const { appointmentSelect } = props;
+      const patientId = appointmentSelect.patientId;
+      const params = { patientId };
+      const params1 = { clinicId: appointmentSelect.clinicId };
+      const params2 = { appointmentId: appointmentSelect.appointmentId };
+      this.props.dispatch({ type: 'GET_MEDICAL_RECORD', params });
+      this.props.dispatch({ type: 'GET_TEMPLATE', params: params1 });
+      this.props.dispatch({ type: 'GET_CHRONICPROBLEM', params });
+      this.props.dispatch({ type: 'GET_ENCOUNTERID', params: params2 });
+      this.props.firstEnter();
+    } else {
+      const { attendingProblemList, chronicProblemList, clinicNotes, isUpdate } = props;
+      this.setState({
+        clinicNotes,
+        chronicProblemList,
+        attendingProblemList,
+        isUpdate
+      });
+    }
   }
   changeCheck = (e, checked, item) => {
     let templateList = _.cloneDeep(this.state.templateList);
@@ -331,12 +355,14 @@ class Note extends Component {
       }
     });
     this.setState({ templateList, clinicalNotes });
+    this.props.changeNote(this.state.attendingProblemList, this.state.chronicProblemList, clinicalNotes, this.state.isUpdate);
   };
   changeMedicalRecord = medicalRecord => {
     this.setState({ medicalRecord });
   };
   editClinicalNotes = e => {
     this.setState({ clinicalNotes: e.target.value });
+    this.props.changeNote(this.state.attendingProblemList, this.state.chronicProblemList, e.target.value, this.state.isUpdate);
   };
   save = () => {
     const patientId = this.props.appointmentSelect.patientId;
@@ -429,6 +455,7 @@ class Note extends Component {
     let clinicalNotes = _.cloneDeep(this.state.clinicalNotes);
     clinicalNotes = clinicalNotes + notes;
     this.setState({ clinicalNotes });
+    this.props.changeNote(this.state.attendingProblemList, this.state.chronicProblemList, clinicalNotes, this.state.isUpdate);
   };
   /* Problems */
   changeSearchValue = e => {
@@ -520,6 +547,7 @@ class Note extends Component {
       }
     }
     this.setState({ open: false, attendingProblemList, searchValue: '' });
+    this.props.changeNote(attendingProblemList, this.state.chronicProblemList, this.state.clinicalNotes, this.state.isUpdate);
   };
   // index 0表示在attendingProblems里， 1表示在chronic Problems
   clickDiagnosis = (selectDiagnosis, index) => {
@@ -556,12 +584,14 @@ class Note extends Component {
         return item.diagnosisId === diagnosis.diagnosisId;
       });
       this.setState({ attendingProblemList });
+    this.props.changeNote(attendingProblemList, this.state.chronicProblemList, this.state.clinicalNotes, this.state.isUpdate);
     } else {
       let chronicProblemList = _.cloneDeep(this.state.chronicProblemList);
       _.remove(chronicProblemList, item => {
         return item.diagnosisId === diagnosis.diagnosisId;
       });
       this.setState({ chronicProblemList });
+    this.props.changeNote(this.state.attendingProblemList, chronicProblemList, this.state.clinicalNotes, this.state.isUpdate);
     }
   };
   transfer = index => {
@@ -586,6 +616,7 @@ class Note extends Component {
       attendingProblemList,
       chronicProblemList
     });
+    this.props.changeNote(attendingProblemList, chronicProblemList, this.state.clinicalNotes, this.state.isUpdate);
   };
   changeChronicPromblemStatus = (e, chronicProblem) => {
     let chronicProblemList = _.cloneDeep(this.state.chronicProblemList);
@@ -594,10 +625,12 @@ class Note extends Component {
     });
     problem.status = e.target.value;
     this.setState({ chronicProblemList });
+    this.props.changeNote(this.state.attendingProblemList, chronicProblemList, this.state.clinicalNotes, this.state.isUpdate);
   };
   closeDialog = () => {
     this.setState({ openDiag: false, isUpdate: true }, () => this.initData(this.props));
     this.props.dispatch({ type: 'CLOSE_CONSULTATION_LOADING' });
+    this.props.changeNote(this.state.attendingProblemList, this.state.chronicProblemList, this.state.clinicalNotes, true);
     // this.props.dispatch({ type: 'CLEAR_CONSULTATION_LOADING' });
     // this.props.close();
   };

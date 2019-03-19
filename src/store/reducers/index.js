@@ -264,7 +264,7 @@ const updatePrescription = (state = prescriptionState, action = {}) => {
     case 'UPDATE_DRUG_LIST':
       return { ...state, searchDrugList: action.searchDrugList };
     case 'UPDATE_DRUG_HISTORY':{
-      let drugHistoryList = action.drugHistoryList;
+      let drugHistoryList = action.drugHistoryList ? action.drugHistoryList : [];
       drugHistoryList.length > 0 && _.forEach(drugHistoryList, item => {
         item.prescriptionDrugBoList && item.prescriptionDrugBoList.length > 0 && _.forEach(item.prescriptionDrugBoList, eve => {
           eve.checked = false;
@@ -272,8 +272,9 @@ const updatePrescription = (state = prescriptionState, action = {}) => {
       });
       return { ...state, drugHistoryList };
     }
-    case 'UPDATE_PRESCRIPTION':
+    case 'UPDATE_PRESCRIPTION':{
       return { ...state, prescriptionLatest: action.data };
+    }
     case 'UPDATE_DEPARTMENTAL_FAVOURITE': {
       let departmentFavouriteList = action.departmentFavouriteList;
       if(departmentFavouriteList.length > 0) {

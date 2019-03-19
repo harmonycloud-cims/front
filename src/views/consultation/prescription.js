@@ -222,6 +222,7 @@ class Prescription extends Component {
   }
   componentDidMount() {
     this.initData();
+    this.props.firstEnter();
   }
   UNSAFE_componentWillReceiveProps(nextProps) {
     if (
@@ -239,18 +240,27 @@ class Prescription extends Component {
     if (nextProps.prescriptionLatest !== this.props.prescriptionLatest) {
       nextProps.prescriptionLatest &&
       JSON.stringify(nextProps.prescriptionLatest) !== '{}' &&
+      nextProps.prescriptionLatest.prescriptionDrugBoList &&
       this.setState({ isUpdate: true, medicineList: nextProps.prescriptionLatest.prescriptionDrugBoList }) &&
       this.props.changePrescription( nextProps.prescriptionLatest.prescriptionDrugBoList, true);
     }
   }
   initData = () => {
+    if(this.props.first) {
+      this.getDepartmentFavourite();
+      this.getDrugList();
+      this.getPrescription();
+    } else {
+      const { isUpdate, medicineList } = this.props;
+      this.setState({isUpdate, medicineList});
+    }
+  };
+  getDepartmentFavourite = () => {
     const params = {
       clinicId: this.props.clinic.clinicId
     };
     this.props.dispatch({ type: 'GET_DEPARTMENTAL_FAVOURITE', params });
-    this.getDrugList();
-    this.getPrescription();
-  };
+  }
   getDrugList = () => {
     const params = { patientId: this.props.appointmentSelect.patientId };
     this.props.dispatch({ type: 'GET_DRUG_HISTORY', params });
@@ -300,6 +310,7 @@ class Prescription extends Component {
   closeDialog = () => {
     this.setState({ openDiag: false, isUpdate: true }, () => this.initData());
     this.props.dispatch({ type: 'CLOSE_CONSULTATION_LOADING' });
+    this.props.changePrescription(this.state.medicineList, true);
   };
   clear = () => {
     this.setState({ isUpdate: false });
