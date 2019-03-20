@@ -312,9 +312,11 @@ class Appointment extends Component {
     };
     this.setState({ bookSuccess: true, print: true }, () => {
       this.props.dispatch({ type: 'BOOK_APPOINTMENT', params: this.params });
-      document.body.innerHTML = window.document.getElementById('print').innerHTML;
-      window.print();
-      window.location.reload();
+      // document.body.innerHTML = window.document.getElementById('print').innerHTML;
+      // window.print();
+      // window.location.reload();
+      // const w=window.open('/index/print','_blank');
+      // w.focus();
     });
   };
   closeDialog = () => {

@@ -611,7 +611,7 @@ function* saveOrder() {
         });
       }
     } catch (error) {
-      yield put({ type: 'CONSULTATION_LOADING_ERROR', data: error });
+      yield put({ type: 'CONSULTATION_LOADING_ERROR', data: 'Services error' });
     }
   }
 }
@@ -630,7 +630,7 @@ function* updateOrder() {
         });
       }
     } catch (error) {
-      yield put({ type: 'CONSULTATION_LOADING_ERROR', data: error });
+      yield put({ type: 'CONSULTATION_LOADING_ERROR', data: 'Services error' });
     }
   }
 }

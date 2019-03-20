@@ -209,7 +209,7 @@ class Note extends Component {
     super(props);
     this.state = {
       medicalRecordList: _.cloneDeep(this.props.medicalRecordList),
-      medicalRecord: {},
+      medicalRecord: this.props.medicalRecordList.length && this.props.medicalRecordList.length > 0 ? this.props.medicalRecordList[0] : {},
       templateList: _.cloneDeep(this.props.templateList),
       clinicalNotes: _.cloneDeep(this.props.clinicalNotes),
       chronicProblemList: _.cloneDeep(this.props.chronicProblemList),

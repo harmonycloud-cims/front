@@ -99,8 +99,8 @@ axios.interceptors.response.use(
     } else {
       err.message = '连接服务器失败!';
     }
-    // console.log(err.message);
-    return Promise.reject(err);
+    console.log(err.message, 'wertyuxcvbnm,znmxcvbnmfvbnwsdftgyhuzxcvbyvbuvbnjfwhbidfkajghfajbvkajfb');
+    // return Promise.reject(err);
   }
 );
 
