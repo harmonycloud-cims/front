@@ -27,6 +27,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "server": "webpack-dev-server --open --inline --content-base . --history-api-fallback",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
