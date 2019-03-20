@@ -105,7 +105,7 @@ class Print extends Component {
   print = () => {
     document.body.innerHTML = window.document.getElementById('print').innerHTML;
     window.print();
-    window.close();
+    // window.close();
   }
   render() {
     const { classes } = this.props;
