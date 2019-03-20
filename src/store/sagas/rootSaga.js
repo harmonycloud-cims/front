@@ -311,10 +311,13 @@ function* bookCompareClose() {
 }
 function* bookAppointment() {
   while (true) {
-    let { params } = yield take('BOOK_APPOINTMENT');
+    let { params, patient } = yield take('BOOK_APPOINTMENT');
+    yield put({type: 'BOOK_PRINT', params, patient});
     try {
       yield call(axios.post, '/appointment/book', params); //阻塞，请求后台数据
+      yield put({type: 'OPEN_BOOK_PRINT' });
       yield put({ type: 'BOOK_COMPARE_RESULT_CLOSE' });
+      yield put({type: 'CLOSE_BOOK_PRINT'});
     } catch (error) {
       console.log(error);
     }

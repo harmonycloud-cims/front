@@ -1,6 +1,7 @@
 import { combineReducers } from 'redux';
 import { allMenuList } from '../../services/staticData';
 import _ from 'lodash';
+import { patientBasic, basicPrint } from '../../services/staticData';
 
 global.token = '';
 export const initState = {
@@ -199,6 +200,24 @@ const updateAppointment = (state = appointmentState, action = {}) => {
       return state;
   }
 };
+const bookPrintState = {
+  print: _.cloneDeep(basicPrint),
+  patient: _.cloneDeep(patientBasic),
+  bookPrint: false
+};
+
+const updateBookPrint = (state = bookPrintState, action = {}) => {
+  switch (action.type) {
+    case 'BOOK_PRINT':
+      return { ...state, print: action.params, patient: action.patient };
+    case 'OPEN_BOOK_PRINT':
+      return { ...state, bookPrint: true };
+    case 'CLOSE_BOOK_PRINT':
+      return { ...state, bookPrint: false };
+    default:
+      return state;
+  }
+};
 const consultationState = {
   medicalRecordList: [],
   templateList: [],
@@ -299,6 +318,7 @@ const rootReducer = combineReducers({
   updateLogin,
   updatePatient,
   updateAppointment,
+  updateBookPrint,
   updateConsultation,
   updatePrescription
 });

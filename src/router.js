@@ -18,6 +18,7 @@ const routes = (
   <Switch>
     <Route path="/login" component={Login} />
     <Redirect exact from="/" to="/login" />
+    <Route path="/print" component={Print} />
     {/* <Redirect exact from="/" to="/print" /> */}
     <Route
         path="/index"
@@ -34,7 +35,6 @@ const routes = (
             <Route path="/index/assessment" component={Assessment} />
             <Route path="/index/investigation" component={Investigation} />
             <Route path="/index/result" component={Result} />
-            <Route path="/index/print" component={Print} />
           </Switch>
         </IndexWarp>
       )}

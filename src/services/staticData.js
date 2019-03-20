@@ -394,5 +394,10 @@ export const documentMap = {
   'Re-entry Permit': '香港特別行政區回港證',
   'Two-way Permit': '中華人民共和國往來港澳通行證(雙程証)',
   'eHR document': '電子醫療紀錄文件',
-  'Macao ID card': '澳門身份證'  
+  'Macao ID card': '澳門身份證'
+};
+export const basicPrint = {
+  date: new Date(),
+  encounterTypeName: '',
+  roomName: ''
 };
