@@ -628,16 +628,19 @@ class Prescription extends Component {
                       ))}
                     </Typography>
                     <Divider />
-                    <MenuItem
-                        onClick={() => this.handleClose({})}
-                        className={
-                        this.state.count === -2
-                          ? classes.menu_list_select
-                          : classes.menu_list
-                      }
-                    >
-                      Not Found
-                    </MenuItem>
+                    {
+                      this.props.openSearchProgress ? null :
+                      <MenuItem
+                          onClick={() => this.handleClose({})}
+                          className={
+                          this.state.count === -2
+                            ? classes.menu_list_select
+                            : classes.menu_list
+                        }
+                      >
+                        Not Found
+                      </MenuItem>
+                    }
                   </Paper>
                 </Popper>
               </Paper>

@@ -209,7 +209,7 @@ const bookPrintState = {
 const updateBookPrint = (state = bookPrintState, action = {}) => {
   switch (action.type) {
     case 'BOOK_PRINT':
-      return { ...state, print: action.params, patient: action.patient };
+      return { ...state, print: action.params, patient: action.patient, bookPrint: false };
     case 'OPEN_BOOK_PRINT':
       return { ...state, bookPrint: true };
     case 'CLOSE_BOOK_PRINT':

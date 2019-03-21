@@ -25,6 +25,9 @@ import { Close, ArrowLeft, ArrowRight, Remove, Search } from '@material-ui/icons
 import { withStyles } from '@material-ui/core/styles';
 import _ from 'lodash';
 import moment from 'moment';
+import { getSimpleText } from '../../services/utils';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 function mapStateToProps(state) {
   return {
@@ -32,6 +35,25 @@ function mapStateToProps(state) {
     openSearchProgress: state.updateConsultation.openSearchProgress
   };
 }
+const toolbarOptions = [
+  ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
+  ['blockquote', 'code-block'],
+
+  [{ 'header': 1 }, { 'header': 2 }],               // custom button values
+  [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+  [{ 'script': 'sub'}, { 'script': 'super' }],      // superscript/subscript
+  [{ 'indent': '-1'}, { 'indent': '+1' }],          // outdent/indent
+  [{ 'direction': 'rtl' }],                         // text direction
+
+  [{ 'size': ['small', false, 'large', 'huge'] }],  // custom dropdown
+  [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+
+  [{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
+  [{ 'font': [] }],
+  [{ 'align': [] }],
+
+  ['clean']                                         // remove formatting button
+];
 const style = {
   root: {
     padding: '2px 4px',
@@ -231,6 +253,8 @@ class Note extends Component {
       if (nextProps.medicalRecordList.length > 0) {
         medicalRecord = nextProps.medicalRecordList[0];
       }
+      medicalRecord.noteContent = medicalRecord.noteContent && getSimpleText(medicalRecord.noteContent);
+      // document.getElementById('textRecord').innerHTML = medicalRecord.noteContent;
       this.setState({
         medicalRecord: medicalRecord,
         medicalRecordList: nextProps.medicalRecordList
@@ -262,6 +286,7 @@ class Note extends Component {
     }
   }
   changeMedicalRecord = medicalRecord => {
+    medicalRecord.noteContent = medicalRecord.noteContent && getSimpleText(medicalRecord.noteContent);
     this.setState({ medicalRecord });
   };
 
@@ -281,16 +306,16 @@ class Note extends Component {
     });
     template.checked = checked;
     _.forEach(templateList, item => {
-      if (item.checked) {
-        clinicalNotes += item.templateContent + '\n';
+      if (item.checked){
+        clinicalNotes += item.templateContent + '<br/>';
       }
     });
     this.setState({ templateList, clinicalNotes });
     this.props.changeNote(this.state.attendingProblemList, this.state.chronicProblemList, clinicalNotes);
   };
-  editClinicalNotes = e => {
-    this.setState({ clinicalNotes: e.target.value });
-    this.props.changeNote(this.state.attendingProblemList, this.state.chronicProblemList, e.target.value);
+  editClinicalNotes = value => {
+    this.setState({ clinicalNotes: value });
+    this.props.changeNote(this.state.attendingProblemList, this.state.chronicProblemList, value);
   };
 
   /* Problems */
@@ -514,6 +539,7 @@ class Note extends Component {
             Record Detail
           </Typography>
           <Typography
+              id="textRecord"
               component="div"
               className={classes.table}
               style={{ padding: 15, minHeight: 220, height: 'calc(100vh - 600px)', color: '#3f51b5' }}
@@ -596,16 +622,19 @@ class Note extends Component {
                         ))}
                       </Typography>
                       <Divider />
-                      <MenuItem
-                          onClick={() => this.handleClose({})}
-                          className={
-                            this.state.count === -2
-                              ? classes.menu_list_select
-                              : classes.menu_list
-                          }
-                      >
-                        Not Found
+                      {
+                        this.props.openSearchProgress ? null :
+                        <MenuItem
+                            onClick={() => this.handleClose({})}
+                            className={
+                              this.state.count === -2
+                                ? classes.menu_list_select
+                                : classes.menu_list
+                            }
+                        >
+                            Not Found
                       </MenuItem>
+                      }
                     </Paper>
                   </Popper>
                   </Paper>
@@ -719,12 +748,18 @@ class Note extends Component {
                 <Typography component="div" className={classes.title}>
                   Clinical Note
                 </Typography>
-                <Typography
+                <ReactQuill
+                    modules={{toolbar: toolbarOptions}}
+                    value={this.state.clinicalNotes}
+                    onChange={this.editClinicalNotes}
+                    style={{height: 'calc(100vh - 666px)', minHeight: 186}}
+                />
+                {/* <Typography
                     component="textarea"
                     className={classes.clinical_note_box}
                     value={this.state.clinicalNotes}
                     onChange={this.editClinicalNotes}
-                />
+                /> */}
               </Grid>
               <Grid item xs={3}>
                 <Typography component="div" className={classes.title}>

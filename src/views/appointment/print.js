@@ -102,15 +102,20 @@ class Print extends Component {
       });
     }
   }
-  print = () => {
+  printOnclick = () => {
+    // console.log(123);
+    // // let old = document.body.innerHTML;
     document.body.innerHTML = window.document.getElementById('print').innerHTML;
+    // window.print(window.document.getElementById('print').innerHTML);
     window.print();
+    // document.body.innerHTML = old;
+    window.location.reload();
     // window.close();
   }
   render() {
     const { classes } = this.props;
     return (
-      <Typography component="div">
+      <Typography component="div" id="all">
         <Typography component="div" className={classes.print_root} id="print">
           <Typography component="div" className={classes.print}>
             <Typography component="div" className={classes.print_title}>
@@ -119,7 +124,7 @@ class Print extends Component {
               </Typography>
               <Typography component="div" className={classes.print_title_right}>
                 <Typography className={classes.print_title_right_content}>公務員診所</Typography>
-                <Typography className={classes.print_title_right_content}>Families Clinic</Typography>
+                <Typography className={classes.print_title_right_content}>{this.props.print.clinicName}</Typography>
                 <Typography className={classes.print_title_right_content}>覆診預約便條 - Appointment Slip</Typography>
                 <Typography className={classes.print_title_right_content} style={{fontWeight: 500}}>九龍公務員診所紅磡庇利街42號九龍城健康中心6樓</Typography>
                 <Typography className={classes.print_title_right_content}>6/F, Kowloon City Health Center 42 Bailey Street, Hung Hom</Typography>
@@ -234,7 +239,7 @@ class Print extends Component {
           </Typography>
         </Typography>
         <Typography component="div" className={classes.print} style={{border: 0}}>
-          <Button onClick={this.print} color="primary" variant="outlined" style={{float: 'right'}}> 打 印 </Button>
+          <Button onClick={() => this.printOnclick()} color="primary" variant="outlined" style={{float: 'right'}}> 打 印 </Button>
         </Typography>
       </Typography>
     );

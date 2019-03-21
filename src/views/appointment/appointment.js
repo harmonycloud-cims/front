@@ -503,7 +503,7 @@ class Appointment extends Component {
                             keyboard
                             invalidDateMessage={'輸入的日期無效'}
                             minDateMessage={'請選擇正確的日期'}
-                            // minDate={new Date()}
+                            minDate={new Date()}
                             value={moment(this.state.date, 'DD MMM YYYY')}
                             onChange={this.changeDate}
                         />
