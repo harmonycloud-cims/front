@@ -19,7 +19,7 @@ export const initState = {
 const updateUser = (state = initState, action = {}) => {
   switch (action.type) {
     case 'UPDATE_LOGIN_USER':
-      _.forEach(action.data.data.user.accessRights, item => {
+      _.forEach(action.data.data.user.accessRightList, item => {
         _.forEach(allMenuList, eve => {
           if (item.accessRightName === eve.accessRightName) {
             item.icon = eve.icon;
@@ -28,11 +28,11 @@ const updateUser = (state = initState, action = {}) => {
           }
         });
       });
-      action.data.data.user.accessRights.unshift(allMenuList[0]);
+      action.data.data.user.accessRightList.unshift(allMenuList[0]);
       return {
         ...state,
         user: action.data.data.user,
-        menuList: action.data.data.user.accessRights,
+        menuList: action.data.data.user.accessRightList,
         ifLogin: true
       };
     case 'UPDATE_CLINICLIST':
@@ -73,8 +73,8 @@ const loginState = {
 };
 const updateLogin = (state = loginState, action = {}) => {
   switch (action.type) {
-    case 'UPDATE_LOGIN_USER':
-      return { ...state, loginMessage: '', loginMessageShow: false };
+    // case 'UPDATE_LOGIN_USER':
+    //   return { ...state, loginMessage: '', loginMessageShow: false };
     case 'LOGIN_ERROR':
       return { ...state, loginMessage: action.error, loginMessageShow: true };
     default:
@@ -118,7 +118,14 @@ const updateAppointment = (state = appointmentState, action = {}) => {
     case 'CALENDARLIST': {
       let dateList = action.dateList;
       let numberWeek = action.numberWeek;
-      let calendarList = action.data;
+      let calendarList = [];
+      let rooms = _.keys(action.data);
+      _.forEach(rooms, item => {
+        calendarList.push({
+          roomId: parseInt(item, 10),
+          appointmentQuotaquotabo: action.data[item]
+        });
+      });
       _.forEach(calendarList, item => {
         item.appointmentCalendar = [];
         _.forEach(dateList, eve => {
@@ -147,7 +154,7 @@ const updateAppointment = (state = appointmentState, action = {}) => {
           });
         }
       }
-      return { ...state, calendarList: action.data };
+      return { ...state, calendarList };
     }
     case 'BOOK_HISTORY':
       return { ...state, bookHistoryList: action.data };
@@ -274,6 +281,8 @@ const updateConsultation = (state = consultationState, action = {}) => {
   }
 };
 const prescriptionState = {
+  errorMessageStatus: false,
+  errorMessage: '',
   departmentFavouriteList: [],
   drugHistoryList: [],
   searchDrugList: [],
@@ -281,6 +290,10 @@ const prescriptionState = {
 };
 const updatePrescription = (state = prescriptionState, action = {}) => {
   switch (action.type) {
+    case 'OPEN_ERROR_MESSAGE':
+      return { ...state, errorMessageStatus: true, errorMessage: action.error };
+    case 'CLOSE_ERROR_MESSAGE':
+      return { ...state, errorMessageStatus: false, errorMessage: '' };
     case 'UPDATE_DRUG_LIST':
       return { ...state, searchDrugList: action.searchDrugList };
     case 'UPDATE_DRUG_HISTORY':{

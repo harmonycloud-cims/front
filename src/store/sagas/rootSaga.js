@@ -25,7 +25,7 @@ function* getEncounterType() {
         console.log(data.errorMessage);
       }
     } catch (error) {
-      console.log(error);
+      yield put({type: 'OPEN_ERROR_MESSAGE', error: 'Service error'});
     }
   }
 }
@@ -55,7 +55,7 @@ function* getRoom() {
         console.log(data.errorMessage);
       }
     } catch (error) {
-      console.log(error);
+      yield put({type: 'OPEN_ERROR_MESSAGE', error: 'Service error'});
     }
   }
 }
@@ -74,7 +74,7 @@ function* getAllRoom() {
         console.log(data.errorMessage);
       }
     } catch (error) {
-      console.log(error);
+      yield put({type: 'OPEN_ERROR_MESSAGE', error: 'Service error'});
     }
   }
 }
@@ -96,7 +96,7 @@ function* getClinicList() {
         console.log(data.errorMessage);
       }
     } catch (error) {
-      console.log(error);
+      yield put({type: 'OPEN_ERROR_MESSAGE', error: 'Service error'});
     }
   }
 }
@@ -124,15 +124,23 @@ function* refreshToken() {
     yield take('REFRESH_TOKEN');
     let oldToken = window.sessionStorage.getItem('token');
     let params = { oldToken: window.sessionStorage.getItem('token') };
-    let { data } = yield call(axios.post, '/user/refreshToken', params, {
-      transformRequest: [
-        function() {
-          let ret = 'oldToken=' + oldToken;
-          return ret;
-        }
-      ]
-    });
-    window.sessionStorage.setItem('token', data.data);
+    try {
+      let { data } = yield call(axios.post, '/user/refreshToken', params, {
+        transformRequest: [
+          function() {
+            let ret = 'oldToken=' + oldToken;
+            return ret;
+          }
+        ]
+      });
+      if(data.refresh) {
+        window.sessionStorage.setItem('token', data.data);
+      } else {
+        yield put({type: 'OPEN_ERROR_MESSAGE', error: 'Service error'});
+      }
+    } catch (error) {
+      yield put({type: 'OPEN_ERROR_MESSAGE', error: 'Service error'});
+    }
   }
 }
 function* doLogin() {
@@ -149,7 +157,7 @@ function* doLogin() {
         yield put({ type: 'LOGIN_ERROR', error: data.errorMessage });
       }
     } catch (error) {
-      console.log(222, error);
+      yield put({type: 'OPEN_ERROR_MESSAGE', error: 'Service error'});
     }
   }
 }
@@ -166,13 +174,14 @@ function* logout() {
   }
 }
 
+/* patient */
 function* fetchPatient(action) {
   try {
     yield put({ type: 'OPEN_SEARCH' });
     let { data } = yield call(
-      axios.post,
+      axios.get,
       '/patient/searchPatient',
-      action.params
+      {params: action.params}
     ); //阻塞，请求后台数据
     if (data.success) {
       yield put({ type: 'PATIENTLIST', data: data.data });
@@ -181,10 +190,9 @@ function* fetchPatient(action) {
       yield put({ type: 'PATIENTLIST', data: [] });
     }
   } catch (error) {
-    console.log(error);
+    yield put({type: 'OPEN_ERROR_MESSAGE', error: 'Service error'});
   }
 }
-/* patient */
 function* seachPatient() {
   yield takeLatest('SEARCH_PATIENT', fetchPatient);
 }
@@ -198,7 +206,7 @@ function* getPatient() {
       if (data.success) {
         yield put({ type: 'PATIENT_BY_ID', patientById: data.data });
       } else {
-        console.log(data.errorMessage);
+        yield put({ type: 'PATIENT_LOADING_ERROR', data: data.errorMessage });
       }
     } catch (error) {
       yield put({ type: 'PATIENT_LOADING_ERROR', data: error });
@@ -212,12 +220,12 @@ function* updatePatient() {
     try {
       let { data } = yield call(axios.post, '/patient/update', params); //阻塞，请求后台数据
       if (data.success) {
-        yield put({ type: 'PATIENT_LOADING', data: data.data.msg });
+        yield put({ type: 'PATIENT_LOADING', data: 'Update is success' });
       } else {
-        yield put({ type: 'PATIENT_LOADING_ERROR', data: data.errorMessage });
+        yield put({ type: 'PATIENT_LOADING_ERROR', data: data.errorMessage ? data.errorMessage : 'Update is Error' });
       }
     } catch (error) {
-      yield put({ type: 'PATIENT_LOADING_ERROR', data: error });
+      yield put({ type: 'PATIENT_LOADING_ERROR', data: 'Service error' });
     }
   }
 }
@@ -228,12 +236,12 @@ function* savePatient() {
     try {
       let { data } = yield call(axios.post, '/patient/register', params); //阻塞，请求后台数据
       if (data.success) {
-        yield put({ type: 'PATIENT_LOADING', data: data.data.msg });
+        yield put({ type: 'PATIENT_LOADING', data: 'Save is success' });
       } else {
-        yield put({ type: 'PATIENT_LOADING_ERROR', data: data.errorMessage });
+        yield put({ type: 'PATIENT_LOADING_ERROR', data: data.errorMessage ? data.errorMessage : 'Save is Error' });
       }
     } catch (error) {
-      yield put({ type: 'PATIENT_LOADING_ERROR', data: error });
+      yield put({ type: 'PATIENT_LOADING_ERROR', data: 'Service error' });
     }
   }
 }
@@ -261,7 +269,7 @@ function* getClendar() {
         console.log(data.errorMessage);
       }
     } catch (error) {
-      console.log(error);
+      yield put({type: 'OPEN_ERROR_MESSAGE', error: 'Service error'});
     }
   }
 }
@@ -273,12 +281,12 @@ function* getBookHistory() {
         params: params
       }); //阻塞，请求后台数据
       if (data.success) {
-        yield put({ type: 'BOOK_HISTORY', data: data.data });
+        yield put({ type: 'BOOK_HISTORY', data: data.data ? data.data : [] });
       } else {
         console.log(data.errorMessage);
       }
     } catch (error) {
-      console.log(error);
+      yield put({type: 'OPEN_ERROR_MESSAGE', error: 'Service error'});
     }
   }
 }
@@ -294,12 +302,16 @@ function* bookCompare() {
       } else {
         yield put({
           type: 'BOOK_COMPARE_RESULT_ERROR',
-          data: data.success,
+          data: true,
           error: data.errorMessage
         });
       }
     } catch (error) {
-      console.log(error);
+      yield put({
+        type: 'BOOK_COMPARE_RESULT_ERROR',
+        data: true,
+        error: error
+      });
     }
   }
 }
@@ -314,15 +326,19 @@ function* bookAppointment() {
     let { params, patient } = yield take('BOOK_APPOINTMENT');
     yield put({type: 'BOOK_PRINT', params, patient});
     try {
-      yield call(axios.post, '/appointment/book', params); //阻塞，请求后台数据
-      yield put({type: 'OPEN_BOOK_PRINT' });
-      yield put({ type: 'BOOK_COMPARE_RESULT_CLOSE' });
-      yield put({type: 'CLOSE_BOOK_PRINT'});
+      let {data} = yield call(axios.post, '/appointment/book', params); //阻塞，请求后台数据
+      if(data.success) {
+        yield put({type: 'OPEN_BOOK_PRINT' });
+        yield put({type: 'CLOSE_BOOK_PRINT'});
+      }
     } catch (error) {
-      console.log(error);
+      yield put({type: 'OPEN_ERROR_MESSAGE', error: 'Service error'});
+    } finally {
+      yield put({ type: 'BOOK_COMPARE_RESULT_CLOSE' });
     }
   }
 }
+
 function* getAttendance() {
   while (true) {
     let { params } = yield take('GET_ATTENDANCELIST');
@@ -336,7 +352,7 @@ function* getAttendance() {
         yield put({ type: 'UPDATE_ATTENDANCELIST', attendanceList: data.data });
       }
     } catch (error) {
-      console.log(error);
+      yield put({type: 'OPEN_ERROR_MESSAGE', error: 'Service error'});
     }
   }
 }
@@ -350,10 +366,11 @@ function* attend() {
       }); //阻塞，请求后台数据
       if (data.success) {
         yield put({ type: 'GET_ATTENDANCELIST', params: params1 });
-        yield put({ type: 'CLOSE_ATTENDING_DIALOG' });
       }
     } catch (error) {
-      console.log(error);
+      yield put({type: 'OPEN_ERROR_MESSAGE', error: 'Service error'});
+    } finally {
+      yield put({ type: 'CLOSE_ATTENDING_DIALOG' });
     }
   }
 }
@@ -372,10 +389,10 @@ function* getMedicalRecordList() {
           medicalRecordList: data.data
         });
       } else {
-        console.log(data.errorMessage);
+        yield put({type: 'OPEN_ERROR_MESSAGE', error: data.errorMessage});
       }
     } catch (error) {
-      console.log(error);
+      yield put({type: 'OPEN_ERROR_MESSAGE', error: 'Service error'});
     }
   }
 }
@@ -389,10 +406,10 @@ function* getTemplateList() {
       if (data.success) {
         yield put({ type: 'UPDATE_TEMPLATELIST', templateList: data.data });
       } else {
-        console.log(data.errorMessage);
+        yield put({type: 'OPEN_ERROR_MESSAGE', error: data.errorMessage});
       }
     } catch (error) {
-      console.log(error);
+      yield put({type: 'OPEN_ERROR_MESSAGE', error: 'Service error'});
     }
   }
 }
@@ -409,10 +426,10 @@ function* getChronicProblemList() {
           chronicProblemList: data.data
         });
       } else {
-        console.log(data.errorMessage);
+        yield put({type: 'OPEN_ERROR_MESSAGE', error: data.errorMessage});
       }
     } catch (error) {
-      console.log(error);
+      yield put({type: 'OPEN_ERROR_MESSAGE', error: 'Service error'});
     }
   }
 }
@@ -429,10 +446,10 @@ function* fectchDiagnogsisProblem(action) {
       });
       yield put({ type: 'CLOSE_SEARCH' });
     } else {
-      console.log(data.errorMessage);
+      yield put({type: 'OPEN_ERROR_MESSAGE', error: data.errorMessage});
     }
   } catch (error) {
-    console.log(error);
+    yield put({type: 'OPEN_ERROR_MESSAGE', error: 'Service error'});
   }
 }
 function* getDiagnosisProblemList() {
@@ -448,10 +465,10 @@ function* getEncounterId() {
       if (data.success) {
         yield put({ type: 'UPDATE_ENCOUNTERID', encounter: data.data });
       } else {
-        console.log(data.errorMessage);
+        yield put({type: 'OPEN_ERROR_MESSAGE', error: data.errorMessage});
       }
     } catch (error) {
-      console.log(error);
+      yield put({type: 'OPEN_ERROR_MESSAGE', error: 'Service error'});
     }
   }
 }
@@ -465,10 +482,10 @@ function* getClinicNote() {
       if (data.success) {
         yield put({ type: 'UPDATE_CLINIC_NOTE', clinicNote: data.data });
       } else {
-        console.log(data.errorMessage);
+        yield put({type: 'OPEN_ERROR_MESSAGE', error: data.errorMessage});
       }
     } catch (error) {
-      console.log(error);
+      yield put({type: 'OPEN_ERROR_MESSAGE', error: 'Service error'});
     }
   }
 }
@@ -487,7 +504,7 @@ function* saveConsultation() {
         });
       }
     } catch (error) {
-      yield put({ type: 'CONSULTATION_LOADING_ERROR', data: error });
+      yield put({ type: 'CONSULTATION_LOADING_ERROR', data: 'Service error' });
     }
   }
 }
@@ -506,7 +523,7 @@ function* updateConsultation() {
         });
       }
     } catch (error) {
-      yield put({ type: 'CONSULTATION_LOADING_ERROR', data: error });
+      yield put({ type: 'CONSULTATION_LOADING_ERROR', data: 'Service error' });
     }
   }
 }
@@ -523,10 +540,10 @@ function* getAttendingProblem() {
           attendingProblemList: data.data
         });
       } else {
-        console.log(data.errorMessage);
+        yield put({type: 'OPEN_ERROR_MESSAGE', error: data.errorMessage});
       }
     } catch (error) {
-      console.log(error);
+      yield put({type: 'OPEN_ERROR_MESSAGE', error: 'Service error'});
     }
   }
 }
@@ -545,10 +562,10 @@ function* getDepartmentFavourite() {
           departmentFavouriteList: data.data
         });
       } else {
-        console.log(data.errorMessage);
+        yield put({type: 'OPEN_ERROR_MESSAGE', error: data.errorMessage});
       }
     } catch (error) {
-      console.log(error);
+      yield put({type: 'OPEN_ERROR_MESSAGE', error: 'Service error'});
     }
   }
 }
@@ -571,7 +588,7 @@ function* getDrugHistory() {
         });
       }
     } catch (error) {
-      console.log(error);
+      yield put({type: 'OPEN_ERROR_MESSAGE', error: 'Service error'});
     }
   }
 }
@@ -594,7 +611,7 @@ function* getPrescription() {
         });
       }
     } catch (error) {
-      console.log(error);
+      yield put({type: 'OPEN_ERROR_MESSAGE', error: 'Service error'});
     }
   }
 }
@@ -650,10 +667,10 @@ function* fectchDrugList(action) {
       });
       yield put({ type: 'CLOSE_SEARCH' });
     } else {
-      console.log(data.errorMessage);
+      yield put({type: 'OPEN_ERROR_MESSAGE', error: data.errorMessage});
     }
   } catch (error) {
-    console.log(error);
+    yield put({type: 'OPEN_ERROR_MESSAGE', error: 'Service error'});
   }
 }
 function* searchDrugList() {

@@ -61,10 +61,10 @@ axios.interceptors.response.use(
         case 400:
           err.message = '请求错误(400)';
           break;
-        case 401:
+        case 405:
           err.message = '未授权，请重新登录(401)';
           // configureStore().store.dispatch({type: 'LOGOUT'});
-          // setTimeout(() => window.location.href='/', 100);
+          // setTimeout(() => window.location.href='/#/login', 100);
           break;
         case 403:
           err.message = '拒绝访问(403)';
@@ -99,7 +99,8 @@ axios.interceptors.response.use(
     } else {
       err.message = '连接服务器失败!';
     }
-    // console.log(err.message, 'wertyuxcvbnm,znmxcvbnmfvbnwsdftgyhuzxcvbyvbuvbnjfwhbidfkajghfajbvkajfb');
+    // console.log(err.message)
+    // document.getElementById('pageError') && (document.getElementById('pageError').style.display = 'block');
     return Promise.reject(err);
   }
 );

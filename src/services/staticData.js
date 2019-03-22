@@ -366,7 +366,7 @@ export const patientBasic = {
   district: districtList[0],
   documentNumber: '',
   documentType: doumentTypeList[0],
-  email: '',
+  // email: '',
   englishGivenName: '',
   englishSurname: '',
   estate: '',

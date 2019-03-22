@@ -51,19 +51,22 @@ class CommonHeader extends Component {
     this.props.dispatch({ type: 'REFRESH_TOKEN' });
     let timer = setInterval(() => {
       this.props.dispatch({ type: 'REFRESH_TOKEN' });
-    }, 13 * 60000);
+    }, 7 * 60000);
     this.setState({ timer });
   }
   UNSAFE_componentWillReceiveProps(nextProps) {
+    // console.log('123321', nextProps.location.pathname, this.props.location.pathname);
     if (nextProps.location.pathname !== this.props.location.pathname) {
       if (
         nextProps.location.pathname === '/' ||
         nextProps.location.pathname === '/login'
       ) {
-        console.log('shijianguola');
+        // console.log('shijianguola');
         this.props.dispatch({ type: 'LOGOUT' });
         this.props.history.push('/login');
-      } else {
+      } else if(nextProps.location.pathname === '/index'){
+        this.props.history.push('/index/welcome');
+      }else {
         this.urlChangeReduxUpdate(nextProps.location.pathname);
       }
     }

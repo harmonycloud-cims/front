@@ -270,25 +270,25 @@ class Attendance extends Component {
                   >
                     HKIC / Doc. No
                   </TableCell>
-                  <TableCell padding={'dense'} className={classes.table_header}>
+                  <TableCell padding={'none'} className={classes.table_header}>
                     English Name
                   </TableCell>
-                  <TableCell padding={'dense'} className={classes.table_header}>
+                  <TableCell padding={'none'} className={classes.table_header}>
                     Appointment Time
                   </TableCell>
-                  <TableCell padding={'dense'} className={classes.table_header}>
+                  <TableCell padding={'none'} className={classes.table_header}>
                     Arrival Time
                   </TableCell>
-                  <TableCell padding={'dense'} className={classes.table_header}>
+                  <TableCell padding={'none'} className={classes.table_header}>
                     Encounter
                   </TableCell>
-                  <TableCell padding={'dense'} className={classes.table_header}>
+                  <TableCell padding={'none'} className={classes.table_header}>
                     Room
                   </TableCell>
-                  <TableCell padding={'dense'} className={classes.table_header}>
+                  <TableCell padding={'none'} className={classes.table_header}>
                     Attend Status
                   </TableCell>
-                  <TableCell padding={'dense'} className={classes.table_header}>
+                  <TableCell padding={'none'} className={classes.table_header}>
                     {' '}
                   </TableCell>
                 </TableRow>
@@ -312,34 +312,34 @@ class Attendance extends Component {
                       }}
                     >
                       <TableCell
-                          style={{ paddingLeft: '15px' }}
+                          style={{ padding: '0 6px 0 15px' }}
                           padding={'none'}
                       >
                         {item.patientDoc}
                       </TableCell>
-                      <TableCell padding={'dense'}>
+                      <TableCell padding={'none'} style={{padding: '0 6px'}}>
                         {item.patientName}
                       </TableCell>
-                      <TableCell padding={'dense'}>
+                      <TableCell padding={'none'} style={{padding: '0 6px'}}>
                         {moment(item.appointmentDate).format(
                           'DD MMM YYYY HH:mm'
                         )}
                       </TableCell>
-                      <TableCell padding={'dense'}>
+                      <TableCell padding={'none'} style={{padding: '0 6px'}}>
                         {item.attendanceTime
                           ? moment(item.attendanceTime).format(
                               'DD MMM YYYY HH:mm'
                             )
                           : null}
                       </TableCell>
-                      <TableCell padding={'dense'}>
+                      <TableCell padding={'none'} style={{padding: '0 6px'}}>
                         {item.encounterTypeName}
                       </TableCell>
-                      <TableCell padding={'dense'}>{item.roomName}</TableCell>
-                      <TableCell padding={'dense'}>
+                      <TableCell padding={'none'} style={{padding: '0 6px'}}>{item.roomName}</TableCell>
+                      <TableCell padding={'none'} style={{padding: '0 6px'}}>
                         {item.attendanceStatus}
                       </TableCell>
-                      <TableCell padding={'dense'}>
+                      <TableCell padding={'none'} style={{padding: '0 6px'}}>
                         {item.attendanceStatus === 'Not Attend' ? (
                           <Button
                               color={'primary'}

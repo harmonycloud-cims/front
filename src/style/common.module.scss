@@ -175,7 +175,7 @@ $buttonColor: #3f51b5;
     float: right;
     width: 310px;
   }
-  .menu_item {
+  @mixin menu_item_basic {
     text-decoration: none; //去掉下划线
     height: 30px;
     padding: 10px 0px 10px 10px;
@@ -231,6 +231,10 @@ $buttonColor: #3f51b5;
       @include com_header_right_warp_time_basic;
       font-size: x-small;
     }
+    .menu_item {
+      @include menu_item_basic;
+      padding: 10px 0px 10px 1px;
+    }
   }
   @media (min-width: 1280px) {
     .com_header_menu_list {
@@ -256,6 +260,10 @@ $buttonColor: #3f51b5;
     .com_header_right_warp_time {
       @include com_header_right_warp_time_basic;
       font-size: 14px;
+    }
+    .menu_item {
+      @include menu_item_basic;
+      padding: 10px 0px 10px 10px;
     }
   }
 

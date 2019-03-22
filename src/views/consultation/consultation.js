@@ -385,7 +385,7 @@ class Consulatation extends Component {
       const prescriptionDrugList = this.state.newPrescriptionDrugList;
       if (this.state.isPrescriptionUpdate) {
         const params = {
-          oldPrescription: this.props.prescriptionLatest.prescription,
+          prescription: this.props.prescriptionLatest.prescription,
           newPrescriptionDrugList: prescriptionDrugList,
           oldPrescriptionDrugList: this.props.prescriptionLatest.prescriptionDrugBoList
         };
@@ -461,7 +461,7 @@ class Consulatation extends Component {
       oldAttendingDiagnosisList,
       oldChronicDiagnosisList,
       oldClinicalNote,
-      oldPrescription,
+      prescription: oldPrescription,
       oldPrescriptionDrugList
     };
     this.setState({openDiag: true});
@@ -489,7 +489,7 @@ class Consulatation extends Component {
     } else if(this.props.saveName === 'prescription') {
       this.getPrescription();
     } else {
-      this.getNextPatient();
+      this.closePatient();
     }
   };
 
@@ -518,7 +518,6 @@ class Consulatation extends Component {
             </Typography>
             {this.state.tabValue === 0 && (
               <Note
-                  appointmentSelect={this.state.appointmentSelect}    // 123456789012345678912345678
                   changeNote={this.changeNote}
 
                   medicalRecordList={this.props.medicalRecordList}
@@ -534,7 +533,6 @@ class Consulatation extends Component {
             {this.state.tabValue === 1 && (
               <Prescription
                   changePrescription={this.changePrescription}
-                  appointmentSelect={this.state.appointmentSelect}// 123456789012345678912345678
 
                   departmentFavouriteList={this.props.departmentFavouriteList}
                   drugHistoryList={this.props.drugHistoryList}
@@ -654,43 +652,43 @@ class Consulatation extends Component {
                       HKIC / Doc. No
                     </TableCell>
                     <TableCell
-                        padding={'dense'}
+                        padding={'none'}
                         className={classes.table_header}
                     >
                       English Name
                     </TableCell>
                     <TableCell
-                        padding={'dense'}
+                        padding={'none'}
                         className={classes.table_header}
                     >
                       Appointment Time
                     </TableCell>
                     <TableCell
-                        padding={'dense'}
+                        padding={'none'}
                         className={classes.table_header}
                     >
                       Arrival Time
                     </TableCell>
                     <TableCell
-                        padding={'dense'}
+                        padding={'none'}
                         className={classes.table_header}
                     >
                       Encounter
                     </TableCell>
                     <TableCell
-                        padding={'dense'}
+                        padding={'none'}
                         className={classes.table_header}
                     >
                       Room
                     </TableCell>
                     <TableCell
-                        padding={'dense'}
+                        padding={'none'}
                         className={classes.table_header}
                     >
                       Attend Status
                     </TableCell>
                     <TableCell
-                        padding={'dense'}
+                        padding={'none'}
                         className={classes.table_header}
                     >
                       {' '}
@@ -716,34 +714,34 @@ class Consulatation extends Component {
                           }}
                       >
                         <TableCell
-                            style={{ paddingLeft: '15px' }}
+                            style={{ padding: '0 6px 0 15px' }}
                             padding={'none'}
                         >
                           {item.patientDoc}
                         </TableCell>
-                        <TableCell padding={'dense'}>
+                        <TableCell padding={'none'} style={{padding: '0 6px'}}>
                           {item.patientName}
                         </TableCell>
-                        <TableCell padding={'dense'}>
+                        <TableCell padding={'none'} style={{padding: '0 6px'}}>
                           {moment(item.appointmentDate).format(
                             'DD MMM YYYY HH:mm'
                           )}
                         </TableCell>
-                        <TableCell padding={'dense'}>
+                        <TableCell padding={'none'} style={{padding: '0 6px'}}>
                           {item.attendanceTime
                             ? moment(item.attendanceTime).format(
                                 'DD MMM YYYY HH:mm'
                               )
                             : null}
                         </TableCell>
-                        <TableCell padding={'dense'}>
+                        <TableCell padding={'none'} style={{padding: '0 6px'}}>
                           {item.encounterTypeName}
                         </TableCell>
-                        <TableCell padding={'dense'}>{item.roomName}</TableCell>
-                        <TableCell padding={'dense'}>
+                        <TableCell padding={'none'} style={{padding: '0 6px'}}>{item.roomName}</TableCell>
+                        <TableCell padding={'none'} style={{padding: '0 6px'}}>
                           {item.attendanceStatus}
                         </TableCell>
-                        <TableCell padding={'dense'}>
+                        <TableCell padding={'none'} style={{padding: '0 6px'}}>
                           {item.attendanceStatus === 'Attend' ? (
                             <Button
                                 variant={'outlined'}
