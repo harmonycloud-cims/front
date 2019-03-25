@@ -221,9 +221,9 @@ function* updatePatient() {
     try {
       let { data } = yield call(axios.post, '/patient/update', params); //阻塞，请求后台数据
       if (data.success) {
-        yield put({ type: 'PATIENT_LOADING', data: 'Update is success' });
+        yield put({ type: 'PATIENT_LOADING', data: 'Update successful' });
       } else {
-        yield put({ type: 'PATIENT_LOADING_ERROR', data: data.errorMessage ? data.errorMessage : 'Update is Error' });
+        yield put({ type: 'PATIENT_LOADING_ERROR', data: data.errorMessage ? data.errorMessage : 'Update Error' });
       }
     } catch (error) {
       yield put({ type: 'PATIENT_LOADING_ERROR', data: 'Service error' });
@@ -237,9 +237,9 @@ function* savePatient() {
     try {
       let { data } = yield call(axios.post, '/patient/register', params); //阻塞，请求后台数据
       if (data.success) {
-        yield put({ type: 'PATIENT_LOADING', data: 'Save is success' });
+        yield put({ type: 'PATIENT_LOADING', data: 'Saved successfully' });
       } else {
-        yield put({ type: 'PATIENT_LOADING_ERROR', data: data.errorMessage ? data.errorMessage : 'Save is Error' });
+        yield put({ type: 'PATIENT_LOADING_ERROR', data: data.errorMessage ? data.errorMessage : 'Save Error' });
       }
     } catch (error) {
       yield put({ type: 'PATIENT_LOADING_ERROR', data: 'Service error' });

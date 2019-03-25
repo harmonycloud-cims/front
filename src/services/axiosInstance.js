@@ -60,51 +60,51 @@ axios.interceptors.response.use(
     if (err && err.response) {
       switch (err.response.status) {
         case 400:
-          err.message = '请求错误(400)';
+          err.message = 'Bad Request(400)';
           break;
         case 401:
-          err.message = '未授权，请重新登录(401)';
+          err.message = 'Please re-login without authorization(401)';
           setTimeout(() => {
             storeConfig.store.dispatch({type: 'CLOSE_ERROR_MESSAGE'});
             storeConfig.store.dispatch({type: 'LOGOUT'});
           }, 3000);
           break;
         case 403:
-          err.message = '拒绝访问(403)';
+          err.message = 'Forbidden(403)';
           setTimeout(() => {
             storeConfig.store.dispatch({type: 'CLOSE_ERROR_MESSAGE'});
             storeConfig.store.dispatch({type: 'LOGOUT'});
           }, 3000);
           break;
         case 404:
-          err.message = '请求出错(404)';
+          err.message = 'Not Found(404)';
           break;
         case 408:
-          err.message = '请求超时(408)';
+          err.message = 'Request Timeout(408)';
           break;
         case 500:
-          err.message = '服务器错误(500)';
+          err.message = 'Internal Server Error(500)';
           break;
         case 501:
-          err.message = '服务未实现(501)';
+          err.message = 'Not Implemented(501)';
           break;
         case 502:
-          err.message = '网络错误(502)';
+          err.message = 'Bad Gateway(502)';
           break;
         case 503:
-          err.message = '服务不可用(503)';
+          err.message = 'Service Unavailable(503)';
           break;
         case 504:
-          err.message = '网络超时(504)';
+          err.message = 'Gateway Timeout(504)';
           break;
         case 505:
-          err.message = 'HTTP版本不受支持(505)';
+          err.message = 'HTTP Version Not Supported(505)';
           break;
         default:
-          err.message = `连接出错(${err.response.status})!`;
+          err.message = `Connection error(${err.response.status})!`;
       }
     } else {
-      err.message = '连接服务器失败!';
+      err.message = 'Connection failure!';
     }
     storeConfig.store.dispatch({type: 'OPEN_ERROR_MESSAGE', error: err.message});
     return Promise.reject(err);
