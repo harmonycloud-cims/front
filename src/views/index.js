@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import { Redirect } from 'react-router-dom';
 import CommonHeader from './compontent/header/header';
 import { Snackbar, SnackbarContent } from '@material-ui/core';
 import { Error, Close } from '@material-ui/icons';
 
 function mapStateToProps(state) {
   return {
+    ifLogin: state.updateUser.ifLogin,
     errorMessageStatus: state.updatePrescription.errorMessageStatus,
     errorMessage: state.updatePrescription.errorMessage
   };
@@ -17,6 +19,9 @@ class IndexWarp extends Component {
   }
 
   render() {
+    if (!this.props.ifLogin) {
+      return <Redirect to={'/'} />;
+    }
     return (
       <div className={'main_body'}>
         <CommonHeader />

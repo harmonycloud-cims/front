@@ -2,6 +2,7 @@ import axios from 'axios';
 import Promise from 'babel-polyfill';
 import NProgress from 'nprogress';
 import 'nprogress/nprogress.css';
+import storeConfig from '../store/storeConfig';
 // import configureStore from '../store/storeConfig';
 
 // To add to window  解决promise 在ie中未定义的问题
@@ -61,13 +62,19 @@ axios.interceptors.response.use(
         case 400:
           err.message = '请求错误(400)';
           break;
-        case 405:
+        case 401:
           err.message = '未授权，请重新登录(401)';
-          // configureStore().store.dispatch({type: 'LOGOUT'});
-          // setTimeout(() => window.location.href='/#/login', 100);
+          setTimeout(() => {
+            storeConfig.store.dispatch({type: 'CLOSE_ERROR_MESSAGE'});
+            storeConfig.store.dispatch({type: 'LOGOUT'});
+          }, 3000);
           break;
         case 403:
           err.message = '拒绝访问(403)';
+          setTimeout(() => {
+            storeConfig.store.dispatch({type: 'CLOSE_ERROR_MESSAGE'});
+            storeConfig.store.dispatch({type: 'LOGOUT'});
+          }, 3000);
           break;
         case 404:
           err.message = '请求出错(404)';
@@ -99,8 +106,7 @@ axios.interceptors.response.use(
     } else {
       err.message = '连接服务器失败!';
     }
-    // console.log(err.message)
-    // document.getElementById('pageError') && (document.getElementById('pageError').style.display = 'block');
+    storeConfig.store.dispatch({type: 'OPEN_ERROR_MESSAGE', error: err.message});
     return Promise.reject(err);
   }
 );

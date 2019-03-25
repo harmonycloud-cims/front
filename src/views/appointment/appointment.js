@@ -18,7 +18,9 @@ import {
   InputBase,
   Dialog,
   DialogActions,
-  DialogContent
+  DialogContent,
+  TableFooter,
+  TablePagination
 } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import SearchInput from '../compontent/input/searchInput';
@@ -136,6 +138,10 @@ const style = {
     position: 'absolute',
     zIndex: -1,
     opacity: 0
+  },
+  table_pagination: {
+    position: 'relative',
+    left: '20%'
   }
 };
 class Appointment extends Component {
@@ -155,7 +161,9 @@ class Appointment extends Component {
         .add(1, 'days')
         .format('DD MMM YYYY'),
       time: '09:00',
-      bookSuccess: false
+      bookSuccess: false,
+      rowsPerPage: 10,
+      page: 0
     };
   }
   componentDidMount() {
@@ -324,6 +332,15 @@ class Appointment extends Component {
   changeDate = e => {
     this.setState({ date: moment(e._d).format('DD MMM YYYY') });
   };
+
+  /* table pagination */
+  handleChangePage = (event, page) => {
+    this.setState({ page });
+  };
+  handleChangeRowsPerPage = event => {
+    this.setState({ page: 0, rowsPerPage: event.target.value });
+  };
+
   render() {
     const { classes } = this.props;
     return (
@@ -381,7 +398,12 @@ class Appointment extends Component {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {this.props.bookHistoryList.map((item, index) => (
+                  {this.props.bookHistoryList
+                    .slice(
+                      this.state.page * this.state.rowsPerPage,
+                      this.state.rowsPerPage * (this.state.page + 1)
+                    )
+                    .map((item, index) => (
                       <TableRow key={index}>
                         <TableCell
                             style={{ paddingLeft: '15px' }}
@@ -404,6 +426,20 @@ class Appointment extends Component {
                       </TableRow>
                     ))}
                   </TableBody>
+                  <TableFooter>
+                    <TableRow>
+                      <TablePagination
+                          className={classes.table_pagination}
+                          rowsPerPageOptions={[5, 10, 25]}
+                          colSpan={3}
+                          count={this.props.bookHistoryList.length}
+                          rowsPerPage={this.state.rowsPerPage}
+                          page={this.state.page}
+                          onChangePage={this.handleChangePage}
+                          onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                      />
+                    </TableRow>
+                  </TableFooter>
                 </Table>
               </Typography>
             </Grid>

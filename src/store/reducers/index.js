@@ -156,8 +156,21 @@ const updateAppointment = (state = appointmentState, action = {}) => {
       }
       return { ...state, calendarList };
     }
-    case 'BOOK_HISTORY':
-      return { ...state, bookHistoryList: action.data };
+    case 'BOOK_HISTORY': {
+      let bookHistoryList = action.data;
+      bookHistoryList.sort(function(a, b) {
+        if (a.appointmentDate > b.appointmentDate) {
+          return -1;
+        } else if (a.appointmentDate < b.appointmentDate) {
+          return 1;
+        }
+        return 0;
+      });
+      // bookHistoryList.sort((a, b) => {
+      //   return b.appointmentDate - a.appointmentDate;
+      // });
+      return { ...state, bookHistoryList };
+    }
     case 'BOOK_COMPARE_RESULT':
       return {
         ...state,

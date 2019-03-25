@@ -6,16 +6,17 @@ import './style/common.module.scss';
 import { HashRouter as Router } from 'react-router-dom';
 import * as serviceWorker from './serviceWorker';
 import { Provider } from 'react-redux';
-import configure from './store/storeConfig';
+// import {store, persistor} from './store/storeConfig';
+import storeConfig from './store/storeConfig';
 import { PersistGate } from 'redux-persist/integration/react';
 import { MuiPickersUtilsProvider } from 'material-ui-pickers';
 import MomentUtils from '@date-io/moment';
 
-const { persistor, store } = configure({});
+// const { persistor, store } = configure({});
 
 ReactDOM.render(
-  <Provider store={store}>
-    <PersistGate loading={null} persistor={persistor}>
+  <Provider store={storeConfig.store}>
+    <PersistGate loading={null} persistor={storeConfig.persistor}>
       <MuiPickersUtilsProvider utils={MomentUtils}>
         <Router>{routes}</Router>
       </MuiPickersUtilsProvider>

@@ -19,7 +19,7 @@ const storageConfig = {
   ] // reducer 里不持久化的数据
 };
 
-export default function configureStore(initState = {}) {
+function configureStore(initState = {}) {
   const middlewares = [sagamiddleware];
   const createStoreMiddleware = applyMiddleware(...middlewares)(createStore);
   const store = createStoreMiddleware(
@@ -39,6 +39,8 @@ export default function configureStore(initState = {}) {
       );
     });
   }
-  let persistor = persistStore(store);
-  return { store, persistor };
+  const persistor = persistStore(store);
+  return {store, persistor};
 }
+const storeConfig = configureStore();
+export default storeConfig;

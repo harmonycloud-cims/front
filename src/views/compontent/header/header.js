@@ -94,7 +94,7 @@ class CommonHeader extends Component {
   };
   logout = () => {
     this.props.dispatch({ type: 'LOGOUT' });
-    this.props.history.push('/login');
+    // this.props.history.push('/login');
   };
   render() {
     return (
