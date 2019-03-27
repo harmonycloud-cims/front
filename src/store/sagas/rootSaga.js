@@ -305,7 +305,7 @@ function* bookCompare() {
       } else {
         yield put({
           type: 'BOOK_COMPARE_RESULT_ERROR',
-          data: true,
+          data: data.succes,
           error: data.errorMessage ? data.errorMessage : 'Service error'
         });
       }

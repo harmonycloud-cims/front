@@ -81,7 +81,7 @@ class Attendance extends Component {
       date: moment(new Date().getTime()).format('DD MMM YYYY'),
       attendanceList: this.props.attendanceList,
       value: '',
-      timer: null,
+      // timer: null,
       rowsPerPage: 10,
       page: 0
     };
@@ -89,11 +89,11 @@ class Attendance extends Component {
 
   componentDidMount() {
     this.initData();
-    // this.websocketConnection();
-    let timer = setInterval(() => {
-      this.initData();
-    }, 60000);
-    this.setState({ timer });
+    this.websocketConnection();
+    // let timer = setInterval(() => {
+    //   this.initData();
+    // }, 60000);
+    // this.setState({ timer });
   }
   UNSAFE_componentWillReceiveProps(nextProps) {
     if (nextProps.attendanceList !== this.props.attendanceList) {
@@ -101,35 +101,49 @@ class Attendance extends Component {
     }
   }
   componentWillUnmount() {
-    // //关闭事件
-    // socket.onclose = () => {
-    //   console.log('websocket已关闭');
-    // };
-    if (this.state.timer !== null) {
-      clearInterval(this.state.timer);
-    }
+    //关闭websocket
+    console.log(socket.readyState, 'close will mount');
+    socket.close();
+    // if (this.state.timer !== null) {
+    //   clearInterval(this.state.timer);
+    // }
+    // if (this.timer !== null) {
+    //   clearInterval(this.timer);
+    // }
   }
 
   websocketConnection = () => {
     if(typeof(WebSocket) === 'undefined') {
-      this.props.dispatch({type: 'OPEN_ERROR_MESSAGE', error: '您的浏览器不支持WebSocket'});
+      this.props.dispatch({type: 'OPEN_ERROR_MESSAGE', error: 'Your browser does not support WebSocket.'});
     }else{
-        let socketUrl=`ws://10.10.103.61:33010/appointment/attendWebsocket/${this.props.user.userId}`;
-        socket = new WebSocket(socketUrl);
-        //打开事件
-        socket.onopen = () => {
-            console.log('websocket已打开');
-            //socket.send("这是来自客户端的消息" + location.href + new Date());
-        };
-        // //获得消息事件
-        socket.onmessage = (msg) => {
-            console.log(msg.data);
-            //发现消息进入    开始处理前端触发逻辑
-        };
-        // //发生了错误事件
-        socket.onerror = () => {
-            console.log('websocket发生了错误');
-        };
+      // const token = `Bearer ${window.sessionStorage.getItem('token')}`;
+      let socketUrl=`/websocket/attendWebsocket/${this.props.user.userId}`;
+      // socketUrl=socketUrl.replace('https','ws').replace('http','ws');
+      socket = new WebSocket(socketUrl);
+      //打开事件
+      socket.onopen = () => {
+        console.log('websocket已打开');
+        socket.send('这是来自客户端的消息' + new Date());
+      };
+      //获得消息事件
+      socket.onmessage = (msg) => {
+          console.log(msg.data, 'onmessage');
+          if(msg.data === 'Success') {
+            this.initData();
+          }
+          //发现消息进入    开始处理前端触发逻辑
+      };
+      // 关闭事件
+      socket.onclose = () => {
+          console.log('websocket已关闭');
+      };
+      //发生了错误事件
+      socket.onerror = () => {
+        console.log('websocket发生了错误');
+      };
+      this.timer = setInterval(() => {
+        console.log(socket.readyState, 'timing');
+      }, 6000);
     }
   }
 
