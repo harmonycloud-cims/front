@@ -73,8 +73,8 @@ const loginState = {
 };
 const updateLogin = (state = loginState, action = {}) => {
   switch (action.type) {
-    // case 'UPDATE_LOGIN_USER':
-    //   return { ...state, loginMessage: '', loginMessageShow: false };
+    case 'UPDATE_LOGIN_USER_SUCCESS':
+      return { ...state, loginMessage: '', loginMessageShow: false };
     case 'LOGIN_ERROR':
       return { ...state, loginMessage: action.error, loginMessageShow: true };
     default:
@@ -166,9 +166,6 @@ const updateAppointment = (state = appointmentState, action = {}) => {
         }
         return 0;
       });
-      // bookHistoryList.sort((a, b) => {
-      //   return b.appointmentDate - a.appointmentDate;
-      // });
       return { ...state, bookHistoryList };
     }
     case 'BOOK_COMPARE_RESULT':

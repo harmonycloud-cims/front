@@ -11,7 +11,7 @@ const style = {
     }
   },
   form: {
-    border: '1px solid rgba(0,0,0,0.2)',
+    border: '1px solid rgba(0,0,0,0.42)',
     padding: 10,
     borderRadius: 2,
     marginBottom: 5
@@ -23,7 +23,7 @@ const style = {
     marginLeft: 10,
     width: '80%',
     minWidth: 200,
-    border: '1px solid rgba(0,0,0,0.2)',
+    border: '1px solid rgba(0,0,0,0.42)',
     paddingLeft: 8,
     borderRadius: 2,
     fontSize: 14
@@ -32,7 +32,7 @@ const style = {
     marginLeft: 10,
     minWidth: 200,
     width: 'calc(80% - 120px)',
-    border: '1px solid rgba(0,0,0,0.2)',
+    border: '1px solid rgba(0,0,0,0.42)',
     paddingLeft: 8,
     borderRadius: 2,
     fontSize: 14

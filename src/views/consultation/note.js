@@ -127,7 +127,7 @@ const style = {
     padding: '10px 0 8px 15px'
   },
   transfer_box: {
-    border: '1px solid rgba(0,0,0,0.2)',
+    border: '1px solid rgba(0,0,0,0.42)',
     height: 108
   },
   diagnosis_search: {
@@ -146,7 +146,7 @@ const style = {
     paddingLeft: 10
   },
   clinical_note_box: {
-    border: '1px solid rgba(0,0,0,0.2)',
+    border: '1px solid rgba(0,0,0,0.42)',
     height: 'calc(100vh - 600px)',
     minHeight: 220,
     width: 'calc(100% - 40px)',
@@ -206,14 +206,14 @@ const style = {
     cursor: 'pointer',
     paddingLeft: 8,
     height: 25,
-    borderBottom: '1px solid rgba(0,0,0,0.2)',
+    borderBottom: '1px solid rgba(0,0,0,0.42)',
     width: 'calc(100% - 8px)'
   },
   diagnosis_problem: {
     cursor: 'pointer',
     paddingLeft: 8,
     height: 25,
-    borderBottom: '1px solid rgba(0,0,0,0.2)',
+    borderBottom: '1px solid rgba(0,0,0,0.42)',
     width: 'calc(100% - 8px)'
   },
   diagnosis_problem_name: {

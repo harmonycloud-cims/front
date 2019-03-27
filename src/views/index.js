@@ -37,7 +37,7 @@ class IndexWarp extends Component {
           <SnackbarContent
               style={{
               backgroundColor: '#fff',
-              maxWidth: 250,
+              maxWidth: 270,
               minWidth: 50,
               color: 'orange'
             }}

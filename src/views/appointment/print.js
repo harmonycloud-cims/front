@@ -123,13 +123,13 @@ class Print extends Component {
                 <img src={ha} alt={''} style={{width: 80}} />
               </Typography>
               <Typography component="div" className={classes.print_title_right}>
-                <Typography className={classes.print_title_right_content}>公務員診所</Typography>
-                <Typography className={classes.print_title_right_content}>{this.props.print.clinicName}</Typography>
+                <Typography className={classes.print_title_right_content}>旅遊健康服務</Typography>
+                <Typography className={classes.print_title_right_content}>Travel Health Service</Typography>
                 <Typography className={classes.print_title_right_content}>覆診預約便條 - Appointment Slip</Typography>
-                <Typography className={classes.print_title_right_content} style={{fontWeight: 500}}>九龍公務員診所紅磡庇利街42號九龍城健康中心6樓</Typography>
-                <Typography className={classes.print_title_right_content}>6/F, Kowloon City Health Center 42 Bailey Street, Hung Hom</Typography>
+                <Typography className={classes.print_title_right_content} style={{fontWeight: 500}}>長沙灣道 303 號長沙灣政府合署1樓</Typography>
+                <Typography className={classes.print_title_right_content}>1/F, Cheung Sha Wan Government Offices, 303 Cheung Sha Wan Road</Typography>
               </Typography>
-              <Typography component="div" className={classes.print_title_tel}>Tel: 23882102</Typography>
+              {/* <Typography component="div" className={classes.print_title_tel}>Tel: 23882102</Typography> */}
             </Typography>
             <Typography component="div" className={classes.print_information}>
               <Typography component="div" className={classes.print_information_left}>

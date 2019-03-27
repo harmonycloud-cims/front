@@ -42,7 +42,7 @@ const style = {
     display: 'flex',
     alignItems: 'center',
     borderRadius: '15px',
-    border: '1px solid rgba(0,0,0,0.2)',
+    border: '1px solid rgba(0,0,0,0.42)',
     height: 25,
     width: 380,
     margin: '5px 10px 0 10px'
@@ -82,7 +82,7 @@ const style = {
   department_favourite_check: {
     display: 'inline',
     padding: '0 5px 0 0',
-    color: 'rgba(0, 0, 0, 0.2)'
+    color: 'rgba(0, 0, 0, 0.42)'
   },
   department_favourite_item_detail: {
     width: 'calc(100% - 40px)',
@@ -162,7 +162,7 @@ const style = {
     paddingBottom: 5
   },
   prescription_table: {
-    border: '1px solid rgba(0,0,0,0.2)',
+    border: '1px solid rgba(0,0,0,0.42)',
     height: 'calc(100vh - 457px)',
     minHeight: 347,
     marginBottom: 20,
@@ -170,7 +170,7 @@ const style = {
   },
   medicine_item: {
     padding: '10px 20px',
-    borderBottom: '1px solid rgba(0, 0, 0, 0.2)',
+    borderBottom: '1px solid rgba(0, 0, 0, 0.42)',
     color: '#3f51b5'
   },
   medicine_icon: {
@@ -184,7 +184,7 @@ const style = {
   },
   drug_history_item: {
     padding: 10,
-    borderBottom: '1px solid rgba(0,0,0,0.2)'
+    borderBottom: '1px solid rgba(0,0,0,0.42)'
   },
   drug_history_time: {
     padding: '0 0 5px 10px'
@@ -429,7 +429,7 @@ class Prescription extends Component {
                 onChange={(event, value) => this.setState({ tabValue: value })}
                 indicatorColor={'primary'}
                 textColor={'primary'}
-                style={{ borderBottom: '1px solid rgba(0,0,0,0.2)' }}
+                style={{ borderBottom: '1px solid rgba(0,0,0,0.42)' }}
             >
               <Tab
                   label="Departmental Favourite"

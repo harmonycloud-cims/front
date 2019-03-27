@@ -15,7 +15,6 @@ import {
   TableHead,
   TableBody,
   Button,
-  InputBase,
   Dialog,
   DialogActions,
   DialogContent,
@@ -30,7 +29,7 @@ import { ChevronRight, ChevronLeft, Warning } from '@material-ui/icons';
 import Patient from '../compontent/patient';
 import moment from 'moment';
 import { caluDate } from '../../services/utils';
-import { InlineDatePicker } from 'material-ui-pickers';
+import { InlineDatePicker, InlineTimePicker } from 'material-ui-pickers';
 
 function mapStateToProps(state) {
   return {
@@ -55,15 +54,15 @@ const style = {
     height: 28
   },
   main: {
-    borderLeft: '1px solid rgba(0,0,0,0.2)',
+    borderLeft: '1px solid rgba(0,0,0,0.42)',
     padding: 8
   },
   border: {
     marginTop: 20,
-    borderTop: '1px solid rgba(0,0,0,0.2)'
+    borderTop: '1px solid rgba(0,0,0,0.42)'
   },
   room_title: {
-    border: '0.5px solid rgba(0,0,0,0.2)',
+    border: '0.5px solid rgba(0,0,0,0.42)',
     borderBottom: 0,
     borderTopLeftRadius: 2,
     borderTopRightRadius: 2,
@@ -108,12 +107,12 @@ const style = {
     float: 'right'
   },
   border3: {
-    border: '1px solid rgba(0,0,0,0.2)',
+    border: '1px solid rgba(0,0,0,0.42)',
     marginTop: 10,
     paddingBottom: 10
   },
   dialog_title: {
-    borderBottom: '1px solid rgba(0,0,0,0.2)'
+    borderBottom: '1px solid rgba(0,0,0,0.42)'
   },
   dialog_button: {
     verticalAlign: 'bottom',
@@ -162,6 +161,7 @@ class Appointment extends Component {
         .format('DD MMM YYYY'),
       time: '09:00',
       bookSuccess: false,
+      timeIsWrong: false,
       rowsPerPage: 10,
       page: 0
     };
@@ -268,9 +268,6 @@ class Appointment extends Component {
     );
     this.setState({ room });
   };
-  changeDateTime = (e, name) => {
-    this.setState({ [name]: e.target.value });
-  };
 
   /* 搜索patient */
   search = value => {
@@ -289,6 +286,13 @@ class Appointment extends Component {
   };
 
   bookCompare = () => {
+    const datetime = moment(`${this.state.date} ${this.state.time}`, 'DD MMM YYYY HH:mm').isBefore(new Date());
+    if(datetime) {
+      this.props.dispatch({type: 'OPEN_ERROR_MESSAGE', error: 'Please choose a future time'});
+      // this.props.dispatch({type: 'BOOK_COMPARE_RESULT', data: true });
+      // this.setState({ timeIsWrong: true });
+      return;
+    }
     const params = {
       patientId: this.state.patient.patientId,
       encounterTypeId: this.props.encounterType.encounterTypeId,
@@ -332,6 +336,10 @@ class Appointment extends Component {
   changeDate = e => {
     this.setState({ date: moment(e._d).format('DD MMM YYYY') });
   };
+  changeTime = e => {
+    const time = moment(e._d).format('HH:mm');
+    this.setState({ time });
+  }
 
   /* table pagination */
   handleChangePage = (event, page) => {
@@ -512,9 +520,21 @@ class Appointment extends Component {
                       </Grid>
                       <Grid item xs={6}>
                         <Typography component={'div'}>Date/Time</Typography>
+                        <Typography
+                            component="div"
+                            style={{
+                              marginLeft: 10,
+                              width: 158,
+                              border: '1px solid rgba(0,0,0,0.42)',
+                              paddingLeft: 8,
+                              height: 31,
+                              borderRadius: 2,
+                              fontSize: 14
+                            }}
+                        >
                         <InlineDatePicker
-                            className={'phone_select_input'}
-                            style={{ marginLeft: 10, width: 180 }}
+                            // className={'phone_select_input'}
+                            // style={{ marginLeft: 10, width: 150 }}
                             mask={value =>
                             value
                               ? [
@@ -535,7 +555,7 @@ class Appointment extends Component {
                             disableOpenOnEnter
                             format={'DD MMM YYYY'}
                             placeholder={'DD MMM YYYY'}
-                            variant={'outlined'}
+                            // variant={'outlined'}
                             keyboard
                             invalidDateMessage={'輸入的日期無效'}
                             minDateMessage={'請選擇正確的日期'}
@@ -543,7 +563,43 @@ class Appointment extends Component {
                             value={moment(this.state.date, 'DD MMM YYYY')}
                             onChange={this.changeDate}
                         />
-                        <InputBase
+                        </Typography>
+                        <Typography
+                            component="div"
+                            style={{
+                              marginLeft: 10,
+                              width: 108,
+                              border: '1px solid rgba(0,0,0,0.42)',
+                              paddingLeft: 8,
+                              height: 31,
+                              borderRadius: 2,
+                              fontSize: 14
+                            }}
+                        >
+                        <InlineTimePicker
+                            // className={'tt'}
+                            // style={{ marginLeft: 10, width: 100 }}
+                            keyboard
+                            disableOpenOnEnter
+                            format="HH:mm"
+                            invalidDateMessage={'輸入的時間無效'}
+                            value={moment(this.state.time, 'HH:mm')}
+                            onChange={this.changeTime}
+                            // variant={'outlined'}
+                            mask={value =>
+                              value
+                                ? [
+                                    /\d/,
+                                    /\d/,
+                                    ':',
+                                    /\d/,
+                                    /\d/
+                                  ]
+                                : []
+                            }
+                        />
+                        </Typography>
+                        {/* <InputBase
                             style={{ width: 120 }}
                             type={'time'}
                             className={'phone_select_input'}
@@ -551,7 +607,7 @@ class Appointment extends Component {
                             onChange={(...arg) =>
                             this.changeDateTime(...arg, 'time')
                           }
-                        />
+                        /> */}
                       </Grid>
                     </Grid>
                   </FormGroup>

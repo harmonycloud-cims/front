@@ -7,7 +7,7 @@ const style = {
   form_input: {
     marginLeft: 10,
     width: '80%',
-    border: '1px solid rgba(0,0,0,0.2)',
+    border: '1px solid rgba(0,0,0,0.42)',
     paddingLeft: 8,
     borderRadius: 2,
     fontSize: 14

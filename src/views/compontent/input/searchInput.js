@@ -24,7 +24,7 @@ const style = {
     display: 'flex',
     alignItems: 'center',
     borderRadius: '15px',
-    border: '1px solid rgba(0,0,0,0.2)',
+    border: '1px solid rgba(0,0,0,0.42)',
     height: 25,
     width: 400
   },
@@ -182,9 +182,12 @@ class SearchInput extends Component {
                     {item.patient.englishSurname},{' '}
                     {item.patient.englishGivenName}
                   </Typography>
-                  <Typography component={'span'}>
+                  <Typography component={'span'} className={classes.mr15}>
                     {item.patient.mobilePhoneAreaCode}-
                     {item.patient.mobilePhone}
+                  </Typography>
+                  <Typography component={'span'}>
+                    No. {item.patient.documentNumber}
                   </Typography>
                 </MenuItem>
               ))}
