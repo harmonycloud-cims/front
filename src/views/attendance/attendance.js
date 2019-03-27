@@ -81,7 +81,7 @@ class Attendance extends Component {
       date: moment(new Date().getTime()).format('DD MMM YYYY'),
       attendanceList: this.props.attendanceList,
       value: '',
-      // timer: null,
+      timer: null,
       rowsPerPage: 10,
       page: 0
     };
@@ -89,11 +89,11 @@ class Attendance extends Component {
 
   componentDidMount() {
     this.initData();
-    this.websocketConnection();
-    // let timer = setInterval(() => {
-    //   this.initData();
-    // }, 60000);
-    // this.setState({ timer });
+    // this.websocketConnection();
+    let timer = setInterval(() => {
+      this.initData();
+    }, 60000);
+    this.setState({ timer });
   }
   UNSAFE_componentWillReceiveProps(nextProps) {
     if (nextProps.attendanceList !== this.props.attendanceList) {
@@ -102,11 +102,11 @@ class Attendance extends Component {
   }
   componentWillUnmount() {
     //关闭websocket
-    console.log(socket.readyState, 'close will mount');
-    socket.close();
-    // if (this.state.timer !== null) {
-    //   clearInterval(this.state.timer);
-    // }
+    // console.log(socket.readyState, 'close will mount');
+    // socket.close();
+    if (this.state.timer !== null) {
+      clearInterval(this.state.timer);
+    }
     // if (this.timer !== null) {
     //   clearInterval(this.timer);
     // }
@@ -117,7 +117,7 @@ class Attendance extends Component {
       this.props.dispatch({type: 'OPEN_ERROR_MESSAGE', error: 'Your browser does not support WebSocket.'});
     }else{
       // const token = `Bearer ${window.sessionStorage.getItem('token')}`;
-      let socketUrl=`ws://localhost:3000/websocket/attendWebsocket/${this.props.user.userId}`;
+      let socketUrl=`ws://10.10.103.61:33010/appointment/attendWebsocket/${this.props.user.userId}`;
       // socketUrl=socketUrl.replace('https','ws').replace('http','ws');
       socket = new WebSocket(socketUrl);
       //打开事件
