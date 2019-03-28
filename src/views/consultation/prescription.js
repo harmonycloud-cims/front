@@ -580,7 +580,7 @@ class Prescription extends Component {
                     this.anchorel = node;
                   }}
                     onChange={this.changeSearchValue}
-                    placeholder="Search by ID/ Name/ Phone"
+                    placeholder="Search by drug name/set"
                     value={this.state.searchValue}
                     onKeyDown={this.keyDown}
                 />

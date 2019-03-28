@@ -9,7 +9,7 @@ import {
   TableHead,
   TableBody,
   Button,
-  Checkbox,
+  Radio,
   FormControlLabel,
   FormGroup,
   FormControl,
@@ -784,7 +784,7 @@ class Note extends Component {
                           key={index}
                           label={item.templateName}
                           control={
-                          <Checkbox
+                          <Radio
                               label={item.templateName}
                               value={item.templateName}
                               checked={item.checked || false}

@@ -117,7 +117,7 @@ class Attendance extends Component {
       this.props.dispatch({type: 'OPEN_ERROR_MESSAGE', error: 'Your browser does not support WebSocket.'});
     }else{
       // const token = `Bearer ${window.sessionStorage.getItem('token')}`;
-      let socketUrl=`ws://localhost/appointment/attendWebsocket/${this.props.user.userId}`;
+      let socketUrl=`/websocket/attendWebsocket/${this.props.user.userId}`;
       // let socketUrl=`/websocket/attendWebsocket/${this.props.user.userId}`;
       // socketUrl=socketUrl.replace('https','ws').replace('http','ws');
       socket = new WebSocket(socketUrl);
