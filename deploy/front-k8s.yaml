@@ -21,11 +21,11 @@ spec:
       - env:
         - name: TZ
           value: Asia/Shanghai
-        image: <image-name>
+        image: docker-registry.default.svc:5000/dhcims-msapoc-dev/front:183
         imagePullPolicy: Always
         name: front
         ports:
-        - containerPort: 80
+        - containerPort: 8080
           protocol: TCP
         resources:
           limits:
@@ -34,14 +34,26 @@ spec:
           requests:
             cpu: 200m
             memory: 512Mi
+        securityContext:
+          privileged: true
+          runAsUser: 0
         volumeMounts:
         - mountPath: /etc/nginx/conf.d/default.conf
-          name: nginx-config
+          name: front-config
           subPath: default.conf
+        - mountPath: /etc/opt/rh/rh-nginx112/nginx/nginx.conf
+          name: nginx-config
+          subPath: nginx.conf
       volumes:
       - configMap:
           items:
           - key: front-config
             path: default.conf
           name: front-config
+        name: front-config
+      - configMap:
+          items:
+          - key: nginx.conf
+            path: nginx.conf
+          name: nginx-config
         name: nginx-config

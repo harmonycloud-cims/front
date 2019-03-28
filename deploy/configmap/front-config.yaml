@@ -19,23 +19,12 @@ data:
     gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript application/javascript;
 
     server {
-        listen       80;
+        listen       8080;
         server_name  localhost;
         root   /usr/share/nginx/html;
 
         #charset koi8-r;
         #access_log  /var/log/nginx/host.access.log  main;
-
-
-        location ^~ /catalogue/ {
-            proxy_pass http://gateway;
-            index  index.html index.htm;
-            proxy_http_version 1.1;
-            #proxy_set_header Host $host;
-            #proxy_set_header X-Real-IP $remote_addr;
-            #proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            rewrite ^/?(.*) /catalogueS/$1 break;
-        }
 
         location ~* \.(html|js|css|jpg|png|woff|ttf)$ {
             index  index.html index.htm;
@@ -50,7 +39,7 @@ data:
 
         
         location /{
-                proxy_pass http://gateway;
+                proxy_pass http://gateway:8080;
                 index  index.html index.htm;
                 proxy_http_version 1.1;
                 #proxy_set_header Host $host;
