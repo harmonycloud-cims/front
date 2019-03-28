@@ -281,7 +281,7 @@ const updateConsultation = (state = consultationState, action = {}) => {
     case 'OPEN_CONSULTATION_LOADING':
       return { ...state, consulationErrorMessage: '', closeDialog: action.data, saveName: action.saveName };
     case 'CONSULTATION_LOADING_SUCCESS':
-      return { ...state, consulationErrorMessage: 'Save successful' };
+      return { ...state, consulationErrorMessage: 'Saved successfully' };
     case 'CLOSE_CONSULTATION_LOADING':
       return { ...state, closeDialog: false };
     case 'CONSULTATION_LOADING_ERROR':

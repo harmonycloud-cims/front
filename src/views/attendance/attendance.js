@@ -89,11 +89,11 @@ class Attendance extends Component {
 
   componentDidMount() {
     this.initData();
-    // this.websocketConnection();
-    let timer = setInterval(() => {
-      this.initData();
-    }, 60000);
-    this.setState({ timer });
+    this.websocketConnection();
+    // let timer = setInterval(() => {
+    //   this.initData();
+    // }, 60000);
+    // this.setState({ timer });
   }
   UNSAFE_componentWillReceiveProps(nextProps) {
     if (nextProps.attendanceList !== this.props.attendanceList) {
@@ -102,14 +102,14 @@ class Attendance extends Component {
   }
   componentWillUnmount() {
     //关闭websocket
-    // console.log(socket.readyState, 'close will mount');
-    // socket.close();
-    if (this.state.timer !== null) {
-      clearInterval(this.state.timer);
-    }
-    // if (this.timer !== null) {
-    //   clearInterval(this.timer);
+    console.log(socket.readyState, 'close will mount');
+    socket.close();
+    // if (this.state.timer !== null) {
+    //   clearInterval(this.state.timer);
     // }
+    if (this.timer !== null) {
+      clearInterval(this.timer);
+    }
   }
 
   websocketConnection = () => {
@@ -135,10 +135,11 @@ class Attendance extends Component {
       };
       // 关闭事件
       socket.onclose = () => {
-          console.log('websocket已关闭');
+          console.log('websocket已关闭', moment().format('YYYY-MM-DD HH:mm:ss'));
       };
       //发生了错误事件
       socket.onerror = () => {
+        socket.open();
         console.log('websocket发生了错误');
       };
       this.timer = setInterval(() => {
