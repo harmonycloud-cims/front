@@ -118,7 +118,7 @@ class Attendance extends Component {
     }else{
       // const token = `Bearer ${window.sessionStorage.getItem('token')}`;
       // let socketUrl=`ws://10.10.103.61:33010/appointment/attendWebsocket/${this.props.user.userId}`;
-      let socketUrl=`ws://127.0.0.1:3000/websocket/attendWebsocket/${this.props.user.userId}`;
+      let socketUrl=`ws://localhost//websocket/attendWebsocket/${this.props.user.userId}`;
       // socketUrl=socketUrl.replace('https','ws').replace('http','ws');
       socket = new WebSocket(socketUrl);
       //打开事件
