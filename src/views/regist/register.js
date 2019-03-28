@@ -39,7 +39,7 @@ const style = {
   form_input: {
     marginLeft: 10,
     width: '80%',
-    border: '1px solid rgba(0,0,0,0.2)',
+    border: '1px solid rgba(0,0,0,0.42)',
     paddingLeft: 8,
     borderRadius: 2,
     fontSize: 14
@@ -48,7 +48,7 @@ const style = {
     marginLeft: 10,
     minWidth: 200,
     width: 'calc(80% - 120px)',
-    border: '1px solid rgba(0,0,0,0.2)',
+    border: '1px solid rgba(0,0,0,0.42)',
     paddingLeft: 8,
     borderRadius: 2,
     fontSize: 14
@@ -124,6 +124,11 @@ class Register extends Component {
   doRegister = e => {
     e.preventDefault();
     let { patient, contactPersonList } = this.state;
+    if(patient.englishGivenName === '' || patient.englishSurname === '' || patient.documentNumber === '' || !patient.dateOfBirth) {
+      this.props.dispatch({type: 'PATIENT_LOADING', data: 'Missing mandatory information'});
+      this.setState({ loading: true });
+      return;
+    }
     // 后台格式(YYYY-MM-DD), 前台格式(DD MMM YYYY)
     patient.dateOfBirth = moment(patient.dateOfBirth, 'DD MMM YYYY').format(
       'YYYY-MM-DD'
@@ -203,9 +208,13 @@ class Register extends Component {
       this.props.dispatch({ type: 'CLOSE_PATIENT_LOADING' })
     );
   };
-  date = e => {
+  changeDate = e => {
     let { patient } = this.state;
-    patient['dateOfBirth'] = moment(e._d).format('DD MMM YYYY');
+    if(e) {
+      patient['dateOfBirth'] = moment(e._d).format('DD MMM YYYY');
+    } else {
+      patient['dateOfBirth'] = null;
+    }
     this.setState({ patient });
   };
   render() {
@@ -282,7 +291,7 @@ class Register extends Component {
               patientList={this.props.patientList}
               selectPatient={this.selectPatient}
           />
-          <form>
+          <form onSubmit={this.doRegister}>
             <div className={styles.form50}>
               <div>
                 Document Type<span style={{ color: 'red' }}>*</span>
@@ -319,9 +328,21 @@ class Register extends Component {
               <div>
                 Date of Birth<span style={{ color: 'red' }}>*</span>
               </div>
+              <Typography
+                  component="div"
+                  style={{
+                    marginLeft: 10,
+                    width: 'calc(80% - 2px)',
+                    border: '1px solid rgba(0,0,0,0.42)',
+                    paddingLeft: 8,
+                    height: 31,
+                    borderRadius: 2,
+                    fontSize: 14
+                  }}
+              >
               <InlineDatePicker
-                  className={'select_input'}
-                  style={{ marginLeft: 10 }}
+                  // className={'select_input'}
+                  style={{ width: '100%', border: 0 }}
                   mask={value =>
                     value
                       ? [
@@ -339,17 +360,19 @@ class Register extends Component {
                         ]
                       : []
                   }
+                  clearable
                   disableOpenOnEnter
                   format={'DD MMM YYYY'}
-                  placeholder={'DD MMM YYYY'}
+                  placeholder={'01 Mar 2019'}
                   keyboard
                   invalidDateMessage={'輸入的日期無效'}
                   maxDateMessage={'請選擇正確的日期'}
                   maxDate={new Date()}
-                  variant={'outlined'}
-                  value={moment(this.state.patient.dateOfBirth, 'DD MMM YYYY')}
-                  onChange={this.date}
+                  // variant={'outlined'}
+                  value={this.state.patient.dateOfBirth ? moment(this.state.patient.dateOfBirth, 'DD MMM YYYY') : null}
+                  onChange={this.changeDate}
               />
+              </Typography>
             </div>
             <div className={styles.form50}>
               <div>Sex</div>

@@ -362,7 +362,7 @@ export const patientBasic = {
   block: '',
   building: '',
   chineseName: '',
-  dateOfBirth: '01 Jan 2000',
+  dateOfBirth: null,
   district: districtList[0],
   documentNumber: '',
   documentType: doumentTypeList[0],

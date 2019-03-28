@@ -152,6 +152,7 @@ function* doLogin() {
         window.sessionStorage.setItem('token', data.data.token);
         window.sessionStorage.setItem('user', params.loginname);
         window.sessionStorage.setItem('clinic', params.clinicName);
+        yield put({ type: 'UPDATE_LOGIN_USER_SUCCESS' }); //发起一个action，类似于dispatch
         yield put({ type: 'UPDATE_LOGIN_USER', data }); //发起一个action，类似于dispatch
       } else {
         yield put({ type: 'LOGIN_ERROR', error: data.errorMessage });
@@ -178,6 +179,7 @@ function* logout() {
 function* fetchPatient(action) {
   try {
     yield put({ type: 'OPEN_SEARCH' });
+    yield put({ type: 'PATIENTLIST', data: [] });
     let { data } = yield call(
       axios.get,
       '/patient/searchPatient',
@@ -237,7 +239,7 @@ function* savePatient() {
     try {
       let { data } = yield call(axios.post, '/patient/register', params); //阻塞，请求后台数据
       if (data.success) {
-        yield put({ type: 'PATIENT_LOADING', data: 'Saved successfully' });
+        yield put({ type: 'PATIENT_LOADING', data: 'Registration is completed' });
       } else {
         yield put({ type: 'PATIENT_LOADING_ERROR', data: data.errorMessage ? data.errorMessage : 'Save Error' });
       }
@@ -303,7 +305,7 @@ function* bookCompare() {
       } else {
         yield put({
           type: 'BOOK_COMPARE_RESULT_ERROR',
-          data: true,
+          data: data.succes,
           error: data.errorMessage ? data.errorMessage : 'Service error'
         });
       }
@@ -706,6 +708,19 @@ function* nextPatient() {
 }
 
 export default function* rootSaga() {
+  // yield [
+  //   fork(getClinicList),
+  //   fork(changeClinic),
+  //   fork(loginChangeClinic),
+  //   fork(getEncounterType),
+  //   fork(changeEncounterType),
+  //   fork(getRoom),
+  //   fork(getAllRoom),
+  //   fork(doLogin),
+  //   fork(refreshToken),
+  //   fork(updateMenu),
+  //   fork(logout)
+  // ];
   yield fork(getClinicList);
   yield fork(changeClinic);
   yield fork(loginChangeClinic);

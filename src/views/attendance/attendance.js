@@ -16,7 +16,8 @@ import {
   InputBase,
   IconButton,
   Paper,
-  Dialog
+  Dialog,
+  Typography
 } from '@material-ui/core';
 import { Search } from '@material-ui/icons';
 import _ from 'lodash';
@@ -27,6 +28,7 @@ import timg from '../../images/timg.gif';
 
 function mapStateToProps(state) {
   return {
+    user: state.updateUser.user,
     patientList: state.updatePatient.patientList,
     clinicList: state.updateUser.clinicList,
     encounterList: state.updateUser.encounterList,
@@ -51,7 +53,7 @@ const style = {
     display: 'flex',
     alignItems: 'center',
     borderRadius: '15px',
-    border: '1px solid rgba(0,0,0,0.2)',
+    border: '1px solid rgba(0,0,0,0.42)',
     height: 25,
     width: 400
   },
@@ -68,6 +70,8 @@ const style = {
     right: 0
   }
 };
+
+let socket;
 class Attendance extends Component {
   constructor(props) {
     super(props);
@@ -85,10 +89,11 @@ class Attendance extends Component {
 
   componentDidMount() {
     this.initData();
-    let timer = setInterval(() => {
-      this.initData();
-    }, 60000);
-    this.setState({ timer });
+    this.websocketConnection();
+    // let timer = setInterval(() => {
+    //   this.initData();
+    // }, 60000);
+    // this.setState({ timer });
   }
   UNSAFE_componentWillReceiveProps(nextProps) {
     if (nextProps.attendanceList !== this.props.attendanceList) {
@@ -96,8 +101,52 @@ class Attendance extends Component {
     }
   }
   componentWillUnmount() {
-    if (this.state.timer !== null) {
-      clearInterval(this.state.timer);
+    //关闭websocket
+    console.log(socket.readyState, 'close will mount');
+    socket.close();
+    // if (this.state.timer !== null) {
+    //   clearInterval(this.state.timer);
+    // }
+    if (this.timer !== null) {
+      clearInterval(this.timer);
+    }
+  }
+
+  websocketConnection = () => {
+    if(typeof(WebSocket) === 'undefined') {
+      this.props.dispatch({type: 'OPEN_ERROR_MESSAGE', error: 'Your browser does not support WebSocket.'});
+    }else{
+      // const token = `Bearer ${window.sessionStorage.getItem('token')}`;
+      // let socketUrl=`ws://192.168.2.62:8090/websocket/attendWebsocket/${this.props.user.userId}`;
+      let socketUrl=`ws://gateway/appointment/attendWebsocket/${this.props.user.userId}`;
+      // let socketUrl=`/websocket/attendWebsocket/${this.props.user.userId}`;
+      // socketUrl=socketUrl.replace('https','ws').replace('http','ws');
+      socket = new WebSocket(socketUrl);
+      //打开事件
+      socket.onopen = () => {
+        console.log('websocket已打开');
+        socket.send('这是来自客户端的消息' + new Date());
+      };
+      //获得消息事件
+      socket.onmessage = (msg) => {
+          console.log(msg.data, 'onmessage');
+          if(msg.data === 'Success') {
+            this.initData();
+          }
+          //发现消息进入    开始处理前端触发逻辑
+      };
+      // 关闭事件
+      socket.onclose = () => {
+          console.log('websocket已关闭', moment().format('YYYY-MM-DD HH:mm:ss'));
+      };
+      //发生了错误事件
+      socket.onerror = () => {
+        // socket.open();
+        console.log('websocket发生了错误');
+      };
+      this.timer = setInterval(() => {
+        console.log(socket.readyState, 'timing');
+      }, 6000);
     }
   }
 
@@ -170,35 +219,51 @@ class Attendance extends Component {
           <Grid item xs={3}>
             <div className={'f_mt10'}>
               <div>Date</div>
-              <InlineDatePicker
-                  className={'select_input'}
-                  style={{ marginLeft: 10 }}
-                  mask={value =>
-                  value
-                    ? [
-                        /\d/,
-                        /\d/,
-                        ' ',
-                        /[A-Z]/,
-                        /[a-z]/,
-                        /[a-z]/,
-                        ' ',
-                        /\d/,
-                        /\d/,
-                        /\d/,
-                        /\d/
-                      ]
-                    : []
-                }
-                  disableOpenOnEnter
-                  format={'DD MMM YYYY'}
-                  placeholder={'DD MMM YYYY'}
-                  variant={'outlined'}
-                  keyboard
-                  invalidDateMessage={'輸入的日期無效'}
-                  value={moment(this.state.date, 'DD MMM YYYY')}
-                  onChange={this.changeDate}
-              />
+              <Typography
+                  component="div"
+                  style={{
+                    marginLeft: 10,
+                    width: 'calc(80% - 2px)',
+                    border: '1px solid rgba(0,0,0,0.42)',
+                    paddingLeft: 8,
+                    height: 31,
+                    borderRadius: 2,
+                    fontSize: 14
+                  }}
+              >
+                <InlineDatePicker
+                    // className={'select_input'}
+                    // style={{ marginLeft: 10 }}
+                    mask={value =>
+                    value
+                      ? [
+                          /\d/,
+                          /\d/,
+                          ' ',
+                          /[A-Z]/,
+                          /[a-z]/,
+                          /[a-z]/,
+                          ' ',
+                          /\d/,
+                          /\d/,
+                          /\d/,
+                          /\d/
+                        ]
+                      : []
+                    }
+                    disableOpenOnEnter
+                    format={'DD MMM YYYY'}
+                    placeholder={'DD MMM YYYY'}
+                    // variant={'outlined'}
+                    keyboard
+                    children={
+                      <input></input>
+                    }
+                    invalidDateMessage={'輸入的日期無效'}
+                    value={moment(this.state.date, 'DD MMM YYYY')}
+                    onChange={this.changeDate}
+                />
+              </Typography>
             </div>
             <div className={'f_mt10'}>
               <div>Attend Status</div>
