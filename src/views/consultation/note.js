@@ -564,7 +564,7 @@ class Note extends Component {
               <Typography component="div">
                 Allergy - aspirin, Peanut(non-drug)
               </Typography>
-              <Typography component="div">ADR - ...</Typography>
+              <Typography component="div">ADR -  Nil</Typography>
               <Typography component="div">Alert - G6PD Deficiency</Typography>
             </FormControl>
           </FormGroup>
