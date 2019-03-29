@@ -56,20 +56,21 @@ class CommonHeader extends Component {
   }
   UNSAFE_componentWillReceiveProps(nextProps) {
     // console.log('123321', nextProps.location.pathname, this.props.location.pathname);
-    if (nextProps.location.pathname !== this.props.location.pathname) {
-      if (
-        nextProps.location.pathname === '/' ||
-        nextProps.location.pathname === '/login'
-      ) {
-        // console.log('shijianguola');
-        this.props.dispatch({ type: 'LOGOUT' });
-        this.props.history.push('/login');
-      } else if(nextProps.location.pathname === '/index'){
+    // if (nextProps.location.pathname !== this.props.location.pathname) {
+    //   if (
+    //     nextProps.location.pathname === '/' ||
+    //     nextProps.location.pathname === '/login'
+    //   ) {
+    //     // console.log('shijianguola');
+    //     this.props.dispatch({ type: 'LOGOUT' });
+    //     this.props.history.push('/login');
+    //   } else
+      if(nextProps.location.pathname === '/index'){
         this.props.history.push('/index/welcome');
       }else {
         this.urlChangeReduxUpdate(nextProps.location.pathname);
       }
-    }
+    // }
   }
   componentWillUnmount() {
     if (this.state.timer !== null) {
@@ -91,6 +92,7 @@ class CommonHeader extends Component {
       type: 'CHANGE_MENU',
       activeMenu: menu.accessRightName
     });
+    // this.props.history.push(url);
   };
   logout = () => {
     this.props.dispatch({ type: 'LOGOUT' });

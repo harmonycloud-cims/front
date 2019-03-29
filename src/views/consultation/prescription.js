@@ -11,7 +11,6 @@ import {
   InputBase,
   MenuItem,
   Popper,
-  Divider,
   CircularProgress,
   IconButton,
   Tabs,
@@ -223,15 +222,21 @@ class Prescription extends Component {
     }
   }
   // show all the group && checked
-  collapseIngredient = id => {
+  collapseIngredient = (id, name) => {
     let departmentFavouriteList = _.cloneDeep(this.state.showDepartmentFavouriteList);
     let departmentFavourite = _.find(departmentFavouriteList, item => {
       return item.drugFavouriteGroupId === id;
     });
     departmentFavourite.isCollapse = !departmentFavourite.isCollapse;
-    _.forEach(departmentFavourite.drugFavouriteGroupDrugDtoList, item => {
-      item.checked = !item.checked;
-    });
+    if(name === 'add'){
+      _.forEach(departmentFavourite.drugFavouriteGroupDrugDtoList, item => {
+        item.checked = true;
+      });
+    } else {
+      _.forEach(departmentFavourite.drugFavouriteGroupDrugDtoList, item => {
+        item.checked = false;
+      });
+    }
     this.setState({ showDepartmentFavouriteList: departmentFavouriteList });
   };
   // 'drag and drop' add medicine
@@ -453,21 +458,24 @@ class Prescription extends Component {
                         <FormGroup
                             row
                             className={classes.department_favourite_group}
-                            onClick={() =>
-                            this.collapseIngredient(item.drugFavouriteGroupId)
-                          }
                         >
                           {item.isCollapse ? (
                             <Remove
                                 color="primary"
                                 size="small"
                                 className={classes.left_warp_favourite_icon}
+                                onClick={() =>
+                                  this.collapseIngredient(item.drugFavouriteGroupId, 'remove')
+                                }
                             />
                           ) : (
                             <Add
                                 color="primary"
                                 size="small"
                                 className={classes.left_warp_favourite_icon}
+                                onClick={() =>
+                                  this.collapseIngredient(item.drugFavouriteGroupId, 'add')
+                                }
                             />
                           )}
                           <Typography
@@ -627,11 +635,11 @@ class Prescription extends Component {
                         </MenuItem>
                       ))}
                     </Typography>
-                    <Divider />
                     {
                       this.props.openSearchProgress ? null :
                       <MenuItem
                           onClick={() => this.handleClose({})}
+                          style={{borderTop: '1px solid rgba(0, 0, 0, 0.42)'}}
                           className={
                           this.state.count === -2
                             ? classes.menu_list_select

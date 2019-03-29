@@ -17,7 +17,6 @@ import {
   Popper,
   Paper,
   MenuItem,
-  Divider,
   IconButton,
   CircularProgress
 } from '@material-ui/core';
@@ -299,7 +298,7 @@ class Note extends Component {
     this.props.changeNote(this.state.attendingProblemList, this.state.chronicProblemList, clinicalNotes);
   };
   changeCheck = (e, checked, item) => {
-    let templateList = _.cloneDeep(this.state.templateList);
+    let templateList = _.cloneDeep(this.props.templateList);
     let clinicalNotes = '';
     let template = _.find(templateList, eve => {
       return eve.clinicalNoteTemplateId === item.clinicalNoteTemplateId;
@@ -307,7 +306,7 @@ class Note extends Component {
     template.checked = checked;
     _.forEach(templateList, item => {
       if (item.checked){
-        clinicalNotes += item.templateContent + '<br/>';
+        clinicalNotes += item.templateContent;
       }
     });
     this.setState({ templateList, clinicalNotes });
@@ -621,18 +620,18 @@ class Note extends Component {
                           </MenuItem>
                         ))}
                       </Typography>
-                      <Divider />
                       {
                         this.props.openSearchProgress ? null :
                         <MenuItem
                             onClick={() => this.handleClose({})}
+                            style={{borderTop: '1px solid rgba(0, 0, 0, 0.42)'}}
                             className={
                               this.state.count === -2
                                 ? classes.menu_list_select
                                 : classes.menu_list
                             }
                         >
-                            Not Found
+                            non-drug
                       </MenuItem>
                       }
                     </Paper>

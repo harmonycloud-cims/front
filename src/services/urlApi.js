@@ -1,1 +1,1 @@
-export const websocketApi = '58.16.78.136:33007';
+export const socketApiUrl = window.location.host;

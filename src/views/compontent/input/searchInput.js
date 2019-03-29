@@ -196,13 +196,14 @@ class SearchInput extends Component {
               this.props.openSearchProgress ? null :
               <MenuItem
                   onClick={() => this.handleClose({})}
+                  style={{borderTop: '1px solid rgba(0, 0, 0, 0.42)'}}
                   className={
                   this.state.count === -2
                     ? classes.menu_list_select
                     : classes.menu_list
                 }
               >
-                Not Found
+                Not Registration
               </MenuItem>
             }
           </Paper>

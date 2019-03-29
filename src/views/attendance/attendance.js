@@ -25,7 +25,7 @@ import { withStyles } from '@material-ui/core/styles/index';
 import moment from 'moment';
 import { InlineDatePicker } from 'material-ui-pickers';
 import timg from '../../images/timg.gif';
-import { websocketApi } from '../../services/urlApi';
+import { socketApiUrl } from '../../services/urlApi';
 
 function mapStateToProps(state) {
   return {
@@ -103,23 +103,20 @@ class Attendance extends Component {
   }
   componentWillUnmount() {
     //关闭websocket
-    console.log(socket.readyState, 'close will mount');
-    socket.close();
+    // console.log(socket.readyState, 'close will mount');
+    socket && socket.close();
     // if (this.state.timer !== null) {
     //   clearInterval(this.state.timer);
     // }
-    if (this.timer !== null) {
-      clearInterval(this.timer);
-    }
   }
 
   websocketConnection = () => {
     if(typeof(WebSocket) === 'undefined') {
       this.props.dispatch({type: 'OPEN_ERROR_MESSAGE', error: 'Your browser does not support WebSocket.'});
     }else{
-      // const token = `Bearer ${window.sessionStorage.getItem('token')}`;
+      // console.log(window.location);
       // let socketUrl=`ws://192.168.2.62:8090/websocket/attendWebsocket/${this.props.user.userId}`;
-      let socketUrl=`ws://${websocketApi}/websocket/attendWebsocket/${this.props.user.userId}`;
+      let socketUrl=`ws://${socketApiUrl}/websocket/attendWebsocket/${this.props.user.userId}`;
       // let socketUrl=`/websocket/attendWebsocket/${this.props.user.userId}`;
       // socketUrl=socketUrl.replace('https','ws').replace('http','ws');
       socket = new WebSocket(socketUrl);

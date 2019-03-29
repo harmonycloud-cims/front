@@ -1,5 +1,6 @@
 import { take, call, put, fork, takeLatest } from 'redux-saga/effects';
 import axios from '../../services/axiosInstance';
+import { setCookie, delCookie } from '../../services/utils';
 /* user */
 function* getEncounterType() {
   while (true) {
@@ -152,6 +153,7 @@ function* doLogin() {
         window.sessionStorage.setItem('token', data.data.token);
         window.sessionStorage.setItem('user', params.loginname);
         window.sessionStorage.setItem('clinic', params.clinicName);
+        setCookie('clinic', params.clinicName, 24*60*60000);
         yield put({ type: 'UPDATE_LOGIN_USER_SUCCESS' }); //发起一个action，类似于dispatch
         yield put({ type: 'UPDATE_LOGIN_USER', data }); //发起一个action，类似于dispatch
       } else {
@@ -171,6 +173,7 @@ function* updateMenu() {
 function* logout() {
   while (true) {
     yield take('LOGOUT');
+    delCookie('clinic');
     yield put({ type: 'CLEAR_INFORMATION' });
   }
 }

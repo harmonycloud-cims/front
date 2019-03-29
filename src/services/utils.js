@@ -51,6 +51,12 @@ export const fn = {
     };
   }
 };
+// 设置cookie
+export const setCookie = (c_name, value, expiredays) => {
+  let exdate = new Date();
+  exdate.setDate(exdate.getDate() + expiredays);
+  document.cookie = c_name + '=' + escape(value) + ((!expiredays) ? '' : ';expires='+exdate.toGMTString()) ;//+ ';domain=' + Cookie_Domain + '; path=/';
+};
 export const getCookie = name => {
   let arr = document.cookie.match(new RegExp('(^| )' + name + '=([^;]*)(;|$)'));
   if (arr) return unescape(arr[2]);

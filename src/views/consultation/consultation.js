@@ -32,9 +32,12 @@ import Note from './note';
 import Prescription from './prescription';
 import { InlineDatePicker } from 'material-ui-pickers';
 import timg from '../../images/timg.gif';
+import { Prompt } from 'react-router-dom';
+import { socketApiUrl } from '../../services/urlApi';
 
 function mapStateToProps(state) {
   return {
+    user: state.updateUser.user,
     clinic: state.updateUser.clinic,
     clinicList: state.updateUser.clinicList,
     allRoomList: state.updateUser.allRoomList,
@@ -100,6 +103,7 @@ const style = {
     marginTop: 6
   }
 };
+let socket;
 class Consulatation extends Component {
   constructor(props) {
     super(props);
@@ -124,22 +128,24 @@ class Consulatation extends Component {
       // clinicNote page
       isNoteUpdate: false,
       newAttendingDiagnosisList: [],
+      oriAttendingDiagnosisList: [],
       newChronicDiagnosisList: [],
+      oriChronicDiagnosisList: [],
       newClinicalNote: '',
+      oriClinicalNote: '',
       // prescription page
       isPrescriptionUpdate: false,
       newPrescriptionDrugList: [],
+      oriPrescriptionDrugList: [],
 
-      openDiag: false
+      openDiag: false,
+      isChanged: false // selected and changed, make sure you have saved.
     };
   }
 
   componentDidMount() {
     this.initData();
-    let timer = setInterval(() => {
-      this.initData();
-    }, 60000);
-    this.setState({ timer });
+    this.websocketConnection();
   }
   UNSAFE_componentWillReceiveProps(nextProps) {
     // select页面attendaceList变换
@@ -149,7 +155,7 @@ class Consulatation extends Component {
     // chronicProblem
     if (nextProps.chronicProblemList !== this.props.chronicProblemList) {
       let newChronicDiagnosisList = _.cloneDeep(nextProps.chronicProblemList);
-      this.setState({newChronicDiagnosisList});
+      this.setState({newChronicDiagnosisList, oriChronicDiagnosisList: newChronicDiagnosisList});
     }
     // encounter
     if (nextProps.encounter !== this.props.encounter) {
@@ -170,12 +176,12 @@ class Consulatation extends Component {
         }
         isNoteUpdate = true;
       }
-      this.setState({newClinicalNote, isNoteUpdate});
+      this.setState({newClinicalNote, oriClinicalNote: newClinicalNote, isNoteUpdate});
     }
     // attendingProblem
     if (nextProps.attendingProblemList !== this.props.attendingProblemList) {
       let newAttendingDiagnosisList = _.cloneDeep(nextProps.attendingProblemList);
-      this.setState({newAttendingDiagnosisList});
+      this.setState({newAttendingDiagnosisList, oriAttendingDiagnosisList: newAttendingDiagnosisList});
     }
     // prescription
     if (nextProps.prescriptionLatest !== this.props.prescriptionLatest) {
@@ -187,13 +193,11 @@ class Consulatation extends Component {
           newPrescriptionDrugList = nextProps.prescriptionLatest.prescriptionDrugBoList;
         }
       }
-      this.setState({isPrescriptionUpdate, newPrescriptionDrugList});
+      this.setState({isPrescriptionUpdate, newPrescriptionDrugList, oriPrescriptionDrugList: newPrescriptionDrugList});
     }
   }
   componentWillUnmount() {
-    if (this.state.timer !== null) {
-      clearInterval(this.state.timer);
-    }
+    socket && socket.close();
   }
 
   initData = () => {
@@ -206,7 +210,32 @@ class Consulatation extends Component {
     };
     this.props.dispatch({ type: 'GET_ATTENDANCELIST', params });
   };
-
+  websocketConnection = () => {
+    if(typeof(WebSocket) === 'undefined') {
+      this.props.dispatch({type: 'OPEN_ERROR_MESSAGE', error: 'Your browser does not support WebSocket.'});
+    }else{
+      let socketUrl=`ws://${socketApiUrl}/websocket/attendWebsocket/${this.props.user.userId}`;
+      socket = new WebSocket(socketUrl);
+      //打开事件
+      socket.onopen = () => {
+        console.log('websocket已打开');
+        socket.send('这是来自客户端的消息' + new Date());
+      };
+      //获得消息事件
+      socket.onmessage = (msg) => {
+          console.log(msg.data, 'onmessage');
+          if(msg.data === 'Success') {
+            this.initData();
+          }
+      };
+      socket.onclose = () => {
+          console.log('websocket已关闭', moment().format('YYYY-MM-DD HH:mm:ss'));
+      };
+      socket.onerror = () => {
+        console.log('websocket发生了错误');
+      };
+    }
+  }
   /* select页面 */
   changeDate = e => {
     this.setState({ date: moment(e._d).format('DD MMM YYYY') }, () =>
@@ -266,7 +295,7 @@ class Consulatation extends Component {
     this.props.dispatch({ type: 'GET_PRESCRIPTION', params: this.params3 });
   }
   closePatient = () => {
-    this.setState({ifSelected: false, appointmentSelect: {}, patientIndex: 0});
+    this.setState({ifSelected: false, appointmentSelect: {}, patientIndex: 0, isChanged: false});
     this.initData();
   };
   // 快捷搜索
@@ -289,15 +318,27 @@ class Consulatation extends Component {
   };
 
   changePrescription = (newPrescriptionDrugList) => {
+    // console.log(this.state.oriPrescriptionDrugList, newPrescriptionDrugList)
+    let isChanged = false;
+    if(JSON.stringify(this.state.oriPrescriptionDrugList) !== JSON.stringify(newPrescriptionDrugList)){
+      isChanged = true;
+    }
     let prescriptionDrugList = [];
     if(newPrescriptionDrugList) {
       prescriptionDrugList = newPrescriptionDrugList;
     }
-    this.setState({newPrescriptionDrugList: prescriptionDrugList});
+    this.setState({newPrescriptionDrugList: prescriptionDrugList, isChanged});
   }
   changeNote = (newAttendingDiagnosisList, newChronicDiagnosisList, newClinicalNote) => {
+    let isChanged = false;
+    // console.log(this.state.oriClinicalNote,'\n',newClinicalNote, this.state.oriClinicalNote === newClinicalNote)
+    if(JSON.stringify(this.state.oriAttendingDiagnosisList)!==JSON.stringify(newAttendingDiagnosisList) ||
+      JSON.stringify(this.state.oriChronicDiagnosisList) !== JSON.stringify(newChronicDiagnosisList) ||
+      this.state.oriClinicalNote !== newClinicalNote){
+      isChanged = true;
+    }
     this.setState({
-      newAttendingDiagnosisList, newChronicDiagnosisList, newClinicalNote
+      newAttendingDiagnosisList, newChronicDiagnosisList, newClinicalNote, isChanged
     });
   }
 
@@ -401,6 +442,7 @@ class Consulatation extends Component {
     }
   }
   cancel = () => {
+    // console.log(this.state.isChanged);
     this.setState({isNoteUpdate: false, isPrescriptionUpdate: false});
     this.closePatient();
   }
@@ -497,6 +539,9 @@ class Consulatation extends Component {
     const { classes } = this.props;
     return (
       <div className={'detail_warp'}>
+        {
+          this.state.ifSelected && this.state.isChanged ? <Prompt message="You have made a change,Are you sure to leave?" when={this.makeSure}/> : null
+        }
         {this.state.ifSelected ? (
           <div>
             <Patient
