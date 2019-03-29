@@ -124,8 +124,16 @@ class Register extends Component {
   doRegister = e => {
     e.preventDefault();
     let { patient, contactPersonList } = this.state;
-    if(patient.englishGivenName === '' || patient.englishSurname === '' || patient.documentNumber === '' || !patient.dateOfBirth) {
-      this.props.dispatch({type: 'PATIENT_LOADING', data: 'Missing mandatory information'});
+    if (
+      patient.englishGivenName === '' ||
+      patient.englishSurname === '' ||
+      patient.documentNumber === '' ||
+      !patient.dateOfBirth
+    ) {
+      this.props.dispatch({
+        type: 'PATIENT_LOADING',
+        data: 'Missing mandatory information'
+      });
       this.setState({ loading: true });
       return;
     }
@@ -210,7 +218,7 @@ class Register extends Component {
   };
   changeDate = e => {
     let { patient } = this.state;
-    if(e) {
+    if (e) {
       patient['dateOfBirth'] = moment(e._d).format('DD MMM YYYY');
     } else {
       patient['dateOfBirth'] = null;
@@ -331,19 +339,19 @@ class Register extends Component {
               <Typography
                   component="div"
                   style={{
-                    marginLeft: 10,
-                    width: 'calc(80% - 2px)',
-                    border: '1px solid rgba(0,0,0,0.42)',
-                    paddingLeft: 8,
-                    height: 31,
-                    borderRadius: 2,
-                    fontSize: 14
-                  }}
+                  marginLeft: 10,
+                  width: 'calc(80% - 2px)',
+                  border: '1px solid rgba(0,0,0,0.42)',
+                  paddingLeft: 8,
+                  height: 31,
+                  borderRadius: 2,
+                  fontSize: 14
+                }}
               >
-              <InlineDatePicker
+                <InlineDatePicker
                   // className={'select_input'}
-                  style={{ width: '100%', border: 0 }}
-                  mask={value =>
+                    style={{ width: '100%', border: 0 }}
+                    mask={value =>
                     value
                       ? [
                           /\d/,
@@ -360,18 +368,22 @@ class Register extends Component {
                         ]
                       : []
                   }
-                  clearable
-                  disableOpenOnEnter
-                  format={'DD MMM YYYY'}
-                  placeholder={'01 Mar 2019'}
-                  keyboard
-                  invalidDateMessage={'輸入的日期無效'}
-                  maxDateMessage={'請選擇正確的日期'}
-                  maxDate={new Date()}
+                    clearable
+                    disableOpenOnEnter
+                    format={'DD MMM YYYY'}
+                    placeholder={'01 Mar 2019'}
+                    keyboard
+                    invalidDateMessage={'輸入的日期無效'}
+                    maxDateMessage={'請選擇正確的日期'}
+                    maxDate={new Date()}
                   // variant={'outlined'}
-                  value={this.state.patient.dateOfBirth ? moment(this.state.patient.dateOfBirth, 'DD MMM YYYY') : null}
-                  onChange={this.changeDate}
-              />
+                    value={
+                    this.state.patient.dateOfBirth
+                      ? moment(this.state.patient.dateOfBirth, 'DD MMM YYYY')
+                      : null
+                  }
+                    onChange={this.changeDate}
+                />
               </Typography>
             </div>
             <div className={styles.form50}>

@@ -91,10 +91,6 @@ class Attendance extends Component {
   componentDidMount() {
     this.initData();
     this.websocketConnection();
-    // let timer = setInterval(() => {
-    //   this.initData();
-    // }, 60000);
-    // this.setState({ timer });
   }
   UNSAFE_componentWillReceiveProps(nextProps) {
     if (nextProps.attendanceList !== this.props.attendanceList) {
@@ -103,50 +99,55 @@ class Attendance extends Component {
   }
   componentWillUnmount() {
     //关闭websocket
-    // console.log(socket.readyState, 'close will mount');
     socket && socket.close();
-    // if (this.state.timer !== null) {
-    //   clearInterval(this.state.timer);
-    // }
+    if (this.timer !== null) {
+      clearInterval(this.timer);
+    }
   }
 
   websocketConnection = () => {
-    if(typeof(WebSocket) === 'undefined') {
-      this.props.dispatch({type: 'OPEN_ERROR_MESSAGE', error: 'Your browser does not support WebSocket.'});
-    }else{
-      // console.log(window.location);
-      // let socketUrl=`ws://192.168.2.62:8090/websocket/attendWebsocket/${this.props.user.userId}`;
-      let socketUrl=`ws://${socketApiUrl}/websocket/attendWebsocket/${this.props.user.userId}`;
-      // let socketUrl=`/websocket/attendWebsocket/${this.props.user.userId}`;
+    if (typeof WebSocket === 'undefined') {
+      this.props.dispatch({
+        type: 'OPEN_ERROR_MESSAGE',
+        error: 'Your browser does not support WebSocket.'
+      });
+    } else {
+      let socketUrl = `ws://${socketApiUrl}/websocket/attendWebsocket/${
+        this.props.user.userId
+      }`;
       // socketUrl=socketUrl.replace('https','ws').replace('http','ws');
       socket = new WebSocket(socketUrl);
       //打开事件
       socket.onopen = () => {
         console.log('websocket已打开');
-        socket.send('这是来自客户端的消息' + new Date());
+        socket.send(`${this.props.user.userId}: ${new Date()}`);
       };
       //获得消息事件
-      socket.onmessage = (msg) => {
-          console.log(msg.data, 'onmessage');
-          if(msg.data === 'Success') {
-            this.initData();
-          }
-          //发现消息进入    开始处理前端触发逻辑
+      socket.onmessage = msg => {
+        console.log(msg.data, 'onmessage');
+        if (msg.data === 'Success') {
+          this.initData();
+        }
+        //发现消息进入    开始处理前端触发逻辑
       };
       // 关闭事件
       socket.onclose = () => {
-          console.log('websocket已关闭', moment().format('YYYY-MM-DD HH:mm:ss'));
+        console.log('websocket已关闭', moment().format('YYYY-MM-DD HH:mm:ss'));
       };
       //发生了错误事件
       socket.onerror = () => {
         // socket.open();
+        this.props.dispatch({
+          type: 'OPEN_ERROR_MESSAGE',
+          error: 'Websocket disconnected'
+        });
         console.log('websocket发生了错误');
       };
-      // this.timer = setInterval(() => {
-      //   console.log(socket.readyState, 'timing');
-      // }, 6000);
+      this.timer = setInterval(() => {
+        socket.send(`${this.props.user.userId}: ${new Date()}`);
+      }, 9 * 60000);
     }
-  }
+  };
 
   initData = () => {
     const params = {
@@ -220,18 +221,18 @@ class Attendance extends Component {
               <Typography
                   component="div"
                   style={{
-                    marginLeft: 10,
-                    width: 'calc(80% - 2px)',
-                    border: '1px solid rgba(0,0,0,0.42)',
-                    paddingLeft: 8,
-                    height: 31,
-                    borderRadius: 2,
-                    fontSize: 14
-                  }}
+                  marginLeft: 10,
+                  width: 'calc(80% - 2px)',
+                  border: '1px solid rgba(0,0,0,0.42)',
+                  paddingLeft: 8,
+                  height: 31,
+                  borderRadius: 2,
+                  fontSize: 14
+                }}
               >
                 <InlineDatePicker
-                    // className={'select_input'}
-                    // style={{ marginLeft: 10 }}
+                  // className={'select_input'}
+                  // style={{ marginLeft: 10 }}
                     mask={value =>
                     value
                       ? [
@@ -248,15 +249,13 @@ class Attendance extends Component {
                           /\d/
                         ]
                       : []
-                    }
+                  }
                     disableOpenOnEnter
                     format={'DD MMM YYYY'}
                     placeholder={'DD MMM YYYY'}
-                    // variant={'outlined'}
+                  // variant={'outlined'}
                     keyboard
-                    children={
-                      <input></input>
-                    }
+                    children={<input />}
                     invalidDateMessage={'輸入的日期無效'}
                     value={moment(this.state.date, 'DD MMM YYYY')}
                     onChange={this.changeDate}
@@ -380,29 +379,31 @@ class Attendance extends Component {
                       >
                         {item.patientDoc}
                       </TableCell>
-                      <TableCell padding={'none'} style={{padding: '0 6px'}}>
+                      <TableCell padding={'none'} style={{ padding: '0 6px' }}>
                         {item.patientName}
                       </TableCell>
-                      <TableCell padding={'none'} style={{padding: '0 6px'}}>
+                      <TableCell padding={'none'} style={{ padding: '0 6px' }}>
                         {moment(item.appointmentDate).format(
                           'DD MMM YYYY HH:mm'
                         )}
                       </TableCell>
-                      <TableCell padding={'none'} style={{padding: '0 6px'}}>
+                      <TableCell padding={'none'} style={{ padding: '0 6px' }}>
                         {item.attendanceTime
                           ? moment(item.attendanceTime).format(
                               'DD MMM YYYY HH:mm'
                             )
                           : null}
                       </TableCell>
-                      <TableCell padding={'none'} style={{padding: '0 6px'}}>
+                      <TableCell padding={'none'} style={{ padding: '0 6px' }}>
                         {item.encounterTypeName}
                       </TableCell>
-                      <TableCell padding={'none'} style={{padding: '0 6px'}}>{item.roomName}</TableCell>
-                      <TableCell padding={'none'} style={{padding: '0 6px'}}>
+                      <TableCell padding={'none'} style={{ padding: '0 6px' }}>
+                        {item.roomName}
+                      </TableCell>
+                      <TableCell padding={'none'} style={{ padding: '0 6px' }}>
                         {item.attendanceStatus}
                       </TableCell>
-                      <TableCell padding={'none'} style={{padding: '0 6px'}}>
+                      <TableCell padding={'none'} style={{ padding: '0 6px' }}>
                         {item.attendanceStatus === 'Not Attend' ? (
                           <Button
                               color={'primary'}

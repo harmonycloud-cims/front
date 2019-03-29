@@ -40,7 +40,7 @@ function configureStore(initState = {}) {
     });
   }
   const persistor = persistStore(store);
-  return {store, persistor};
+  return { store, persistor };
 }
 const storeConfig = configureStore();
 export default storeConfig;

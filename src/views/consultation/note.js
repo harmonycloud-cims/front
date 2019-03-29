@@ -20,7 +20,13 @@ import {
   IconButton,
   CircularProgress
 } from '@material-ui/core';
-import { Close, ArrowLeft, ArrowRight, Remove, Search } from '@material-ui/icons';
+import {
+  Close,
+  ArrowLeft,
+  ArrowRight,
+  Remove,
+  Search
+} from '@material-ui/icons';
 import { withStyles } from '@material-ui/core/styles';
 import _ from 'lodash';
 import moment from 'moment';
@@ -35,23 +41,23 @@ function mapStateToProps(state) {
   };
 }
 const toolbarOptions = [
-  ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
+  ['bold', 'italic', 'underline', 'strike'], // toggled buttons
   ['blockquote', 'code-block'],
 
-  [{ 'header': 1 }, { 'header': 2 }],               // custom button values
-  [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-  [{ 'script': 'sub'}, { 'script': 'super' }],      // superscript/subscript
-  [{ 'indent': '-1'}, { 'indent': '+1' }],          // outdent/indent
-  [{ 'direction': 'rtl' }],                         // text direction
+  [{ header: 1 }, { header: 2 }], // custom button values
+  [{ list: 'ordered' }, { list: 'bullet' }],
+  [{ script: 'sub' }, { script: 'super' }], // superscript/subscript
+  [{ indent: '-1' }, { indent: '+1' }], // outdent/indent
+  [{ direction: 'rtl' }], // text direction
 
-  [{ 'size': ['small', false, 'large', 'huge'] }],  // custom dropdown
-  [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+  [{ size: ['small', false, 'large', 'huge'] }], // custom dropdown
+  [{ header: [1, 2, 3, 4, 5, 6, false] }],
 
-  [{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
-  [{ 'font': [] }],
-  [{ 'align': [] }],
+  [{ color: [] }, { background: [] }], // dropdown with defaults from theme
+  [{ font: [] }],
+  [{ align: [] }],
 
-  ['clean']                                         // remove formatting button
+  ['clean'] // remove formatting button
 ];
 const style = {
   root: {
@@ -230,7 +236,11 @@ class Note extends Component {
     super(props);
     this.state = {
       medicalRecordList: _.cloneDeep(this.props.medicalRecordList),
-      medicalRecord: this.props.medicalRecordList.length && this.props.medicalRecordList.length > 0 ? this.props.medicalRecordList[0] : {},
+      medicalRecord:
+        this.props.medicalRecordList.length &&
+        this.props.medicalRecordList.length > 0
+          ? this.props.medicalRecordList[0]
+          : {},
       templateList: _.cloneDeep(this.props.templateList),
       clinicalNotes: _.cloneDeep(this.props.clinicalNotes),
       chronicProblemList: _.cloneDeep(this.props.chronicProblemList),
@@ -242,7 +252,7 @@ class Note extends Component {
 
       ifTransfer: 0, //0表示attending Problem 和chronicProblem不能互相copy，1.attending->chronic, 2.chronic->attending
       openDiag: false,
-      count: -1   //keyboard select;
+      count: -1 //keyboard select;
     };
   }
   UNSAFE_componentWillReceiveProps(nextProps) {
@@ -252,7 +262,8 @@ class Note extends Component {
       if (nextProps.medicalRecordList.length > 0) {
         medicalRecord = nextProps.medicalRecordList[0];
       }
-      medicalRecord.noteContent = medicalRecord.noteContent && getSimpleText(medicalRecord.noteContent);
+      medicalRecord.noteContent =
+        medicalRecord.noteContent && getSimpleText(medicalRecord.noteContent);
       // document.getElementById('textRecord').innerHTML = medicalRecord.noteContent;
       this.setState({
         medicalRecord: medicalRecord,
@@ -272,20 +283,21 @@ class Note extends Component {
     // chronicProblem
     if (nextProps.chronicProblemList !== this.props.chronicProblemList) {
       let chronicProblemList = _.cloneDeep(nextProps.chronicProblemList);
-      this.setState({chronicProblemList});
+      this.setState({ chronicProblemList });
     }
     // clinicalNotes
     if (nextProps.clinicalNotes !== this.props.clinicalNotes) {
-      this.setState({clinicalNotes: _.cloneDeep(nextProps.clinicalNotes)});
+      this.setState({ clinicalNotes: _.cloneDeep(nextProps.clinicalNotes) });
     }
     // attendingProblem
     if (nextProps.attendingProblemList !== this.props.attendingProblemList) {
       let attendingProblemList = _.cloneDeep(nextProps.attendingProblemList);
-      this.setState({attendingProblemList});
+      this.setState({ attendingProblemList });
     }
   }
   changeMedicalRecord = medicalRecord => {
-    medicalRecord.noteContent = medicalRecord.noteContent && getSimpleText(medicalRecord.noteContent);
+    medicalRecord.noteContent =
+      medicalRecord.noteContent && getSimpleText(medicalRecord.noteContent);
     this.setState({ medicalRecord });
   };
 
@@ -295,7 +307,11 @@ class Note extends Component {
     let clinicalNotes = _.cloneDeep(this.state.clinicalNotes);
     clinicalNotes = clinicalNotes + notes;
     this.setState({ clinicalNotes });
-    this.props.changeNote(this.state.attendingProblemList, this.state.chronicProblemList, clinicalNotes);
+    this.props.changeNote(
+      this.state.attendingProblemList,
+      this.state.chronicProblemList,
+      clinicalNotes
+    );
   };
   changeCheck = (e, checked, item) => {
     let templateList = _.cloneDeep(this.props.templateList);
@@ -305,16 +321,24 @@ class Note extends Component {
     });
     template.checked = checked;
     _.forEach(templateList, item => {
-      if (item.checked){
+      if (item.checked) {
         clinicalNotes += item.templateContent;
       }
     });
     this.setState({ templateList, clinicalNotes });
-    this.props.changeNote(this.state.attendingProblemList, this.state.chronicProblemList, clinicalNotes);
+    this.props.changeNote(
+      this.state.attendingProblemList,
+      this.state.chronicProblemList,
+      clinicalNotes
+    );
   };
   editClinicalNotes = value => {
     this.setState({ clinicalNotes: value });
-    this.props.changeNote(this.state.attendingProblemList, this.state.chronicProblemList, value);
+    this.props.changeNote(
+      this.state.attendingProblemList,
+      this.state.chronicProblemList,
+      value
+    );
   };
 
   /* Problems */
@@ -329,10 +353,10 @@ class Note extends Component {
         this.props.dispatch({ type: 'SEARCH_DIAGNOSIS_PROBLEMS', params });
         this.setState({ open: true });
       } else {
-        this.setState({open: false});
+        this.setState({ open: false });
       }
     } else {
-      this.setState({open: false});
+      this.setState({ open: false });
     }
   };
   searchDiagnosisProblem = () => {
@@ -343,9 +367,9 @@ class Note extends Component {
       this.props.dispatch({ type: 'SEARCH_DIAGNOSIS_PROBLEMS', params });
       this.setState({ open: true });
     }
-  }
+  };
   keyDown = e => {
-    if(this.state.open) {
+    if (this.state.open) {
       let temp = _.cloneDeep(this.state.count);
       let len = this.props.diagnosisProblemList.length; //patient count
       if (e.keyCode === 40) {
@@ -369,7 +393,7 @@ class Note extends Component {
         }
       }
       if (e.keyCode === 13) {
-        if(this.state.count === -1) {
+        if (this.state.count === -1) {
           this.searchDiagnosisProblem();
         } else {
           if (temp === -2) {
@@ -383,9 +407,9 @@ class Note extends Component {
           }
         }
       }
-      if(temp > 3) {
-        document.getElementById('myInput').scrollTop = (temp-3)*35;
-      } else if (temp > 0 && temp <= 3){
+      if (temp > 3) {
+        document.getElementById('myInput').scrollTop = (temp - 3) * 35;
+      } else if (temp > 0 && temp <= 3) {
         document.getElementById('myInput').scrollTop = 0;
       }
       this.setState({ count: temp });
@@ -408,7 +432,11 @@ class Note extends Component {
       }
     }
     this.setState({ open: false, attendingProblemList, searchValue: '' });
-    this.props.changeNote(attendingProblemList, this.state.chronicProblemList, this.state.clinicalNotes);
+    this.props.changeNote(
+      attendingProblemList,
+      this.state.chronicProblemList,
+      this.state.clinicalNotes
+    );
   };
   // index 0表示在attendingProblems里， 1表示在chronic Problems
   clickDiagnosis = (selectDiagnosis, index) => {
@@ -445,14 +473,22 @@ class Note extends Component {
         return item.diagnosisId === diagnosis.diagnosisId;
       });
       this.setState({ attendingProblemList });
-    this.props.changeNote(attendingProblemList, this.state.chronicProblemList, this.state.clinicalNotes);
+      this.props.changeNote(
+        attendingProblemList,
+        this.state.chronicProblemList,
+        this.state.clinicalNotes
+      );
     } else {
       let chronicProblemList = _.cloneDeep(this.state.chronicProblemList);
       _.remove(chronicProblemList, item => {
         return item.diagnosisId === diagnosis.diagnosisId;
       });
       this.setState({ chronicProblemList });
-    this.props.changeNote(this.state.attendingProblemList, chronicProblemList, this.state.clinicalNotes);
+      this.props.changeNote(
+        this.state.attendingProblemList,
+        chronicProblemList,
+        this.state.clinicalNotes
+      );
     }
   };
   transfer = index => {
@@ -477,7 +513,11 @@ class Note extends Component {
       attendingProblemList,
       chronicProblemList
     });
-    this.props.changeNote(attendingProblemList, chronicProblemList, this.state.clinicalNotes);
+    this.props.changeNote(
+      attendingProblemList,
+      chronicProblemList,
+      this.state.clinicalNotes
+    );
   };
   changeChronicPromblemStatus = (e, chronicProblem) => {
     let chronicProblemList = _.cloneDeep(this.state.chronicProblemList);
@@ -486,7 +526,11 @@ class Note extends Component {
     });
     problem.status = e.target.value;
     this.setState({ chronicProblemList });
-    this.props.changeNote(this.state.attendingProblemList, chronicProblemList, this.state.clinicalNotes);
+    this.props.changeNote(
+      this.state.attendingProblemList,
+      chronicProblemList,
+      this.state.clinicalNotes
+    );
   };
 
   render() {
@@ -541,7 +585,12 @@ class Note extends Component {
               id="textRecord"
               component="div"
               className={classes.table}
-              style={{ padding: 15, minHeight: 220, height: 'calc(100vh - 600px)', color: '#3f51b5' }}
+              style={{
+              padding: 15,
+              minHeight: 220,
+              height: 'calc(100vh - 600px)',
+              color: '#3f51b5'
+            }}
           >
             {this.state.medicalRecord.noteContent}
           </Typography>
@@ -563,7 +612,7 @@ class Note extends Component {
               <Typography component="div">
                 Allergy - aspirin, Peanut(non-drug)
               </Typography>
-              <Typography component="div">ADR -  Nil</Typography>
+              <Typography component="div">ADR - Nil</Typography>
               <Typography component="div">Alert - G6PD Deficiency</Typography>
             </FormControl>
           </FormGroup>
@@ -575,67 +624,76 @@ class Note extends Component {
               <Grid item xs={5}>
                 <Typography>Attending Problem(s)</Typography>
                 <Typography component="div" className={classes.transfer_box}>
-                <Paper className={classes.root} elevation={1}>
-                  <InputBase
-                      value={this.state.searchValue}
-                      onChange={this.changeSearchValue}
-                      placeholder="Input keyword to search"
-                      className={classes.diagnosis_search}
-                      inputRef={node => {
-                      this.anchorel = node;
-                    }}
-                      onKeyDown={this.keyDown}
-                  />
-                  <IconButton
-                      onClick={this.searchDiagnosisProblem}
-                      className={classes.iconButton}
-                      aria-label="Search"
-                      color={'primary'}
-                  >
-                    {
-                      this.props.openSearchProgress ? <CircularProgress size={20}/> : <Search />
-                    }
-                  </IconButton>
-                  <Popper open={this.state.open} anchorEl={this.anchorel}>
-                    <Paper className={classes.paper}>
-                      <Typography
-                          component="div"
-                          className={classes.menu_all_list}
-                          ref="myInput"
-                          id="myInput"
-                      >
-                        {this.props.diagnosisProblemList.map((item, index) => (
+                  <Paper className={classes.root} elevation={1}>
+                    <InputBase
+                        value={this.state.searchValue}
+                        onChange={this.changeSearchValue}
+                        placeholder="Input keyword to search"
+                        className={classes.diagnosis_search}
+                        inputRef={node => {
+                        this.anchorel = node;
+                      }}
+                        onKeyDown={this.keyDown}
+                    />
+                    <IconButton
+                        onClick={this.searchDiagnosisProblem}
+                        className={classes.iconButton}
+                        aria-label="Search"
+                        color={'primary'}
+                    >
+                      {this.props.openSearchProgress ? (
+                        <CircularProgress size={20} />
+                      ) : (
+                        <Search />
+                      )}
+                    </IconButton>
+                    <Popper open={this.state.open} anchorEl={this.anchorel}>
+                      <Paper className={classes.paper}>
+                        <Typography
+                            component="div"
+                            className={classes.menu_all_list}
+                            ref="myInput"
+                            id="myInput"
+                        >
+                          {this.props.diagnosisProblemList.map(
+                            (item, index) => (
+                              <MenuItem
+                                  key={index}
+                                  onClick={() => this.handleClose(item)}
+                                  className={
+                                  this.state.count === index
+                                    ? classes.menu_list_select
+                                    : classes.menu_list
+                                }
+                                  title={item.diagnosisDescription}
+                              >
+                                <Typography
+                                    component={'div'}
+                                    className={classes.mr15}
+                                >
+                                  {item.diagnosisDescription}
+                                </Typography>
+                              </MenuItem>
+                            )
+                          )}
+                        </Typography>
+                        {this.props.openSearchProgress ? null : (
                           <MenuItem
-                              key={index}
-                              onClick={() => this.handleClose(item)}
-                              className={this.state.count === index ? classes.menu_list_select : classes.menu_list}
-                              title={item.diagnosisDescription}
-                          >
-                            <Typography
-                                component={'div'}
-                                className={classes.mr15}
-                            >
-                              {item.diagnosisDescription}
-                            </Typography>
-                          </MenuItem>
-                        ))}
-                      </Typography>
-                      {
-                        this.props.openSearchProgress ? null :
-                        <MenuItem
-                            onClick={() => this.handleClose({})}
-                            style={{borderTop: '1px solid rgba(0, 0, 0, 0.42)'}}
-                            className={
+                              onClick={() => this.handleClose({})}
+                              style={{
+                              borderTop: '1px solid rgba(0, 0, 0, 0.42)'
+                            }}
+                              className={
                               this.state.count === -2
                                 ? classes.menu_list_select
                                 : classes.menu_list
                             }
-                        >
+                          >
                             non-drug
-                      </MenuItem>
-                      }
-                    </Paper>
-                  </Popper>
+                          </MenuItem>
+                        )}
+                      </Paper>
+                    </Popper>
                   </Paper>
                   <FormGroup row className={classes.diagnosis_problem_list}>
                     {this.state.attendingProblemList.map((item, index) => (
@@ -748,10 +806,10 @@ class Note extends Component {
                   Clinical Note
                 </Typography>
                 <ReactQuill
-                    modules={{toolbar: toolbarOptions}}
+                    modules={{ toolbar: toolbarOptions }}
                     value={this.state.clinicalNotes}
                     onChange={this.editClinicalNotes}
-                    style={{height: 'calc(100vh - 666px)', minHeight: 186}}
+                    style={{ height: 'calc(100vh - 666px)', minHeight: 186 }}
                 />
                 {/* <Typography
                     component="textarea"

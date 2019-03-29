@@ -205,30 +205,38 @@ class Prescription extends Component {
       count: -1,
       grade: 'adult',
 
-      showDepartmentFavouriteList: _.cloneDeep(this.props.departmentFavouriteList),
+      showDepartmentFavouriteList: _.cloneDeep(
+        this.props.departmentFavouriteList
+      ),
       showDrugHistoryList: _.cloneDeep(this.props.drugHistoryList),
       medicineList: _.cloneDeep(this.props.medicineList)
     };
   }
   UNSAFE_componentWillReceiveProps(nextProps) {
-    if (nextProps.departmentFavouriteList !== this.props.departmentFavouriteList) {
-      this.setState({showDepartmentFavouriteList: nextProps.departmentFavouriteList});
+    if (
+      nextProps.departmentFavouriteList !== this.props.departmentFavouriteList
+    ) {
+      this.setState({
+        showDepartmentFavouriteList: nextProps.departmentFavouriteList
+      });
     }
     if (nextProps.drugHistoryList !== this.props.drugHistoryList) {
-      this.setState({showDrugHistoryList: nextProps.drugHistoryList});
+      this.setState({ showDrugHistoryList: nextProps.drugHistoryList });
     }
     if (nextProps.medicineList !== this.props.medicineList) {
-      this.setState({medicineList: nextProps.medicineList});
+      this.setState({ medicineList: nextProps.medicineList });
     }
   }
   // show all the group && checked
   collapseIngredient = (id, name) => {
-    let departmentFavouriteList = _.cloneDeep(this.state.showDepartmentFavouriteList);
+    let departmentFavouriteList = _.cloneDeep(
+      this.state.showDepartmentFavouriteList
+    );
     let departmentFavourite = _.find(departmentFavouriteList, item => {
       return item.drugFavouriteGroupId === id;
     });
     departmentFavourite.isCollapse = !departmentFavourite.isCollapse;
-    if(name === 'add'){
+    if (name === 'add') {
       _.forEach(departmentFavourite.drugFavouriteGroupDrugDtoList, item => {
         item.checked = true;
       });
@@ -273,16 +281,22 @@ class Prescription extends Component {
 
   // click ‘copy’ to add medicine
   clickCheckbox = (index, ind) => {
-    if(this.state.tabValue === 0) {
+    if (this.state.tabValue === 0) {
       let departmentFavouriteList = _.cloneDeep(
         this.state.showDepartmentFavouriteList
       );
-      departmentFavouriteList[index].drugFavouriteGroupDrugDtoList[ind].checked = !departmentFavouriteList[index].drugFavouriteGroupDrugDtoList[ind].checked;
+      departmentFavouriteList[index].drugFavouriteGroupDrugDtoList[
+        ind
+      ].checked = !departmentFavouriteList[index].drugFavouriteGroupDrugDtoList[
+        ind
+      ].checked;
       this.setState({ showDepartmentFavouriteList: departmentFavouriteList });
     } else {
       let drugHistoryList = _.cloneDeep(this.state.showDrugHistoryList);
-      drugHistoryList[index].prescriptionDrugBoList[ind].checked = !drugHistoryList[index].prescriptionDrugBoList[ind].checked;
-      this.setState({showDrugHistoryList: drugHistoryList});
+      drugHistoryList[index].prescriptionDrugBoList[
+        ind
+      ].checked = !drugHistoryList[index].prescriptionDrugBoList[ind].checked;
+      this.setState({ showDrugHistoryList: drugHistoryList });
     }
   };
   copy = () => {
@@ -302,9 +316,7 @@ class Prescription extends Component {
       this.setState({ medicineList });
       this.props.changePrescription(medicineList);
     } else {
-      let drugHistoryList = _.cloneDeep(
-        this.state.showDrugHistoryList
-      );
+      let drugHistoryList = _.cloneDeep(this.state.showDrugHistoryList);
       let oldMedicineList = _.cloneDeep(this.state.medicineList);
       let checkedList = [];
       drugHistoryList.length > 0 &&
@@ -422,7 +434,7 @@ class Prescription extends Component {
               <Typography component="div">
                 Allergy - aspirin, Peanut(non-drug)
               </Typography>
-              <Typography component="div">ADR -  Nil</Typography>
+              <Typography component="div">ADR - Nil</Typography>
               <Typography component="div">Alert - G6PD Deficiency</Typography>
             </FormControl>
           </FormGroup>
@@ -445,80 +457,93 @@ class Prescription extends Component {
             {this.state.tabValue === 0 && (
               <Typography component="div" className={classes.left_warp_tab}>
                 {this.state.showDepartmentFavouriteList.length > 0
-                  ? this.state.showDepartmentFavouriteList.map((item, index) => (
-                      <Typography
-                          component="div"
-                          key={index}
-                          className={classes.department_favourite_item}
-                          draggable="true"
-                          onDragStart={(...arg) =>
-                          this.drag(...arg, item.drugFavouriteGroupId)
-                        }
-                      >
-                        <FormGroup
-                            row
-                            className={classes.department_favourite_group}
+                  ? this.state.showDepartmentFavouriteList.map(
+                      (item, index) => (
+                        <Typography
+                            component="div"
+                            key={index}
+                            className={classes.department_favourite_item}
+                            draggable="true"
+                            onDragStart={(...arg) =>
+                            this.drag(...arg, item.drugFavouriteGroupId)
+                          }
                         >
-                          {item.isCollapse ? (
-                            <Remove
-                                color="primary"
-                                size="small"
-                                className={classes.left_warp_favourite_icon}
-                                onClick={() =>
-                                  this.collapseIngredient(item.drugFavouriteGroupId, 'remove')
-                                }
-                            />
-                          ) : (
-                            <Add
-                                color="primary"
-                                size="small"
-                                className={classes.left_warp_favourite_icon}
-                                onClick={() =>
-                                  this.collapseIngredient(item.drugFavouriteGroupId, 'add')
-                                }
-                            />
-                          )}
-                          <Typography
-                              style={{
-                              color: item.isCollapse ? '#3f51b5' : 'black'
-                            }}
+                          <FormGroup
+                              row
+                              className={classes.department_favourite_group}
                           >
-                            {item.groupName}
-                          </Typography>
-                        </FormGroup>
-                        {item.isCollapse
-                          ? item.drugFavouriteGroupDrugDtoList.map((eve, ind) => (
-                              <FormGroup
-                                  key={ind}
-                                  row
-                                  className={
-                                  classes.left_warp_favourite_ingredient
+                            {item.isCollapse ? (
+                              <Remove
+                                  color="primary"
+                                  size="small"
+                                  className={classes.left_warp_favourite_icon}
+                                  onClick={() =>
+                                  this.collapseIngredient(
+                                    item.drugFavouriteGroupId,
+                                    'remove'
+                                  )
                                 }
-                              >
-                                <Checkbox
-                                    className={classes.department_favourite_check}
-                                    checked={eve.checked || false}
-                                    color="default"
-                                    value={`${eve.drugId}${eve.tradeName}`}
-                                    onClick={() =>
-                                    this.clickCheckbox(index, ind)
-                                  }
-                                />
-                                <Typography
-                                    component="div"
-                                    color="primary"
-                                    className={
-                                    classes.department_favourite_item_detail
-                                  }
-                                >
-                                  {eve.tradeName}({eve.ingredient}) inj -<br />
-                                  {eve.regimenLine}
-                                </Typography>
-                              </FormGroup>
-                            ))
-                          : null}
-                      </Typography>
-                    ))
+                              />
+                            ) : (
+                              <Add
+                                  color="primary"
+                                  size="small"
+                                  className={classes.left_warp_favourite_icon}
+                                  onClick={() =>
+                                  this.collapseIngredient(
+                                    item.drugFavouriteGroupId,
+                                    'add'
+                                  )
+                                }
+                              />
+                            )}
+                            <Typography
+                                style={{
+                                color: item.isCollapse ? '#3f51b5' : 'black'
+                              }}
+                            >
+                              {item.groupName}
+                            </Typography>
+                          </FormGroup>
+                          {item.isCollapse
+                            ? item.drugFavouriteGroupDrugDtoList.map(
+                                (eve, ind) => (
+                                  <FormGroup
+                                      key={ind}
+                                      row
+                                      className={
+                                      classes.left_warp_favourite_ingredient
+                                    }
+                                  >
+                                    <Checkbox
+                                        className={
+                                        classes.department_favourite_check
+                                      }
+                                        checked={eve.checked || false}
+                                        color="default"
+                                        value={`${eve.drugId}${eve.tradeName}`}
+                                        onClick={() =>
+                                        this.clickCheckbox(index, ind)
+                                      }
+                                    />
+                                    <Typography
+                                        component="div"
+                                        color="primary"
+                                        className={
+                                        classes.department_favourite_item_detail
+                                      }
+                                    >
+                                      {eve.tradeName}({eve.ingredient}) inj -
+                                      <br />
+                                      {eve.regimenLine}
+                                    </Typography>
+                                  </FormGroup>
+                                )
+                              )
+                            : null}
+                        </Typography>
+                      )
+                    )
                   : null}
               </Typography>
             )}
@@ -535,31 +560,39 @@ class Prescription extends Component {
                           conponent="div"
                           className={classes.drug_history_time}
                       >
-                        {moment(item.prescription.createDate).format('DD MMM YYYY')} {item.prescription.clinicName}
+                        {moment(item.prescription.createDate).format(
+                          'DD MMM YYYY'
+                        )}{' '}
+                        {item.prescription.clinicName}
                       </Typography>
-                      {
-                        item.prescriptionDrugBoList && item.prescriptionDrugBoList.length > 0 && item.prescriptionDrugBoList.map((eve, ind) =>
-                        <FormGroup key={ind} row className={classes.drug_history_record}>
-                        <Checkbox
-                            className={classes.department_favourite_check}
-                            checked={eve.checked || false}
-                            color="default"
-                            value={`${eve.drugId}${eve.tradeName}`}
-                            onClick={() => this.clickCheckbox(index, ind)
-                          }
-                        />
-                        <Typography
-                            component="div"
-                            color="primary"
-                            className={classes.department_favourite_item_detail}
-                        >
-                          {eve.tradeName}({eve.ingredient}) inj -<br />
-                          {eve.regimenLine}
-                        </Typography>
-                      </FormGroup>
-                    )
-                      }
-                      </Typography>
+                      {item.prescriptionDrugBoList &&
+                        item.prescriptionDrugBoList.length > 0 &&
+                        item.prescriptionDrugBoList.map((eve, ind) => (
+                          <FormGroup
+                              key={ind}
+                              row
+                              className={classes.drug_history_record}
+                          >
+                            <Checkbox
+                                className={classes.department_favourite_check}
+                                checked={eve.checked || false}
+                                color="default"
+                                value={`${eve.drugId}${eve.tradeName}`}
+                                onClick={() => this.clickCheckbox(index, ind)}
+                            />
+                            <Typography
+                                component="div"
+                                color="primary"
+                                className={
+                                classes.department_favourite_item_detail
+                              }
+                            >
+                              {eve.tradeName}({eve.ingredient}) inj -<br />
+                              {eve.regimenLine}
+                            </Typography>
+                          </FormGroup>
+                        ))}
+                    </Typography>
                   ))}
               </Typography>
             )}
@@ -635,11 +668,10 @@ class Prescription extends Component {
                         </MenuItem>
                       ))}
                     </Typography>
-                    {
-                      this.props.openSearchProgress ? null :
+                    {this.props.openSearchProgress ? null : (
                       <MenuItem
                           onClick={() => this.handleClose({})}
-                          style={{borderTop: '1px solid rgba(0, 0, 0, 0.42)'}}
+                          style={{ borderTop: '1px solid rgba(0, 0, 0, 0.42)' }}
                           className={
                           this.state.count === -2
                             ? classes.menu_list_select
@@ -648,7 +680,7 @@ class Prescription extends Component {
                       >
                         Not Found
                       </MenuItem>
-                    }
+                    )}
                   </Paper>
                 </Popper>
               </Paper>

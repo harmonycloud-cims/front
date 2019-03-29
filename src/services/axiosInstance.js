@@ -19,7 +19,7 @@ NProgress.configure({
 let needLoadingRequestCount = 0;
 export function showFullScreenLoading() {
   if (needLoadingRequestCount === 0) {
-      NProgress.start();
+    NProgress.start();
   }
   needLoadingRequestCount++;
 }
@@ -65,15 +65,15 @@ axios.interceptors.response.use(
         case 401:
           err.message = 'Please re-login without authorization(401)';
           setTimeout(() => {
-            storeConfig.store.dispatch({type: 'CLOSE_ERROR_MESSAGE'});
-            storeConfig.store.dispatch({type: 'LOGOUT'});
+            storeConfig.store.dispatch({ type: 'CLOSE_ERROR_MESSAGE' });
+            storeConfig.store.dispatch({ type: 'LOGOUT' });
           }, 3000);
           break;
         case 403:
           err.message = 'Forbidden(403)';
           setTimeout(() => {
-            storeConfig.store.dispatch({type: 'CLOSE_ERROR_MESSAGE'});
-            storeConfig.store.dispatch({type: 'LOGOUT'});
+            storeConfig.store.dispatch({ type: 'CLOSE_ERROR_MESSAGE' });
+            storeConfig.store.dispatch({ type: 'LOGOUT' });
           }, 3000);
           break;
         case 404:
@@ -106,7 +106,10 @@ axios.interceptors.response.use(
     } else {
       err.message = 'Connection failure!';
     }
-    storeConfig.store.dispatch({type: 'OPEN_ERROR_MESSAGE', error: err.message});
+    storeConfig.store.dispatch({
+      type: 'OPEN_ERROR_MESSAGE',
+      error: err.message
+    });
     return Promise.reject(err);
   }
 );

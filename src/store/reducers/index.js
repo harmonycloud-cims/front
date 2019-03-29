@@ -94,7 +94,11 @@ const updatePatient = (state = patientState, action = {}) => {
     case 'PATIENT_BY_ID':
       return { ...state, patientById: action.patientById };
     case 'PATIENT_LOADING':
-      return { ...state, patientErrorMessage: action.data, patientLoading: true };
+      return {
+        ...state,
+        patientErrorMessage: action.data,
+        patientLoading: true
+      };
     case 'PATIENT_LOADING_ERROR':
       return { ...state, patientErrorMessage: action.data };
     case 'PATIENT_LOADING_ERROR_CLOSE':
@@ -226,7 +230,12 @@ const bookPrintState = {
 const updateBookPrint = (state = bookPrintState, action = {}) => {
   switch (action.type) {
     case 'BOOK_PRINT':
-      return { ...state, print: action.params, patient: action.patient, bookPrint: false };
+      return {
+        ...state,
+        print: action.params,
+        patient: action.patient,
+        bookPrint: false
+      };
     case 'OPEN_BOOK_PRINT':
       return { ...state, bookPrint: true };
     case 'CLOSE_BOOK_PRINT':
@@ -279,7 +288,12 @@ const updateConsultation = (state = consultationState, action = {}) => {
     case 'UPDATE_ATTENDING_PROBLEM':
       return { ...state, attendingProblemList: action.attendingProblemList };
     case 'OPEN_CONSULTATION_LOADING':
-      return { ...state, consulationErrorMessage: '', closeDialog: action.data, saveName: action.saveName };
+      return {
+        ...state,
+        consulationErrorMessage: '',
+        closeDialog: action.data,
+        saveName: action.saveName
+      };
     case 'CONSULTATION_LOADING_SUCCESS':
       return { ...state, consulationErrorMessage: 'Saved successfully' };
     case 'CLOSE_CONSULTATION_LOADING':
@@ -306,21 +320,26 @@ const updatePrescription = (state = prescriptionState, action = {}) => {
       return { ...state, errorMessageStatus: false, errorMessage: '' };
     case 'UPDATE_DRUG_LIST':
       return { ...state, searchDrugList: action.searchDrugList };
-    case 'UPDATE_DRUG_HISTORY':{
-      let drugHistoryList = action.drugHistoryList ? action.drugHistoryList : [];
-      drugHistoryList.length > 0 && _.forEach(drugHistoryList, item => {
-        item.prescriptionDrugBoList && item.prescriptionDrugBoList.length > 0 && _.forEach(item.prescriptionDrugBoList, eve => {
-          eve.checked = false;
+    case 'UPDATE_DRUG_HISTORY': {
+      let drugHistoryList = action.drugHistoryList
+        ? action.drugHistoryList
+        : [];
+      drugHistoryList.length > 0 &&
+        _.forEach(drugHistoryList, item => {
+          item.prescriptionDrugBoList &&
+            item.prescriptionDrugBoList.length > 0 &&
+            _.forEach(item.prescriptionDrugBoList, eve => {
+              eve.checked = false;
+            });
         });
-      });
       return { ...state, drugHistoryList };
     }
-    case 'UPDATE_PRESCRIPTION':{
+    case 'UPDATE_PRESCRIPTION': {
       return { ...state, prescriptionLatest: action.data };
     }
     case 'UPDATE_DEPARTMENTAL_FAVOURITE': {
       let departmentFavouriteList = action.departmentFavouriteList;
-      if(departmentFavouriteList.length > 0) {
+      if (departmentFavouriteList.length > 0) {
         _.forEach(departmentFavouriteList, item => {
           item.isCollapse = false;
           _.forEach(item.drugFavouriteGroupDrugDtoList, eve => {

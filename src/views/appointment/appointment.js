@@ -193,8 +193,8 @@ class Appointment extends Component {
         this.initData(this.props);
       });
     }
-    if(nextProps.bookPrint && nextProps.bookPrint !== this.props.bookPrint) {
-      window.open('/#/print','_blank');
+    if (nextProps.bookPrint && nextProps.bookPrint !== this.props.bookPrint) {
+      window.open('/#/print', '_blank');
     }
   }
 
@@ -286,9 +286,15 @@ class Appointment extends Component {
   };
 
   bookCompare = () => {
-    const datetime = moment(`${this.state.date} ${this.state.time}`, 'DD MMM YYYY HH:mm').isBefore(new Date());
-    if(datetime) {
-      this.props.dispatch({type: 'OPEN_ERROR_MESSAGE', error: 'Please choose a future time'});
+    const datetime = moment(
+      `${this.state.date} ${this.state.time}`,
+      'DD MMM YYYY HH:mm'
+    ).isBefore(new Date());
+    if (datetime) {
+      this.props.dispatch({
+        type: 'OPEN_ERROR_MESSAGE',
+        error: 'Please choose a future time'
+      });
       // this.props.dispatch({type: 'BOOK_COMPARE_RESULT', data: true });
       // this.setState({ timeIsWrong: true });
       return;
@@ -325,7 +331,11 @@ class Appointment extends Component {
       roomName: this.state.room.roomName
     };
     this.setState({ bookSuccess: true }, () => {
-      this.props.dispatch({ type: 'BOOK_APPOINTMENT', params: this.params, patient: this.state.patient });
+      this.props.dispatch({
+        type: 'BOOK_APPOINTMENT',
+        params: this.params,
+        patient: this.state.patient
+      });
     });
   };
   closeDialog = () => {
@@ -339,7 +349,7 @@ class Appointment extends Component {
   changeTime = e => {
     const time = moment(e._d).format('HH:mm');
     this.setState({ time });
-  }
+  };
 
   /* table pagination */
   handleChangePage = (event, page) => {
@@ -406,33 +416,35 @@ class Appointment extends Component {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                  {this.props.bookHistoryList
-                    .slice(
-                      this.state.page * this.state.rowsPerPage,
-                      this.state.rowsPerPage * (this.state.page + 1)
-                    )
-                    .map((item, index) => (
-                      <TableRow key={index}>
-                        <TableCell
-                            style={{ paddingLeft: '15px' }}
-                            padding={'none'}
-                        >
-                          {moment(item.appointmentDate).format(
-                            'DD MMM YYYY HH:mm'
-                          )}
-                        </TableCell>
-                        <TableCell padding={'none'}>
-                          {item.clinicName}
-                        </TableCell>
-                        <TableCell padding={'none'}>
-                          {item.encounterTypeName}
-                        </TableCell>
-                        <TableCell padding={'none'}>{item.roomName}</TableCell>
-                        <TableCell padding={'none'}>
-                          {item.attendanceStatus}
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {this.props.bookHistoryList
+                      .slice(
+                        this.state.page * this.state.rowsPerPage,
+                        this.state.rowsPerPage * (this.state.page + 1)
+                      )
+                      .map((item, index) => (
+                        <TableRow key={index}>
+                          <TableCell
+                              style={{ paddingLeft: '15px' }}
+                              padding={'none'}
+                          >
+                            {moment(item.appointmentDate).format(
+                              'DD MMM YYYY HH:mm'
+                            )}
+                          </TableCell>
+                          <TableCell padding={'none'}>
+                            {item.clinicName}
+                          </TableCell>
+                          <TableCell padding={'none'}>
+                            {item.encounterTypeName}
+                          </TableCell>
+                          <TableCell padding={'none'}>
+                            {item.roomName}
+                          </TableCell>
+                          <TableCell padding={'none'}>
+                            {item.attendanceStatus}
+                          </TableCell>
+                        </TableRow>
+                      ))}
                   </TableBody>
                   <TableFooter>
                     <TableRow>
@@ -523,81 +535,73 @@ class Appointment extends Component {
                         <Typography
                             component="div"
                             style={{
-                              marginLeft: 10,
-                              width: 158,
-                              border: '1px solid rgba(0,0,0,0.42)',
-                              paddingLeft: 8,
-                              height: 31,
-                              borderRadius: 2,
-                              fontSize: 14
-                            }}
+                            marginLeft: 10,
+                            width: 158,
+                            border: '1px solid rgba(0,0,0,0.42)',
+                            paddingLeft: 8,
+                            height: 31,
+                            borderRadius: 2,
+                            fontSize: 14
+                          }}
                         >
-                        <InlineDatePicker
+                          <InlineDatePicker
                             // className={'phone_select_input'}
                             // style={{ marginLeft: 10, width: 150 }}
-                            mask={value =>
-                            value
-                              ? [
-                                  /\d/,
-                                  /\d/,
-                                  ' ',
-                                  /[A-Z]/,
-                                  /[a-z]/,
-                                  /[a-z]/,
-                                  ' ',
-                                  /\d/,
-                                  /\d/,
-                                  /\d/,
-                                  /\d/
-                                ]
-                              : []
-                          }
-                            disableOpenOnEnter
-                            format={'DD MMM YYYY'}
-                            placeholder={'DD MMM YYYY'}
-                            // variant={'outlined'}
-                            keyboard
-                            invalidDateMessage={'輸入的日期無效'}
-                            minDateMessage={'請選擇正確的日期'}
-                            minDate={new Date()}
-                            value={moment(this.state.date, 'DD MMM YYYY')}
-                            onChange={this.changeDate}
-                        />
-                        </Typography>
-                        <Typography
-                            component="div"
-                            style={{
-                              marginLeft: 10,
-                              width: 108,
-                              border: '1px solid rgba(0,0,0,0.42)',
-                              paddingLeft: 8,
-                              height: 31,
-                              borderRadius: 2,
-                              fontSize: 14
-                            }}
-                        >
-                        <InlineTimePicker
-                            // className={'tt'}
-                            // style={{ marginLeft: 10, width: 100 }}
-                            keyboard
-                            disableOpenOnEnter
-                            format="HH:mm"
-                            invalidDateMessage={'輸入的時間無效'}
-                            value={moment(this.state.time, 'HH:mm')}
-                            onChange={this.changeTime}
-                            // variant={'outlined'}
-                            mask={value =>
+                              mask={value =>
                               value
                                 ? [
                                     /\d/,
                                     /\d/,
-                                    ':',
+                                    ' ',
+                                    /[A-Z]/,
+                                    /[a-z]/,
+                                    /[a-z]/,
+                                    ' ',
+                                    /\d/,
+                                    /\d/,
                                     /\d/,
                                     /\d/
                                   ]
                                 : []
                             }
-                        />
+                              disableOpenOnEnter
+                              format={'DD MMM YYYY'}
+                              placeholder={'DD MMM YYYY'}
+                            // variant={'outlined'}
+                              keyboard
+                              invalidDateMessage={'輸入的日期無效'}
+                              minDateMessage={'請選擇正確的日期'}
+                              minDate={new Date()}
+                              value={moment(this.state.date, 'DD MMM YYYY')}
+                              onChange={this.changeDate}
+                          />
+                        </Typography>
+                        <Typography
+                            component="div"
+                            style={{
+                            marginLeft: 10,
+                            width: 108,
+                            border: '1px solid rgba(0,0,0,0.42)',
+                            paddingLeft: 8,
+                            height: 31,
+                            borderRadius: 2,
+                            fontSize: 14
+                          }}
+                        >
+                          <InlineTimePicker
+                            // className={'tt'}
+                            // style={{ marginLeft: 10, width: 100 }}
+                              keyboard
+                              disableOpenOnEnter
+                              format="HH:mm"
+                              invalidDateMessage={'輸入的時間無效'}
+                              value={moment(this.state.time, 'HH:mm')}
+                              onChange={this.changeTime}
+                            // variant={'outlined'}
+                              mask={value =>
+                              value ? [/\d/, /\d/, ':', /\d/, /\d/] : []
+                            }
+                          />
                         </Typography>
                         {/* <InputBase
                             style={{ width: 120 }}

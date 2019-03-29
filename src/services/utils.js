@@ -55,7 +55,11 @@ export const fn = {
 export const setCookie = (c_name, value, expiredays) => {
   let exdate = new Date();
   exdate.setDate(exdate.getDate() + expiredays);
-  document.cookie = c_name + '=' + escape(value) + ((!expiredays) ? '' : ';expires='+exdate.toGMTString()) ;//+ ';domain=' + Cookie_Domain + '; path=/';
+  document.cookie =
+    c_name +
+    '=' +
+    escape(value) +
+    (!expiredays ? '' : ';expires=' + exdate.toGMTString()); //+ ';domain=' + Cookie_Domain + '; path=/';
 };
 export const getCookie = name => {
   let arr = document.cookie.match(new RegExp('(^| )' + name + '=([^;]*)(;|$)'));
@@ -93,8 +97,8 @@ export const caluDate = date => {
   }
   return { dateList, numberWeek };
 };
-export const getSimpleText = (html) =>{
-  let re1 = new RegExp('<.+?>','g');//匹配html标签的正则表达式，"g"是搜索匹配多个符合的内容
-  let msg = html.replace(re1,'');//执行替换成空字符
+export const getSimpleText = html => {
+  let re1 = new RegExp('<.+?>', 'g'); //匹配html标签的正则表达式，"g"是搜索匹配多个符合的内容
+  let msg = html.replace(re1, ''); //执行替换成空字符
   return msg;
 };

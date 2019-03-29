@@ -155,7 +155,10 @@ class Consulatation extends Component {
     // chronicProblem
     if (nextProps.chronicProblemList !== this.props.chronicProblemList) {
       let newChronicDiagnosisList = _.cloneDeep(nextProps.chronicProblemList);
-      this.setState({newChronicDiagnosisList, oriChronicDiagnosisList: newChronicDiagnosisList});
+      this.setState({
+        newChronicDiagnosisList,
+        oriChronicDiagnosisList: newChronicDiagnosisList
+      });
     }
     // encounter
     if (nextProps.encounter !== this.props.encounter) {
@@ -171,33 +174,53 @@ class Consulatation extends Component {
       let newClinicalNote = '';
       let isNoteUpdate = false;
       if (nextProps.clinicNote) {
-        if(nextProps.clinicNote.noteContent) {
+        if (nextProps.clinicNote.noteContent) {
           newClinicalNote = _.cloneDeep(nextProps.clinicNote.noteContent);
         }
         isNoteUpdate = true;
       }
-      this.setState({newClinicalNote, oriClinicalNote: newClinicalNote, isNoteUpdate});
+      this.setState({
+        newClinicalNote,
+        oriClinicalNote: newClinicalNote,
+        isNoteUpdate
+      });
     }
     // attendingProblem
     if (nextProps.attendingProblemList !== this.props.attendingProblemList) {
-      let newAttendingDiagnosisList = _.cloneDeep(nextProps.attendingProblemList);
-      this.setState({newAttendingDiagnosisList, oriAttendingDiagnosisList: newAttendingDiagnosisList});
+      let newAttendingDiagnosisList = _.cloneDeep(
+        nextProps.attendingProblemList
+      );
+      this.setState({
+        newAttendingDiagnosisList,
+        oriAttendingDiagnosisList: newAttendingDiagnosisList
+      });
     }
     // prescription
     if (nextProps.prescriptionLatest !== this.props.prescriptionLatest) {
       let isPrescriptionUpdate = false;
       let newPrescriptionDrugList = [];
-      if(nextProps.prescriptionLatest && JSON.stringify(nextProps.prescriptionLatest) !== '{}') {
+      if (
+        nextProps.prescriptionLatest &&
+        JSON.stringify(nextProps.prescriptionLatest) !== '{}'
+      ) {
         isPrescriptionUpdate = true;
-        if(nextProps.prescriptionLatest.prescriptionDrugBoList) {
-          newPrescriptionDrugList = nextProps.prescriptionLatest.prescriptionDrugBoList;
+        if (nextProps.prescriptionLatest.prescriptionDrugBoList) {
+          newPrescriptionDrugList =
+            nextProps.prescriptionLatest.prescriptionDrugBoList;
         }
       }
-      this.setState({isPrescriptionUpdate, newPrescriptionDrugList, oriPrescriptionDrugList: newPrescriptionDrugList});
+      this.setState({
+        isPrescriptionUpdate,
+        newPrescriptionDrugList,
+        oriPrescriptionDrugList: newPrescriptionDrugList
+      });
     }
   }
   componentWillUnmount() {
     socket && socket.close();
+    if (this.timer !== null) {
+      clearInterval(this.timer);
+    }
   }
 
   initData = () => {
@@ -211,31 +234,47 @@ class Consulatation extends Component {
     this.props.dispatch({ type: 'GET_ATTENDANCELIST', params });
   };
   websocketConnection = () => {
-    if(typeof(WebSocket) === 'undefined') {
-      this.props.dispatch({type: 'OPEN_ERROR_MESSAGE', error: 'Your browser does not support WebSocket.'});
-    }else{
-      let socketUrl=`ws://${socketApiUrl}/websocket/attendWebsocket/${this.props.user.userId}`;
+    if (typeof WebSocket === 'undefined') {
+      this.props.dispatch({
+        type: 'OPEN_ERROR_MESSAGE',
+        error: 'Your browser does not support WebSocket.'
+      });
+    } else {
+      let socketUrl = `ws://${socketApiUrl}/websocket/attendWebsocket/${
+        this.props.user.userId
+      }`;
       socket = new WebSocket(socketUrl);
       //打开事件
       socket.onopen = () => {
         console.log('websocket已打开');
-        socket.send('这是来自客户端的消息' + new Date());
+        socket.send(`${this.props.user.userId}: ${new Date()}`);
       };
       //获得消息事件
-      socket.onmessage = (msg) => {
-          console.log(msg.data, 'onmessage');
-          if(msg.data === 'Success') {
-            this.initData();
-          }
+      socket.onmessage = msg => {
+        console.log(msg.data, 'onmessage');
+        if (msg.data === 'Success') {
+          this.initData();
+        }
+        //发现消息进入    开始处理前端触发逻辑
       };
+      // 关闭事件
       socket.onclose = () => {
-          console.log('websocket已关闭', moment().format('YYYY-MM-DD HH:mm:ss'));
+        console.log('websocket已关闭', moment().format('YYYY-MM-DD HH:mm:ss'));
       };
+      //发生了错误事件
       socket.onerror = () => {
+        // socket.open();
+        this.props.dispatch({
+          type: 'OPEN_ERROR_MESSAGE',
+          error: 'Websocket disconnected'
+        });
         console.log('websocket发生了错误');
       };
+      this.timer = setInterval(() => {
+        socket.send(`${this.props.user.userId}: ${new Date()}`);
+      }, 9 * 60000);
     }
-  }
+  };
   /* select页面 */
   changeDate = e => {
     this.setState({ date: moment(e._d).format('DD MMM YYYY') }, () =>
@@ -276,9 +315,17 @@ class Consulatation extends Component {
     this.props.dispatch({ type: 'GET_CHRONICPROBLEM', params: this.params });
     this.props.dispatch({ type: 'GET_ENCOUNTERID', params: this.params2 });
     // prescription page
-    this.props.dispatch({ type: 'GET_DEPARTMENTAL_FAVOURITE', params: this.params1 });
+    this.props.dispatch({
+      type: 'GET_DEPARTMENTAL_FAVOURITE',
+      params: this.params1
+    });
     this.props.dispatch({ type: 'GET_DRUG_HISTORY', params: this.params });
-    this.setState({ ifSelected: true, tabValue: 0, appointmentSelect: item, patientIndex: index });
+    this.setState({
+      ifSelected: true,
+      tabValue: 0,
+      appointmentSelect: item,
+      patientIndex: index
+    });
   };
   getClinicNote = () => {
     this.params3 = { encounterId: this.props.encounter.encounterId };
@@ -286,16 +333,24 @@ class Consulatation extends Component {
     this.props.dispatch({ type: 'GET_MEDICAL_RECORD', params: this.params });
     this.props.dispatch({ type: 'GET_CHRONICPROBLEM', params: this.params });
     this.props.dispatch({ type: 'GET_CLINIC_NOTE', params: this.params3 });
-    this.props.dispatch({ type: 'GET_ATTENDING_PROBLEM', params: this.params3 });
-  }
+    this.props.dispatch({
+      type: 'GET_ATTENDING_PROBLEM',
+      params: this.params3
+    });
+  };
   getPrescription = () => {
     this.params3 = { encounterId: this.props.encounter.encounterId };
     // prescription page
     this.props.dispatch({ type: 'GET_DRUG_HISTORY', params: this.params });
     this.props.dispatch({ type: 'GET_PRESCRIPTION', params: this.params3 });
-  }
+  };
   closePatient = () => {
-    this.setState({ifSelected: false, appointmentSelect: {}, patientIndex: 0, isChanged: false});
+    this.setState({
+      ifSelected: false,
+      appointmentSelect: {},
+      patientIndex: 0,
+      isChanged: false
+    });
     this.initData();
   };
   // 快捷搜索
@@ -317,35 +372,49 @@ class Consulatation extends Component {
     this.setState({ tabValue: value });
   };
 
-  changePrescription = (newPrescriptionDrugList) => {
+  changePrescription = newPrescriptionDrugList => {
     // console.log(this.state.oriPrescriptionDrugList, newPrescriptionDrugList)
     let isChanged = false;
-    if(JSON.stringify(this.state.oriPrescriptionDrugList) !== JSON.stringify(newPrescriptionDrugList)){
+    if (
+      JSON.stringify(this.state.oriPrescriptionDrugList) !==
+      JSON.stringify(newPrescriptionDrugList)
+    ) {
       isChanged = true;
     }
     let prescriptionDrugList = [];
-    if(newPrescriptionDrugList) {
+    if (newPrescriptionDrugList) {
       prescriptionDrugList = newPrescriptionDrugList;
     }
-    this.setState({newPrescriptionDrugList: prescriptionDrugList, isChanged});
-  }
-  changeNote = (newAttendingDiagnosisList, newChronicDiagnosisList, newClinicalNote) => {
+    this.setState({ newPrescriptionDrugList: prescriptionDrugList, isChanged });
+  };
+  changeNote = (
+    newAttendingDiagnosisList,
+    newChronicDiagnosisList,
+    newClinicalNote
+  ) => {
     let isChanged = false;
     // console.log(this.state.oriClinicalNote,'\n',newClinicalNote, this.state.oriClinicalNote === newClinicalNote)
-    if(JSON.stringify(this.state.oriAttendingDiagnosisList)!==JSON.stringify(newAttendingDiagnosisList) ||
-      JSON.stringify(this.state.oriChronicDiagnosisList) !== JSON.stringify(newChronicDiagnosisList) ||
-      this.state.oriClinicalNote !== newClinicalNote){
+    if (
+      JSON.stringify(this.state.oriAttendingDiagnosisList) !==
+        JSON.stringify(newAttendingDiagnosisList) ||
+      JSON.stringify(this.state.oriChronicDiagnosisList) !==
+        JSON.stringify(newChronicDiagnosisList) ||
+      this.state.oriClinicalNote !== newClinicalNote
+    ) {
       isChanged = true;
     }
     this.setState({
-      newAttendingDiagnosisList, newChronicDiagnosisList, newClinicalNote, isChanged
+      newAttendingDiagnosisList,
+      newChronicDiagnosisList,
+      newClinicalNote,
+      isChanged
     });
-  }
+  };
 
-  save = (name) => {
+  save = name => {
     const encounterId = this.props.encounter.encounterId;
     const patientId = this.state.appointmentSelect.patientId;
-    if(name === 'note') {
+    if (name === 'note') {
       const attendingDiagnosisList = [];
       const chronicDiagnosisList = [];
       const clinicalNote = {
@@ -362,7 +431,7 @@ class Consulatation extends Component {
             patientId
           };
           _.forEach(this.props.attendingProblemList, eve => {
-            if(item.diagnosisId === eve.diagnosisId){
+            if (item.diagnosisId === eve.diagnosisId) {
               attendingProblem.id = eve.attendingDiagnosisId;
             }
           });
@@ -376,7 +445,7 @@ class Consulatation extends Component {
             patientId
           };
           _.forEach(this.props.chronicProblemList, eve => {
-            if(item.diagnosisId === eve.diagnosisId){
+            if (item.diagnosisId === eve.diagnosisId) {
               chronicProblem.id = eve.chronicDiagnosisId;
             }
           });
@@ -416,7 +485,7 @@ class Consulatation extends Component {
         this.props.dispatch({ type: 'SAVE_CONSULTATION', params });
         this.setState({ openDiag: true, isNoteUpdate: true });
       }
-    } else if(name === 'prescription') {
+    } else if (name === 'prescription') {
       const prescription = {
         clinicId: this.props.clinic.clinicId,
         clinicName: this.props.clinic.clinicName,
@@ -428,9 +497,10 @@ class Consulatation extends Component {
         const params = {
           prescription: this.props.prescriptionLatest.prescription,
           newPrescriptionDrugList: prescriptionDrugList,
-          oldPrescriptionDrugList: this.props.prescriptionLatest.prescriptionDrugBoList
+          oldPrescriptionDrugList: this.props.prescriptionLatest
+            .prescriptionDrugBoList
         };
-        this.props.dispatch({type: 'UPDATE_ORDER', params});
+        this.props.dispatch({ type: 'UPDATE_ORDER', params });
       } else {
         const params = {
           prescription,
@@ -440,12 +510,12 @@ class Consulatation extends Component {
       }
       this.setState({ openDiag: true, isPrescriptionUpdate: true });
     }
-  }
+  };
   cancel = () => {
     // console.log(this.state.isChanged);
-    this.setState({isNoteUpdate: false, isPrescriptionUpdate: false});
+    this.setState({ isNoteUpdate: false, isPrescriptionUpdate: false });
     this.closePatient();
-  }
+  };
 
   /* nextPatient */
   nextPatient = () => {
@@ -479,7 +549,7 @@ class Consulatation extends Component {
     let oldAttendingDiagnosisList = null;
     let oldChronicDiagnosisList = null;
     let oldClinicalNote = null;
-    if(this.state.isNoteUpdate) {
+    if (this.state.isNoteUpdate) {
       oldAttendingDiagnosisList = this.props.attendingProblemList;
       oldChronicDiagnosisList = this.props.chronicProblemList;
       oldClinicalNote = this.props.clinicNote;
@@ -491,9 +561,10 @@ class Consulatation extends Component {
       patientId
     };
     let oldPrescriptionDrugList = null;
-    if(this.state.isPrescriptionUpdate) {
+    if (this.state.isPrescriptionUpdate) {
       oldPrescription = this.props.prescriptionLatest.prescription;
-      oldPrescriptionDrugList = this.props.prescriptionLatest.prescriptionDrugBoList;
+      oldPrescriptionDrugList = this.props.prescriptionLatest
+        .prescriptionDrugBoList;
     }
     const params = {
       newAttendingDiagnosisList,
@@ -506,9 +577,9 @@ class Consulatation extends Component {
       prescription: oldPrescription,
       oldPrescriptionDrugList
     };
-    this.setState({openDiag: true});
-    this.props.dispatch({type: 'NEXT_PATIENT', params});
-  }
+    this.setState({ openDiag: true });
+    this.props.dispatch({ type: 'NEXT_PATIENT', params });
+  };
   getNextPatient = () => {
     // next patient
     let attend = [];
@@ -516,19 +587,19 @@ class Consulatation extends Component {
       item.attendanceStatus === 'Attend' && attend.push(item);
     });
     let index = _.cloneDeep(this.state.patientIndex);
-    if(index === attend.length-1) {
+    if (index === attend.length - 1) {
       index = 0;
     } else {
       index = index + 1;
     }
     this.select(this.props.attendanceList[index], index);
-  }
+  };
   closeDialog = () => {
     this.setState({ openDiag: false });
     this.props.dispatch({ type: 'CLOSE_CONSULTATION_LOADING' });
-    if(this.props.saveName === 'note') {
+    if (this.props.saveName === 'note') {
       this.getClinicNote();
-    } else if(this.props.saveName === 'prescription') {
+    } else if (this.props.saveName === 'prescription') {
       this.getPrescription();
     } else {
       this.closePatient();
@@ -539,9 +610,12 @@ class Consulatation extends Component {
     const { classes } = this.props;
     return (
       <div className={'detail_warp'}>
-        {
-          this.state.ifSelected && this.state.isChanged ? <Prompt message="You have made a change,Are you sure to leave?" when={this.makeSure}/> : null
-        }
+        {this.state.ifSelected && this.state.isChanged ? (
+          <Prompt
+              message="You have made a change,Are you sure to leave?"
+              when={this.makeSure}
+          />
+        ) : null}
         {this.state.ifSelected ? (
           <div>
             <Patient
@@ -559,18 +633,24 @@ class Consulatation extends Component {
                 <Tab label="Note/Diagnosis" />
                 <Tab label="Prescription" />
               </Tabs>
-              <Button variant="outlined" color="primary" size="small" onClick={() => this.nextPatient()} className={classes.next}>Next Patient</Button>
+              <Button
+                  variant="outlined"
+                  color="primary"
+                  size="small"
+                  onClick={() => this.nextPatient()}
+                  className={classes.next}
+              >
+                Next Patient
+              </Button>
             </Typography>
             {this.state.tabValue === 0 && (
               <Note
                   changeNote={this.changeNote}
-
                   medicalRecordList={this.props.medicalRecordList}
                   templateList={this.props.templateList}
                   attendingProblemList={this.state.newAttendingDiagnosisList}
                   chronicProblemList={this.state.newChronicDiagnosisList}
                   clinicalNotes={this.state.newClinicalNote}
-
                   save={this.save}
                   cancel={this.cancel}
               />
@@ -578,12 +658,10 @@ class Consulatation extends Component {
             {this.state.tabValue === 1 && (
               <Prescription
                   changePrescription={this.changePrescription}
-
                   departmentFavouriteList={this.props.departmentFavouriteList}
                   drugHistoryList={this.props.drugHistoryList}
                   medicineList={this.state.newPrescriptionDrugList}
                   isUpdate={this.state.isPrescriptionUpdate}
-
                   save={this.save}
                   cancel={this.cancel}
               />
@@ -597,18 +675,18 @@ class Consulatation extends Component {
                 <Typography
                     component="div"
                     style={{
-                      marginLeft: 10,
-                      width: 'calc(80% - 2px)',
-                      border: '1px solid rgba(0,0,0,0.42)',
-                      paddingLeft: 8,
-                      height: 31,
-                      borderRadius: 2,
-                      fontSize: 14
-                    }}
+                    marginLeft: 10,
+                    width: 'calc(80% - 2px)',
+                    border: '1px solid rgba(0,0,0,0.42)',
+                    paddingLeft: 8,
+                    height: 31,
+                    borderRadius: 2,
+                    fontSize: 14
+                  }}
                 >
                   <InlineDatePicker
-                      // className={'select_input'}
-                      // style={{ marginLeft: 10 }}
+                    // className={'select_input'}
+                    // style={{ marginLeft: 10 }}
                       mask={value =>
                       value
                         ? [
@@ -629,7 +707,7 @@ class Consulatation extends Component {
                       disableOpenOnEnter
                       format={'DD MMM YYYY'}
                       placeholder={'DD MMM YYYY'}
-                      // variant={'outlined'}
+                    // variant={'outlined'}
                       keyboard
                       invalidDateMessage={'輸入的日期無效'}
                       value={moment(this.state.date, 'DD MMM YYYY')}
@@ -763,13 +841,13 @@ class Consulatation extends Component {
                       <TableRow
                           key={index}
                           style={{
-                            backgroundColor:
-                              item.patientSex === 'female'
-                                ? 'rgba(255,0,0,0.2)'
-                                : item.patientSex === 'male'
-                                ? '#CFECFA'
-                                : 'rgba(255,155,55, 0.4)'
-                          }}
+                          backgroundColor:
+                            item.patientSex === 'female'
+                              ? 'rgba(255,0,0,0.2)'
+                              : item.patientSex === 'male'
+                              ? '#CFECFA'
+                              : 'rgba(255,155,55, 0.4)'
+                        }}
                       >
                         <TableCell
                             style={{ padding: '0 6px 0 15px' }}
@@ -777,29 +855,52 @@ class Consulatation extends Component {
                         >
                           {item.patientDoc}
                         </TableCell>
-                        <TableCell padding={'none'} style={{padding: '0 6px'}}>
+                        <TableCell
+                            padding={'none'}
+                            style={{ padding: '0 6px' }}
+                        >
                           {item.patientName}
                         </TableCell>
-                        <TableCell padding={'none'} style={{padding: '0 6px'}}>
+                        <TableCell
+                            padding={'none'}
+                            style={{ padding: '0 6px' }}
+                        >
                           {moment(item.appointmentDate).format(
                             'DD MMM YYYY HH:mm'
                           )}
                         </TableCell>
-                        <TableCell padding={'none'} style={{padding: '0 6px'}}>
+                        <TableCell
+                            padding={'none'}
+                            style={{ padding: '0 6px' }}
+                        >
                           {item.attendanceTime
                             ? moment(item.attendanceTime).format(
                                 'DD MMM YYYY HH:mm'
                               )
                             : null}
                         </TableCell>
-                        <TableCell padding={'none'} style={{padding: '0 6px'}}>
+                        <TableCell
+                            padding={'none'}
+                            style={{ padding: '0 6px' }}
+                        >
                           {item.encounterTypeName}
                         </TableCell>
-                        <TableCell padding={'none'} style={{padding: '0 6px'}}>{item.roomName}</TableCell>
-                        <TableCell padding={'none'} style={{padding: '0 6px'}}>
+                        <TableCell
+                            padding={'none'}
+                            style={{ padding: '0 6px' }}
+                        >
+                          {item.roomName}
+                        </TableCell>
+                        <TableCell
+                            padding={'none'}
+                            style={{ padding: '0 6px' }}
+                        >
                           {item.attendanceStatus}
                         </TableCell>
-                        <TableCell padding={'none'} style={{padding: '0 6px'}}>
+                        <TableCell
+                            padding={'none'}
+                            style={{ padding: '0 6px' }}
+                        >
                           {item.attendanceStatus === 'Attend' ? (
                             <Button
                                 variant={'outlined'}
