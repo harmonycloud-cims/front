@@ -147,7 +147,7 @@ class Consulatation extends Component {
     this.initData();
     let timer = setInterval(() => {
       this.initData();
-    }, 60000);
+    }, 10000);
     this.setState({timer});
     this.websocketConnection();
   }
