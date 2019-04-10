@@ -3,7 +3,6 @@ import { allMenuList } from '../../services/staticData';
 import _ from 'lodash';
 import { patientBasic, basicPrint } from '../../services/staticData';
 
-global.token = '';
 export const initState = {
   ifLogin: false,
   clinicList: [],

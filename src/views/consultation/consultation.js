@@ -145,6 +145,10 @@ class Consulatation extends Component {
 
   componentDidMount() {
     this.initData();
+    let timer = setInterval(() => {
+      this.initData();
+    }, 60000);
+    this.setState({timer});
     this.websocketConnection();
   }
   UNSAFE_componentWillReceiveProps(nextProps) {
@@ -221,6 +225,9 @@ class Consulatation extends Component {
     if (this.timer !== null) {
       clearInterval(this.timer);
     }
+    if (this.state.timer !== null ) {
+      clearInterval(this.state.timer);
+    }
   }
 
   initData = () => {
@@ -240,14 +247,13 @@ class Consulatation extends Component {
         error: 'Your browser does not support WebSocket.'
       });
     } else {
-      let socketUrl = `ws://${socketApiUrl}/websocket/attendWebsocket/${
+      let socketUrl = `ws://${socketApiUrl}/attendWebsocket/${
         this.props.user.userId
       }`;
       socket = new WebSocket(socketUrl);
       //打开事件
       socket.onopen = () => {
         console.log('websocket已打开');
-        socket.send(`${this.props.user.userId}: ${new Date()}`);
       };
       //获得消息事件
       socket.onmessage = msg => {
@@ -258,8 +264,12 @@ class Consulatation extends Component {
         //发现消息进入    开始处理前端触发逻辑
       };
       // 关闭事件
-      socket.onclose = () => {
-        console.log('websocket已关闭', moment().format('YYYY-MM-DD HH:mm:ss'));
+      socket.onclose = (e) => {
+        console.log('websocket已关闭', e.code, e.reason, e.wasClean, moment().format('YYYY-MM-DD HH:mm:ss'));
+        // if(e.code !== 1000) {
+        //   clearInterval(this.timer);
+        //   this.websocketConnection();
+        // }
       };
       //发生了错误事件
       socket.onerror = () => {
@@ -271,8 +281,10 @@ class Consulatation extends Component {
         console.log('websocket发生了错误');
       };
       this.timer = setInterval(() => {
-        socket.send(`${this.props.user.userId}: ${new Date()}`);
-      }, 9 * 60000);
+        if(socket.readyState === 1) {
+          socket.send(`${this.props.user.userId}: ${new Date()}`);
+        }
+      }, 2 * 60000);
     }
   };
   /* select页面 */
