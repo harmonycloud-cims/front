@@ -32,7 +32,9 @@ export function tryHideFullScreenLoading() {
 
 axios.interceptors.request.use(
   config => {
-    showFullScreenLoading();
+    if (config.url.indexOf('/appointment/appointmentList') < 0) {
+      showFullScreenLoading();
+    }
     if (
       !(config.url.indexOf('/login') > -1 || config.url.indexOf('/user') > -1)
     ) {

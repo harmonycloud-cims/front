@@ -257,7 +257,7 @@ class Consulatation extends Component {
       };
       //获得消息事件
       socket.onmessage = msg => {
-        console.log(msg.data, 'onmessage');
+        // console.log(msg.data, 'onmessage');
         if (msg.data === 'Success') {
           this.initData();
         }
